@@ -6,7 +6,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex flex-shrink-0 items-center">
             <span className="text-2xl font-bold tracking-tight text-blue-600">
-              DEMO<span className="text-gray-800">SITE</span>
+              HEADER<span className="text-gray-800">TẠM</span>
             </span>
           </div>
 

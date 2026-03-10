@@ -1,22 +1,18 @@
 import './globals.css';
-import Footer from '@/components/layout/Footer';
-import Header from '@/components/layout/Header';
+import { Geist } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata = {
-  title: 'Shop App',
-  description: 'E-commerce application',
+  title: 'IS207-FS',
+  description: 'IS207 Phat trien ung dung Web',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="vi" suppressHydrationWarning>
-      <body>
-        <Header />
-        <main className="relative z-0 mx-auto mt-20 min-h-[calc(100vh-80px)] w-full">
-          {children}
-        </main>
-        <Footer />
-      </body>
+    <html lang="vi" className={cn('font-sans', geist.variable)}>
+      <body>{children}</body>
     </html>
   );
 }
