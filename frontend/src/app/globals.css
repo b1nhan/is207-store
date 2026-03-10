@@ -1,0 +1,177 @@
+@import 'tailwindcss';
+
+/* ===== Cerulean Blue UI Color Kit ===== */
+:root {
+  /* Raw Palette */
+  --cb-50: #eff5ff;
+  --cb-100: #dce8fd;
+  --cb-200: #c0d8fd;
+  --cb-300: #95c0fb;
+  --cb-400: #629df8;
+  --cb-500: #3e79f3;
+  --cb-600: #285ae8;
+  --cb-700: #234ade;
+  --cb-800: #2039ad;
+  --cb-900: #203588;
+  --cb-950: #182353;
+
+  /* Core */
+  --background: #f7f9ff;
+  --foreground: var(--cb-950);
+
+  /* Main colors */
+  --primary: var(--cb-600);
+  --primary-foreground: #ffffff;
+  --secondary: var(--cb-100);
+  --secondary-foreground: var(--cb-800);
+  --sub: var(--cb-50);
+  --sub-foreground: var(--cb-700);
+
+  /* States */
+  --hover: var(--cb-700);
+  --focus: var(--cb-500);
+  --ring: var(--cb-400);
+  --ring-offset: #ffffff;
+
+  /* Borders */
+  --border: var(--cb-200);
+  --divider: var(--cb-100);
+
+  /* Semantic */
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --warning: #d97706;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --error: #dc2626;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --info: var(--cb-500);
+  --info-bg: var(--cb-50);
+  --info-border: var(--cb-200);
+
+  /* Text */
+  --text-primary: var(--cb-950);
+  --text-secondary: var(--cb-800);
+  --text-muted: #6b7db3;
+
+  /* Disabled */
+  --disabled-bg: var(--cb-100);
+  --disabled-text: #a0aec0;
+  --disabled-border: var(--cb-200);
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-border: var(--cb-100);
+  --elevated: #ffffff;
+  --elevated-shadow:
+    0 8px 32px rgba(32, 53, 136, 0.1), 0 1.5px 4px rgba(32, 53, 136, 0.06);
+
+  /* Buttons */
+  --button-primary-bg: var(--cb-600);
+  --button-primary-text: #ffffff;
+  --button-primary-hover: var(--cb-700);
+  --button-primary-active: var(--cb-800);
+  --button-secondary-bg: var(--cb-100);
+  --button-secondary-text: var(--cb-700);
+  --button-secondary-hover: var(--cb-200);
+
+  /* Extras */
+  --overlay: rgba(24, 35, 83, 0.45);
+  --skeleton: var(--cb-100);
+  --badge-bg: var(--cb-100);
+  --badge-text: var(--cb-700);
+  --link: var(--cb-600);
+  --link-hover: var(--cb-800);
+  --selection-bg: var(--cb-200);
+  --tooltip-bg: var(--cb-900);
+  --tooltip-text: #ffffff;
+  --scrollbar-thumb: var(--cb-300);
+  --placeholder: #94a3b8;
+  --icon-muted: var(--cb-400);
+  --icon-active: var(--cb-600);
+}
+
+/* ===== Base Styles ===== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--selection-bg);
+    color: var(--cb-900);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--cb-50);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cb-400);
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Placeholder */
+  ::placeholder {
+    color: var(--placeholder);
+  }
+
+  /* Links */
+  a {
+    color: var(--link);
+  }
+  a:hover {
+    color: var(--link-hover);
+  }
+
+  /* Headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+}
