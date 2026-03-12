@@ -6,18 +6,34 @@ export default function HomePage() {
   const newArrivals = [
     {
       id: 1,
-      name: 'Áo Thun Medusa Black',
+      name: 'Áo Thun hnk',
       price: 36,
       image:
-        'https://pundo.vn/wp-content/uploads/2025/10/ao-boy-pho-1-600x600.webp',
+        'https://tse4.mm.bing.net/th/id/OIP.bdoc7HBGYkzF39B6O5L33gHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
       material: '100% Cotton',
     },
     {
       id: 2,
-      name: 'Quần Chino Slim Fit',
+      name: 'Quần sip hi hi',
       price: 49,
       image:
-        'https://tse3.mm.bing.net/th/id/OIP.MU5yeZO2ulos8aK99iZB3wHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+        'https://cdn.yousport.vn/Media/products/070326103845617/quan-ao-mikal-bamboo.jpg',
+      material: 'Kaki',
+    },
+    {
+      id: 3,
+      name: 'Áo ba lỗ bảo nguyễn',
+      price: 49,
+      image:
+        'https://tse1.mm.bing.net/th/id/OIP.npZbrV5-ETWtDx_j7bmA3QHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+      material: 'Kaki',
+    },
+    {
+      id: 4,
+      name: 'Áo ba lỗ bảo nguyễn',
+      price: 49,
+      image:
+        'https://tse1.mm.bing.net/th/id/OIP.npZbrV5-ETWtDx_j7bmA3QHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
       material: 'Kaki',
     },
   ];
@@ -43,6 +59,41 @@ export default function HomePage() {
       material: 'Polyester',
     },
   ];
+  const discount = [
+    {
+      id: 5,
+      name: 'Áo độ mixi',
+      price: 120,
+      image:
+        'https://tse3.mm.bing.net/th/id/OIP.SsCwhAAxux2Kk9f5CJ5AsQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+      material: 'ba mia loai 2',
+    },
+    {
+      id: 7,
+      name: 'Áo độ mixi',
+      price: 120,
+      image:
+        'https://tse3.mm.bing.net/th/id/OIP.SsCwhAAxux2Kk9f5CJ5AsQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+      material: 'ba mia loai 2',
+    },
+    {
+      id: 6,
+      name: 'Áo độ mixi',
+      price: 120,
+      image:
+        'https://tse3.mm.bing.net/th/id/OIP.SsCwhAAxux2Kk9f5CJ5AsQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+      material: 'ba mia loai 2',
+    },
+    {
+      id: 8,
+      name: 'Áo độ mixi',
+      price: 120,
+      image:
+        'https://tse3.mm.bing.net/th/id/OIP.SsCwhAAxux2Kk9f5CJ5AsQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3',
+      material: 'ba mia loai 2',
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-16 pb-20">
       <HeroSection />
@@ -51,6 +102,7 @@ export default function HomePage() {
         newProduct={newArrivals}
         hotProduct={bestSellers}
         noibatProduct={featured}
+        giamgia={discount}
       />
     </div>
   );
