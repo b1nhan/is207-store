@@ -6,6 +6,8 @@ export function CategorySection() {
       {/* code ở đây */}
       <div>
         <h2> Category Section</h2>
+        <h2> Category Section</h2>
+        <h2> Category Section</h2>
       </div>
     </>
   );
