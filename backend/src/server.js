@@ -1,13 +1,13 @@
-require('dotenv').config();
-const app = require('./app');
-// const { connectDB } = require("./database/connection");
+import 'dotenv/config';
+import app from './app.js';
+import { connectDB } from './database/connection.js';
 
 const PORT = process.env.PORT || 8080;
 
 const startServer = async () => {
   // ─── Database ───────────────────────────────────────────────────────────────
   // Uncomment khi đã cấu hình database/connection.js
-  // await connectDB();
+  await connectDB();
 
   // ─── Start HTTP Server ──────────────────────────────────────────────────────
   app.listen(PORT, () => {
