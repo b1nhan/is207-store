@@ -4,31 +4,33 @@ import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
   return (
-    <section className="bg-[#182353] text-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-16 py-28">
-        {/* LEFT */}
-        <div className="space-y-6">
-          <p className="text-2xl font-medium tracking-wide text-[#6b7db3]/60">
+    <section className="bg-cb-950 flex h-[632px] items-center overflow-hidden text-white">
+      <div className="relative mx-auto flex h-full max-w-[1440px] flex-shrink-0 items-center justify-between px-16 py-0">
+        <div className="flex-shrink-0 space-y-6">
+          <p className="text-text-muted text-[25px] leading-[32px] font-semibold">
             IS207
           </p>
 
-          <h1 className="text-7xl font-bold tracking-tight text-white">
+          <h1 className="text-8xl font-bold tracking-tight text-white">
             FASHION STORE
           </h1>
 
-          <p className="text-base text-[#6b7db3]">Đồ đẹp vãi lz</p>
+          <p className="text-text-muted max-w-[714px] text-[18px] leading-[24px] font-semibold">
+            Đồ đẹp vãi lz
+          </p>
 
-          <button className="rounded-md bg-[#3E79F3] px-10 py-4 font-medium text-white transition hover:bg-[#234ADE]">
-            Mua Ngay
-          </button>
+          <Button variant="primary" size="xl">
+            Mua ngay
+          </Button>
         </div>
 
-        {/* RIGHT */}
-        <img
-          src="https://res.cloudinary.com/dlefkbf8l/image/upload/v1773366222/ao-cho-la-ban-khong-phai-toi.png"
-          alt="shirt"
-          className="w-[380px]"
-        />
+        <div className="h-[622px] w-[622px] flex-shrink-0 translate-x-[70px] translate-y-[130px]">
+          <img
+            src="https://res.cloudinary.com/dlefkbf8l/image/upload/v1773366222/ao-cho-la-ban-khong-phai-toi.png"
+            alt="shirt"
+            className="h-full w-full object-contain"
+          />
+        </div>
       </div>
     </section>
   );
@@ -36,75 +38,70 @@ export function HeroSection() {
 
 export function HeroSection2() {
   return (
-    <section className="w-full bg-red-200">
+    <section className="w-full">
       <div className="grid grid-cols-2">
-        {/* LEFT BLOCK */}
-        <div className="flex items-center justify-between bg-[#3E79F3] px-16 py-24 text-white">
-          {/* IMAGE */}
+        <div className="bg-cb-500 flex items-center justify-between px-16 py-16 text-white">
           <img
             src="https://res.cloudinary.com/dlefkbf8l/image/upload/v1773366222/ao-cho-la-ban-khong-phai-toi.png"
             alt="shirt"
-            className="w-[250px]"
+            className="h-[420px] w-[380px] -translate-x-[10px] object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.35)]"
           />
 
-          {/* TEXT */}
-          <div className="flex max-w-md flex-col items-center space-y-6 text-center">
-            <h3 className="text-6xl leading-tight font-light tracking-tight text-white">
-              Bộ sưu tập mới
-            </h3>
+          <div className="flex min-w-[400px] translate-x-[-50px] flex-col items-end space-y-6 pr-2 text-right">
+            <h3 className="text-5xl font-bold text-white">Bộ sưu tập mới</h3>
 
-            <p className="max-w-sm text-base leading-relaxed text-white/90">
-              Incredibly powerful CPUs, GPUs, and an SSD with integrated I/O
-              will redefine your PlayStation experience.
+            <p className="text-cb-50 w-[282px] text-[15px] leading-[24px] font-medium">
+              Những item cực cháy vừa cập bến. Thiết kế độc quyền giúp bạn tự
+              tin khẳng định chất riêng không đụng hàng.
             </p>
 
-            <button className="rounded-lg bg-[#E6E9EF] px-12 py-4 font-medium text-[#3E79F3] transition hover:bg-white">
+            <Button variant="secondary" size="xl">
               Xem ngay
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* RIGHT BLOCK */}
-        <div className="flex items-center justify-between bg-[#DCE8FD] px-16 py-24">
-          {/* TEXT */}
+        <div className="bg-secondary flex items-center justify-between px-16 py-16">
           <div className="max-w-md space-y-8">
             <div className="leading-none">
-              <p className="text-5xl font-extralight text-[#1C2D5A]">Flash</p>
-
-              <h3 className="-mt-1 text-7xl font-semibold text-[#1C2D5A]">
+              <p className="text-text-primary text-5xl font-extralight">
+                Flash
+              </p>
+              <h3 className="text-text-primary -mt-1 text-7xl font-semibold">
                 Sale
               </h3>
             </div>
 
-            <p className="text-lg leading-relaxed font-bold text-[#1C2D5A]/80">
-              The new 15-inch MacBook Air makes room for more of what you love
-              with a spacious Liquid Retina display.
+            <p className="text-text-primary/80 text-lg leading-relaxed font-bold">
+              Giảm giá sập sàn toàn bộ item hot hit. Áp dụng trong thời gian đếm
+              ngược, nhanh tay chốt đơn kẻo lỡ size nhé!
             </p>
 
-            <button className="rounded-lg bg-[#3E79F3] px-10 py-4 text-lg font-medium text-white transition hover:bg-[#234ADE]">
-              Mua Ngay
-            </button>
+            <Button variant="primary" size="xl">
+              Xem ngay
+            </Button>
           </div>
 
-          {/* COUNTDOWN */}
           <div className="flex flex-col items-center space-y-8">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#3E79F3] text-xl font-bold text-white shadow-md"></div>
-
-            <div className="flex flex-col items-center space-y-2">
-              <div className="h-2 w-2 rounded-full bg-[#3E79F3]"></div>
-              <div className="h-2 w-2 rounded-full bg-[#3E79F3]"></div>
-            </div>
-
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#3E79F3] text-xl font-bold text-white shadow-md">
+            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
               00
             </div>
 
             <div className="flex flex-col items-center space-y-2">
-              <div className="h-2 w-2 rounded-full bg-[#3E79F3]"></div>
-              <div className="h-2 w-2 rounded-full bg-[#3E79F3]"></div>
+              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
+              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
             </div>
 
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#3E79F3] text-xl font-bold text-white shadow-md">
+            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
+              00
+            </div>
+
+            <div className="flex flex-col items-center space-y-2">
+              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
+              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
+            </div>
+
+            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
               00
             </div>
           </div>
@@ -113,11 +110,3 @@ export function HeroSection2() {
     </section>
   );
 }
-
-// import { Button } from "@/components/ui/button";
-
-// export function ProductSection() {
-//   return (
-
-//   );
-// }
