@@ -1,90 +1,82 @@
 'use client';
 import './CategorySection.css';
 import { useRef } from 'react';
-import {
-  Smartphone,
-  Watch,
-  Camera,
-  Headphones,
-  Monitor,
-  Gamepad2,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
+import { MOCK_CATEGORIES } from '../../constants/mockdata';
 
 export function CategorySection() {
   const scrollRef = useRef(null);
 
+  const SCROLL_AMOUNT = 300;
+
   const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({
+      left: -SCROLL_AMOUNT,
+      behavior: 'smooth',
+    });
   };
 
   const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({
+      left: SCROLL_AMOUNT,
+      behavior: 'smooth',
+    });
   };
 
-  const categories = [
-    { name: 'Áo thun', icon: Smartphone },
-    { name: 'Áo sơ mi', icon: Watch },
-    { name: 'Quần đùi', icon: Camera },
-    { name: 'Quần dài', icon: Headphones },
-    { name: 'Đồ ngủ', icon: Monitor },
-    { name: 'Đồ thể thao', icon: Gamepad2 },
-    { name: 'Áo khoác', icon: Smartphone },
-    { name: 'Quần jean', icon: Watch },
-    { name: 'Áo hoodie', icon: Camera },
-    { name: 'Áo polo', icon: Headphones },
-    { name: 'Quần short', icon: Monitor },
-    { name: 'Áo len', icon: Gamepad2 },
-  ];
-
   return (
-    <div className="bg-gray-50 px-16 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <h2 className="text-text-secondary text-2xl font-semibold">
-          Danh Mục Sản Phẩm
-        </h2>
+    <section className="bg-background py-10">
+      <div className="mx-auto max-w-[1440px] px-12">
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-text-primary text-2xl font-medium">
+            Danh Mục Sản Phẩm
+          </h2>
 
-        <div className="flex items-center gap-0">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={scrollLeft}
-            className="text-text-secondary p-1 transition hover:opacity-70"
-          >
-            <ChevronLeft size={38} strokeWidth={1.5} />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              onClick={scrollLeft}
+              className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0 hover:bg-transparent"
+            >
+              <ChevronLeft size={34} strokeWidth={2.4} />
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            onClick={scrollRight}
-            className="text-text-secondary p-1 transition hover:opacity-70"
-          >
-            <ChevronRight size={38} strokeWidth={1.5} />
-          </Button>
+            <Button
+              variant="ghost"
+              onClick={scrollRight}
+              className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0 hover:bg-transparent"
+            >
+              <ChevronRight size={34} strokeWidth={2.4} />
+            </Button>
+          </div>
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="no-scrollbar flex gap-8 overflow-x-auto scroll-smooth"
+        >
+          {MOCK_CATEGORIES.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <div
+                key={item.id}
+                className="bg-secondary hover:bg-cb-200 flex h-[128px] min-w-[160px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[15px] px-6 py-6 text-center transition"
+              >
+                <Icon
+                  size={32}
+                  strokeWidth={1.8}
+                  className="text-text-primary"
+                />
+
+                <p className="text-text-primary text-[16px] leading-6 font-medium">
+                  {item.name}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
-
-      <div
-        ref={scrollRef}
-        className="no-scrollbar flex gap-6 overflow-x-auto scroll-smooth"
-      >
-        {categories.map((item, index) => {
-          const Icon = item.icon;
-
-          return (
-            <div
-              key={index}
-              className="flex h-[130px] min-w-[180px] flex-col items-center justify-center rounded-2xl bg-[#dbe5f4] text-slate-700 transition hover:bg-[#cdd9ee]"
-            >
-              <Icon size={36} strokeWidth={1.5} />
-              <p className="mt-3 text-sm font-medium text-black">{item.name}</p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    </section>
   );
 }
