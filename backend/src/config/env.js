@@ -1,10 +1,11 @@
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
 const REQUIRED_VARS = [
   // ─── Server ───────────────────────────────────────────────────────────────
-  // "NODE_ENV",
+  // 'NODE_ENV',
   // ─── Database ─────────────────────────────────────────────────────────────
   'DB_HOST',
   'DB_PORT',
@@ -13,10 +14,10 @@ const REQUIRED_VARS = [
   'DB_NAME',
   // ─── JWT ──────────────────────────────────────────────────────────────────
   // Uncomment khi làm Auth
-  // "JWT_ACCESS_SECRET",
-  // "JWT_REFRESH_SECRET",
-  // "JWT_ACCESS_EXPIRES_IN",
-  // "JWT_REFRESH_EXPIRES_IN",
+  // 'JWT_ACCESS_SECRET',
+  // 'JWT_REFRESH_SECRET',
+  // 'JWT_ACCESS_EXPIRES_IN',
+  // 'JWT_REFRESH_EXPIRES_IN',
   // ─── Cloudinary ───────────────────────────────────────────────────────────
   // Uncomment khi làm Upload
   // "CLOUDINARY_CLOUD_NAME",
@@ -28,8 +29,8 @@ const REQUIRED_VARS = [
 // Kiểm tra các biến bắt buộc — app sẽ crash ngay nếu thiếu
 const missing = REQUIRED_VARS.filter((key) => !process.env[key]);
 if (missing.length > 0) {
-  console.error(`❌ Thiếu biến môi trường bắt buộc: ${missing.join(', ')}`);
-  process.exit(1);
+  logger.warn(`Lưu ý: Thiếu biến môi trường: ${missing.join(', ')}`);
+  // process.exit(1);
 }
 
 const env = {

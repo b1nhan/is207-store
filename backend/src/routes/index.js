@@ -5,8 +5,8 @@ import { Router } from 'express';
 
 // const authRoutes     = require("./authRoutes");
 import productRoutes from './productRoutes.js';
+import categoryRoutes from './categoryRoutes.js';
 
-// const categoryRoutes = require("./categoryRoutes");
 // const brandRoutes    = require("./brandRoutes");
 // const cartRoutes     = require("./cartRoutes");
 // const orderRoutes    = require("./orderRoutes");
@@ -19,7 +19,7 @@ const routes = Router();
 // ─── Mount Routes ─────────────────────────────────────────────────────────────
 // Giai đoạn 1 — Public API
 routes.use('/products', productRoutes);
-// router.use("/categories", categoryRoutes);
+routes.use('/categories', categoryRoutes);
 // router.use("/brands",     brandRoutes);
 
 // Giai đoạn 2 — Auth
