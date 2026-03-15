@@ -1,18 +1,18 @@
-require('dotenv').config();
-const app = require('./app');
-// const { connectDB } = require("./database/connection");
+import 'dotenv/config';
+import app from './app.js';
+import { connectDB } from './database/connection.js';
+import { logger } from './utils/logger.js';
 
 const PORT = process.env.PORT || 8080;
 
 const startServer = async () => {
   // ─── Database ───────────────────────────────────────────────────────────────
   // Uncomment khi đã cấu hình database/connection.js
-  // await connectDB();
+  await connectDB();
 
   // ─── Start HTTP Server ──────────────────────────────────────────────────────
   app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-    // console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+    logger.info(`Server is running on http://localhost:${PORT}`);
   });
 };
 
