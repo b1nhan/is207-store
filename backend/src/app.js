@@ -4,8 +4,11 @@ import corsOptions from './config/corsOptions.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { routes } from './routes/index.js';
+import { logger } from './utils/logger.js';
 
 const app = express();
+
+app.use(logger.httpLogger);
 
 // ─── Body Parsers ─────────────────────────────────────────────────────────────
 app.use(express.json());

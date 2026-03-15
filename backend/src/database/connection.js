@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import env from '../config/env.js';
+import { logger } from '../utils/logger.js';
 
 let pool;
 
@@ -16,10 +17,10 @@ const connectDB = async () => {
     });
 
     const connection = await pool.getConnection();
-    console.log('MySQL connected');
+    logger.info('MySQL connected');
     connection.release();
   } catch (error) {
-    console.error('Database connection failed:', error);
+    logger.error('Database connection failed:', error);
     process.exit(1);
   }
 };
