@@ -1,17 +1,15 @@
-import './HeroSection.css';
-import './HeroSection.css';
 import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
   return (
-    <section className="bg-cb-950 flex h-[632px] items-center overflow-hidden text-white">
+    <section className="bg-foreground text-primary-foreground flex h-[632px] items-center overflow-hidden">
       <div className="relative mx-auto flex h-full max-w-[1440px] flex-shrink-0 items-center justify-between px-16 py-0">
         <div className="flex-shrink-0 space-y-6">
           <p className="text-text-muted text-[25px] leading-[32px] font-semibold">
             IS207
           </p>
 
-          <h1 className="text-8xl font-bold tracking-tight text-white">
+          <h1 className="text-primary-foreground text-8xl font-bold tracking-tight">
             FASHION STORE
           </h1>
 
@@ -40,7 +38,7 @@ export function HeroSection2() {
   return (
     <section className="w-full">
       <div className="grid grid-cols-2">
-        <div className="bg-cb-500 flex items-center justify-between px-16 py-16 text-white">
+        <div className="bg-info text-primary-foreground flex items-center justify-between px-16 py-16">
           <img
             src="https://res.cloudinary.com/dlefkbf8l/image/upload/v1773366222/ao-cho-la-ban-khong-phai-toi.png"
             alt="shirt"
@@ -48,9 +46,11 @@ export function HeroSection2() {
           />
 
           <div className="flex min-w-[400px] translate-x-[-50px] flex-col items-end space-y-6 pr-2 text-right">
-            <h3 className="text-5xl font-bold text-white">Bộ sưu tập mới</h3>
+            <h3 className="text-primary-foreground text-5xl font-bold">
+              Bộ sưu tập mới
+            </h3>
 
-            <p className="text-cb-50 w-[282px] text-[15px] leading-[24px] font-medium">
+            <p className="text-primary-foreground">
               Những item cực cháy vừa cập bến. Thiết kế độc quyền giúp bạn tự
               tin khẳng định chất riêng không đụng hàng.
             </p>
@@ -72,7 +72,7 @@ export function HeroSection2() {
               </h3>
             </div>
 
-            <p className="text-text-primary/80 text-lg leading-relaxed font-bold">
+            <p className="text-text-primary text-lg leading-relaxed font-bold">
               Giảm giá sập sàn toàn bộ item hot hit. Áp dụng trong thời gian đếm
               ngược, nhanh tay chốt đơn kẻo lỡ size nhé!
             </p>
@@ -83,25 +83,25 @@ export function HeroSection2() {
           </div>
 
           <div className="flex flex-col items-center space-y-8">
-            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
+            <div className="bg-info text-primary-foreground flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold shadow-md">
               00
             </div>
 
             <div className="flex flex-col items-center space-y-2">
-              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
-              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
+              <div className="bg-info h-2 w-2 rounded-full"></div>
+              <div className="bg-info h-2 w-2 rounded-full"></div>
             </div>
 
-            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
+            <div className="bg-info text-primary-foreground flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold shadow-md">
               00
             </div>
 
             <div className="flex flex-col items-center space-y-2">
-              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
-              <div className="bg-cb-500 h-2 w-2 rounded-full"></div>
+              <div className="bg-info h-2 w-2 rounded-full"></div>
+              <div className="bg-info h-2 w-2 rounded-full"></div>
             </div>
 
-            <div className="bg-cb-500 flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold text-white shadow-md">
+            <div className="bg-info text-primary-foreground flex h-18 w-18 items-center justify-center rounded-[10px] text-xl font-bold shadow-md">
               00
             </div>
           </div>

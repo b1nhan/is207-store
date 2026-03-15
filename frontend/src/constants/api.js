@@ -28,8 +28,7 @@ export const API_ENDPOINTS = {
   // ── Categories ─────────────────────────────────────────────────────────────
   CATEGORIES: {
     LIST: '/categories',
-    DETAIL: (id) => `/categories/${id}`,
-    BY_SLUG: (slug) => `/categories/slug/${slug}`,
+    BY_SLUG: (slug) => `/categories/${slug}`,
   },
 
   // ── Brands ─────────────────────────────────────────────────────────────────
