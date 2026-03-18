@@ -2,6 +2,8 @@ import { HeroSection, HeroSection2 } from '@/components/homepage/HeroSection';
 import { CategorySectionWrapper } from '@/components/homepage/CategorySectionWrapper';
 import ProductSection from '@/components/homepage/ProductSection';
 import { productService } from '@/services/productService';
+//demo
+import ProductGridSection from '@/components/productPage/ProductGridSection';
 
 export default async function HomePage() {
   let newArrivals = [],
@@ -43,6 +45,7 @@ export default async function HomePage() {
         noibatProduct={featured}
         giamgia={discount}
       />
+      <ProductGridSection />
     </div>
   );
 }
