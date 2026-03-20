@@ -34,8 +34,7 @@ export const API_ENDPOINTS = {
   // ── Brands ─────────────────────────────────────────────────────────────────
   BRANDS: {
     LIST: '/brands',
-    DETAIL: (id) => `/brands/${id}`,
-    BY_SLUG: (slug) => `/brands/slug/${slug}`,
+    BY_ID: (id) => `/brands/${id}/products`,
   },
 
   // ── Cart ───────────────────────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 // FIX 1: Removed the {} braces to match the default export from index.js
-import routes from './routes/index.js';
+import { routes } from './routes/index.js';
 import { logger } from './utils/logger.js';
 
 const app = express();
