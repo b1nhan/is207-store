@@ -1,47 +1,82 @@
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LogOutIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import Link from 'next/link';
 import SearchBar from './SearchBar';
 
-const Header = () => {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex flex-shrink-0 items-center">
-            <a href="/">
-              <span className="text-text-primary text-2xl font-bold tracking-tight">
-                Shop<span className="text-primary">FS</span>
-              </span>
-            </a>
-          </div>
+const NAV_ITEMS = [
+  { title: 'Trang chủ', href: '/' },
+  { title: 'Sản phẩm', href: '/products' },
+  { title: 'Danh mục', href: '/' },
+];
 
-          <SearchBar />
+const DROPDOWN_ITEMS = [{ title: 'Profile', href: '/', icon: UserIcon }];
 
-          {/* Navigation - Desktop */}
-          <nav className="hidden space-x-8 md:flex">
-            <a
-              href="/"
-              className="font-medium text-gray-600 transition-colors hover:text-blue-600"
-            >
-              Trang chủ
-            </a>
-            <a
-              href="/products"
-              className="font-medium text-gray-600 transition-colors hover:text-blue-600"
-            >
-              Sản phẩm
-            </a>
-          </nav>
+const Logo = () => (
+  <Link href="/">
+    <span className="text-text-primary text-2xl font-bold tracking-tight">
+      Shop<span className="text-primary">FS</span>
+    </span>
+  </Link>
+);
 
-          {/* Button Action */}
-          <div className="flex items-center">
-            <button className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700 active:scale-95">
-              Bắt đầu ngay
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
+const NavLinks = () => (
+  <nav className="hidden space-x-8 md:flex">
+    {NAV_ITEMS.map(({ title, href }) => (
+      <Link
+        key={title}
+        href={href}
+        className="text-text-primary hover:text-primary text-lg font-semibold transition-colors"
+      >
+        {title}
+      </Link>
+    ))}
+  </nav>
+);
+
+const AccountDropdown = () => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost" size="lg" className="text-lg font-semibold">
+        Account
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      {DROPDOWN_ITEMS.map(({ title, href, icon: Icon }) => (
+        <DropdownMenuItem key={title} asChild>
+          <Link href={href}>
+            <Icon />
+            {title}
+          </Link>
+        </DropdownMenuItem>
+      ))}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem variant="destructive">
+        <LogOutIcon />
+        Log out
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+const Header = () => (
+  <header className="bg-primary-foreground sticky top-0 z-50 flex h-16 w-full items-center justify-around">
+    <Logo />
+    <SearchBar />
+    <NavLinks />
+    <div className="flex gap-4">
+      <Button variant="ghost" size="icon-lg">
+        <ShoppingCartIcon />
+      </Button>
+      <AccountDropdown />
+    </div>
+  </header>
+);
 
 export default Header;

@@ -266,7 +266,7 @@ export default function SearchBar({ className = '' }) {
       {/* ── Input wrapper ── */}
       <div
         className={[
-          'flex h-11 items-center gap-2 rounded-xl border-[1.5px] px-3 transition-[border-color,background,box-shadow] duration-200',
+          'flex h-11 items-center gap-2 rounded-lg border-[1.5px] px-3 transition-[border-color,background,box-shadow] duration-200',
           // 'border-transparent bg-[var(--cb-50)]',
           'bg-background',
           'focus-within:bg-surface focus-within:border-transparent focus-within:shadow-[0_0_0_3px_var(--cb-200)]',
@@ -285,7 +285,7 @@ export default function SearchBar({ className = '' }) {
           type="search"
           className={[
             'min-w-0 flex-1 border-none bg-transparent outline-none',
-            'text-foreground font-sans text-sm placeholder:text-[var(--placeholder)]',
+            'text-foreground text-base placeholder:text-[var(--placeholder)]',
             '[&::-webkit-search-cancel-button]:hidden',
           ].join(' ')}
           placeholder="Tìm kiếm sản phẩm..."
