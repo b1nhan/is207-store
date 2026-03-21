@@ -11,11 +11,6 @@ export default async function HomePage() {
     featured = [],
     discount = [];
 
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Shop', href: '/shop' },
-  ];
-
   try {
     // Fetch song song, nếu 1 cái lỗi không ảnh hưởng cái khác
     const [newRes, hotRes, featuredRes, discountRes] = await Promise.allSettled(
@@ -41,7 +36,6 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-16 pb-20">
-      <Breadcrumbs items={breadcrumbItems} />
       <HeroSection />
       <CategorySectionWrapper />
       <HeroSection2 />
