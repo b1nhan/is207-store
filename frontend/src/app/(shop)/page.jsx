@@ -50,6 +50,7 @@ export default async function HomePage() {
         noibatProduct={featured}
         giamgia={discount}
       />
+      <ProductGridSection />
     </div>
   );
 }
