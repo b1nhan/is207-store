@@ -3,23 +3,127 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useDebounce } from '@/hooks/useDebounce';
 import { productService } from '@/services/productService';
-import { formatCurrency } from '@/utils/currency';
 import { ROUTES } from '@/constants/routes';
+import {
+  Search,
+  Image,
+  ChevronRight,
+  Loader,
+  SearchX,
+  Info,
+  SearchAlert,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_DELAY = 300;
 
-// ─── SearchBar Component ───────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Strip diacritics and lowercase for accent-insensitive matching */
+function normalize(str) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function HighlightMatch({ text, query }) {
+  if (!query) return <>{text}</>;
+
+  const normalizedText = normalize(text);
+  const normalizedQuery = normalize(query);
+  const startIndex = normalizedText.indexOf(normalizedQuery);
+
+  if (startIndex === -1) return <>{text}</>;
+
+  // Use normalizedQuery.length so multi-byte/diacritic chars are sliced correctly
+  const endIndex = startIndex + normalizedQuery.length;
+
+  return (
+    <>
+      {text.slice(0, startIndex)}
+      <mark className="text-primary bg-transparent font-semibold">
+        {text.slice(startIndex, endIndex)}
+      </mark>
+      {text.slice(endIndex)}
+    </>
+  );
+}
+
+function SearchResultItem({ item, index, isActive, query, onSelect, onHover }) {
+  return (
+    <li
+      id={`result-${index}`}
+      className={[
+        'group flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 transition-colors duration-100',
+        isActive ? 'bg-[var(--cb-50)]' : 'hover:bg-[var(--cb-50)]',
+      ].join(' ')}
+      onClick={() => onSelect(item.product_id)}
+      onMouseEnter={() => onHover(index)}
+    >
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[var(--cb-100)]">
+        {item.thumbnail ? (
+          <img
+            src={item.thumbnail}
+            alt={item.product_name}
+            width={44}
+            height={44}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[var(--cb-300)]">
+            <Image />
+          </div>
+        )}
+      </div>
+
+      <span className="text-foreground flex-1 truncate text-[13.5px] font-normal">
+        <HighlightMatch text={item.product_name} query={query} />
+      </span>
+
+      <ChevronRight />
+    </li>
+  );
+}
+
+function SkeletonList() {
+  const shimmerClass = [
+    'bg-gradient-to-r from-[var(--cb-100)] via-[var(--cb-200)] to-[var(--cb-100)]',
+    'bg-[length:200%_100%]',
+    'animate-[shimmer_1.2s_infinite]',
+  ].join(' ');
+
+  return (
+    <div className="flex flex-col gap-1 p-2">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="flex items-center gap-2.5 rounded-lg p-2">
+          <div className={`h-11 w-11 shrink-0 rounded-lg ${shimmerClass}`} />
+          <div className="flex flex-1 flex-col gap-1.5">
+            <div className={`h-2.5 w-3/4 rounded ${shimmerClass}`} />
+            <div className={`h-2.5 w-2/5 rounded ${shimmerClass}`} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SearchBar({ className = '' }) {
   const router = useRouter();
 
   // ── State ──
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [items, setItems] = useState([]); // always an array
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -32,15 +136,12 @@ export default function SearchBar({ className = '' }) {
 
   const debouncedQuery = useDebounce(query, DEBOUNCE_DELAY);
 
-  // ── Fetch autocomplete results ──
+  // ── Data fetching ──
   const fetchResults = useCallback(async (q) => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    abortControllerRef.current?.abort();
 
     if (!q || q.length < MIN_QUERY_LENGTH) {
-      setResults([]);
+      setItems([]);
       setIsOpen(false);
       setIsLoading(false);
       return;
@@ -51,54 +152,67 @@ export default function SearchBar({ className = '' }) {
     setError(null);
 
     try {
-      // GET /products/search?q=...
-      console.log('OKO ');
       const data = await productService.searchProducts(q, {
         signal: abortControllerRef.current.signal,
       });
 
-      console.log('ok', q);
-      console.log(data);
-      setResults(data || []);
+      // Normalise: API may return { data: [...] } or a plain array
+      const list = Array.isArray(data) ? data : (data?.data ?? []);
+      setItems(list);
       setIsOpen(true);
       setActiveIndex(-1);
     } catch (err) {
-      if (err.name === 'AbortError') return; // Request was cancelled
+      if (err.name === 'AbortError') return;
       setError('Không thể tải kết quả. Vui lòng thử lại.');
-      setResults([]);
+      setItems([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // ── Effect: trigger fetch when debounced query changes ──
   useEffect(() => {
     fetchResults(debouncedQuery);
   }, [debouncedQuery, fetchResults]);
 
-  // ── Effect: close dropdown on outside click ──
+  // ── Close on outside click ──
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
-        !inputRef.current.contains(e.target)
-      ) {
-        setIsOpen(false);
-        setActiveIndex(-1);
-      }
+        dropdownRef.current?.contains(e.target) ||
+        inputRef.current?.contains(e.target)
+      )
+        return;
+      setIsOpen(false);
+      setActiveIndex(-1);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Handlers ──
+  // ── Navigation helpers ──
+  const navigateToProduct = useCallback(
+    (productId) => {
+      setIsOpen(false);
+      setQuery('');
+      router.push(`${ROUTES.PRODUCTS}/${productId}`);
+    },
+    [router],
+  );
+
+  const handleFullSearch = useCallback(() => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setIsOpen(false);
+    router.push(`${ROUTES.PRODUCTS}?search=${encodeURIComponent(trimmed)}`);
+  }, [query, router]);
+
+  // ── Input handlers ──
   const handleInputChange = (e) => {
     const value = e.target.value;
     setQuery(value);
     if (!value) {
-      setResults([]);
+      setItems([]);
       setIsOpen(false);
     }
   };
@@ -109,7 +223,7 @@ export default function SearchBar({ className = '' }) {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setActiveIndex((prev) => Math.min(prev + 1, results.length - 1));
+        setActiveIndex((prev) => Math.min(prev + 1, items.length - 1));
         break;
       case 'ArrowUp':
         e.preventDefault();
@@ -117,8 +231,8 @@ export default function SearchBar({ className = '' }) {
         break;
       case 'Enter':
         e.preventDefault();
-        if (activeIndex >= 0 && results[activeIndex]) {
-          navigateToProduct(results[activeIndex].product_id);
+        if (activeIndex >= 0 && items[activeIndex]) {
+          navigateToProduct(items[activeIndex].product_id);
         } else {
           handleFullSearch();
         }
@@ -131,61 +245,55 @@ export default function SearchBar({ className = '' }) {
     }
   };
 
-  const navigateToProduct = (productId) => {
-    setIsOpen(false);
-    setQuery('');
-    router.push(`${ROUTES.PRODUCTS}/${productId}`);
-  };
-
-  const handleFullSearch = () => {
-    if (!query.trim()) return;
-    setIsOpen(false);
-    console.log('handlefullsearch');
-    router.push(
-      `${ROUTES.PRODUCTS}?search=${encodeURIComponent(query.trim())}`,
-    );
-  };
-
   const handleClear = () => {
     setQuery('');
-    setResults([]);
+    setItems([]);
     setIsOpen(false);
     inputRef.current?.focus();
   };
 
-  const showDropdown = isOpen && (isLoading || results.length > 0 || error);
+  // ── Derived state ──
+  // const showDropdown = isOpen && (isLoading || items.length > 0 || !!error);
+  const showDropdown = isOpen;
+  const showEmpty =
+    !isLoading &&
+    !error &&
+    items.length == 0 &&
+    query.length >= MIN_QUERY_LENGTH;
 
   return (
-    <div className={`search-bar ${className}`} role="search">
+    <div className={`relative w-full max-w-[480px] ${className}`} role="search">
       {/* ── Input wrapper ── */}
-      <div className="search-input-wrapper">
-        {/* Search icon */}
-        <span className="search-icon" aria-hidden="true">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
+      <div
+        className={[
+          'flex h-11 items-center gap-2 rounded-xl border-[1.5px] px-3 transition-[border-color,background,box-shadow] duration-200',
+          // 'border-transparent bg-[var(--cb-50)]',
+          'bg-background',
+          'focus-within:bg-surface focus-within:border-transparent focus-within:shadow-[0_0_0_3px_var(--cb-200)]',
+        ].join(' ')}
+      >
+        {/* Search icon — color shifts on focus-within via parent class */}
+        <span
+          className="[.search-wrapper:focus-within_&]:text-foreground flex shrink-0 items-center text-[var(--icon-muted)] transition-colors duration-200"
+          aria-hidden="true"
+        >
+          <Search />
         </span>
 
         <input
           ref={inputRef}
           type="search"
-          className="search-input"
+          className={[
+            'min-w-0 flex-1 border-none bg-transparent outline-none',
+            'text-foreground font-sans text-sm placeholder:text-[var(--placeholder)]',
+            '[&::-webkit-search-cancel-button]:hidden',
+          ].join(' ')}
           placeholder="Tìm kiếm sản phẩm..."
           value={query}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
+            if (items.length > 0) setIsOpen(true);
           }}
           aria-label="Tìm kiếm sản phẩm"
           aria-autocomplete="list"
@@ -199,36 +307,25 @@ export default function SearchBar({ className = '' }) {
 
         {/* Loading spinner / Clear button */}
         {isLoading ? (
-          <span className="search-spinner" aria-label="Đang tải">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-            </svg>
+          <span
+            className="flex animate-spin items-center text-[var(--icon-muted)]"
+            aria-label="Đang tải"
+          >
+            <Loader />
           </span>
         ) : query ? (
           <button
             type="button"
-            className="search-clear-btn"
+            className={[
+              'flex h-5 w-5 shrink-0 items-center justify-center rounded-full p-0',
+              'cursor-pointer border-none bg-[var(--cb-200)] text-[var(--text-muted)]',
+              'transition-[background,color] duration-150',
+              'hover:text-foreground hover:bg-[var(--cb-300)]',
+            ].join(' ')}
             onClick={handleClear}
             aria-label="Xóa tìm kiếm"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+            <SearchX />
           </button>
         ) : null}
       </div>
@@ -238,477 +335,97 @@ export default function SearchBar({ className = '' }) {
         <div
           ref={dropdownRef}
           id="search-dropdown"
-          className="search-dropdown"
+          className={[
+            'absolute top-[calc(100%+6px)] right-0 left-0 z-[1000]',
+
+            'overflow-hidden rounded-[14px] border-[1.5px] border-[var(--card-border)] bg-[var(--surface)]',
+
+            'shadow-[var(--elevated-shadow)]',
+
+            'animate-[dropdownIn_0.18s_ease]',
+          ].join(' ')}
           role="listbox"
           aria-label="Kết quả tìm kiếm"
         >
-          {/* Error state */}
+          {/* Error */}
+
           {error && (
-            <div className="search-message search-message--error">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4m0 4h.01" />
-              </svg>
+            <div className="flex flex-row items-center justify-center gap-2 px-4 py-3.5 text-[13.5px] text-[var(--error)]">
+              <Info />
+
               {error}
             </div>
           )}
 
           {/* Loading skeleton */}
-          {isLoading && !error && (
-            <div className="search-skeletons">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="search-skeleton-item">
-                  <div className="search-skeleton-img" />
-                  <div className="search-skeleton-text">
-                    <div className="search-skeleton-line search-skeleton-line--long" />
-                    <div className="search-skeleton-line search-skeleton-line--short" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
+          {isLoading && !error && <SkeletonList />}
 
           {/* Results */}
-          {!isLoading && !error && results.length > 0 && (
+
+          {!isLoading && !error && items.length > 0 && (
             <>
-              <ul className="search-results-list" role="presentation">
-                {results.map((item, index) => (
-                  <li
+              <ul
+                className="m-0 flex list-none flex-col gap-0.5 p-2"
+                role="presentation"
+              >
+                {items.map((item, index) => (
+                  <SearchResultItem
                     key={item.product_id}
-                    id={`result-${index}`}
-                    className={`search-result-item ${index === activeIndex ? 'search-result-item--active' : ''}`}
-                    role="option"
-                    aria-selected={index === activeIndex}
-                    // onClick={() => navigateToProduct(item.product_id)}
-                    onMouseEnter={() => setActiveIndex(index)}
-                  >
-                    {/* Thumbnail */}
-                    <div className="search-result-img">
-                      {item.thumbnail ? (
-                        <img
-                          src={item.thumbnail}
-                          alt={item.product_name}
-                          width={44}
-                          height={44}
-                          style={{
-                            objectFit: 'cover',
-                            width: '100%',
-                            height: '100%',
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="search-result-img-placeholder">
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          >
-                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <path d="m21 15-5-5L5 21" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Name */}
-                    <span className="search-result-name">
-                      <HighlightMatch text={item.product_name} query={query} />
-                    </span>
-
-                    {/* Arrow */}
-                    <svg
-                      className="search-result-arrow"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    >
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  </li>
+                    item={item}
+                    index={index}
+                    isActive={index === activeIndex}
+                    query={query}
+                    onSelect={navigateToProduct}
+                    onHover={setActiveIndex}
+                  />
                 ))}
               </ul>
 
-              {/* View all link */}
-              <button
-                type="button"
-                className="search-view-all"
+              <Button
+                variant="ghost"
+                size="lg"
+                className={cn(
+                  'flex w-full items-center justify-center py-6',
+
+                  'text-text-muted text-base font-medium',
+                )}
                 onClick={handleFullSearch}
               >
                 Xem tất cả kết quả cho &ldquo;{query}&rdquo;
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M5 12h14m-7-7 7 7-7 7" />
-                </svg>
-              </button>
+                <Search />
+              </Button>
             </>
           )}
 
           {/* Empty state */}
-          {!isLoading &&
-            !error &&
-            results.length === 0 &&
-            query.length >= MIN_QUERY_LENGTH && (
-              <div className="search-message search-message--empty">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                  <path d="M8 11h6m-3-3v6" />
-                </svg>
-                <p>
-                  Không tìm thấy &ldquo;<strong>{query}</strong>&rdquo;
-                </p>
-              </div>
-            )}
+
+          {showEmpty && (
+            <div className="text-text-muted flex flex-col items-center gap-2 px-4 py-5 text-center text-base font-medium">
+              <SearchAlert />
+
+              <p className="m-0 leading-relaxed">
+                Không tìm thấy kết quả cho &ldquo;
+                <strong className="text-text-muted">{query}</strong>&rdquo;
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      <style>{styles}</style>
+      {/*
+        Two keyframes that Tailwind v4 cannot express as inline utilities.
+        These are the only remaining <style> lines — everything visual is in className above.
+      */}
+      <style>{`
+        @keyframes dropdownIn {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          to { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   );
 }
-
-// ─── HighlightMatch: bold matching text ────────────────────────────────────────
-function HighlightMatch({ text, query }) {
-  if (!query) return <>{text}</>;
-
-  const regex = new RegExp(
-    `(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
-    'gi',
-  );
-  const parts = text.split(regex);
-
-  return (
-    <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark key={i} className="search-highlight">
-            {part}
-          </mark>
-        ) : (
-          <span key={i}>{part}</span>
-        ),
-      )}
-    </>
-  );
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
-
-  .search-bar {
-    position: relative;
-    width: 100%;
-    max-width: 480px;
-    font-family: 'Be Vietnam Pro', sans-serif;
-  }
-
-  /* Input wrapper */
-  .search-input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f5f4f0;
-    border: 1.5px solid transparent;
-    border-radius: 12px;
-    padding: 0 12px;
-    height: 44px;
-    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-  }
-
-  .search-input-wrapper:focus-within {
-    background: #fff;
-    border-color: #1a1a1a;
-    box-shadow: 0 0 0 3px rgba(26,26,26,0.08);
-  }
-
-  .search-icon {
-    color: #888;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    transition: color 0.2s;
-  }
-
-  .search-input-wrapper:focus-within .search-icon {
-    color: #1a1a1a;
-  }
-
-  .search-input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 14px;
-    font-family: inherit;
-    color: #1a1a1a;
-    min-width: 0;
-  }
-
-  .search-input::placeholder {
-    color: #aaa;
-  }
-
-  /* Chrome: hide default search clear */
-  .search-input::-webkit-search-cancel-button { display: none; }
-
-  /* Spinner */
-  .search-spinner svg {
-    animation: spin 0.75s linear infinite;
-    color: #888;
-    display: block;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Clear button */
-  .search-clear-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #e0ddd8;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    color: #555;
-    flex-shrink: 0;
-    transition: background 0.15s, color 0.15s;
-    padding: 0;
-  }
-
-  .search-clear-btn:hover {
-    background: #ccc;
-    color: #111;
-  }
-
-  /* Dropdown */
-  .search-dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1.5px solid #e8e6e1;
-    border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
-    overflow: hidden;
-    z-index: 1000;
-    animation: dropdownIn 0.18s ease;
-  }
-
-  @keyframes dropdownIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Skeleton */
-  .search-skeletons {
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .search-skeleton-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border-radius: 8px;
-  }
-
-  .search-skeleton-img {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    background: linear-gradient(90deg, #f0ede8 25%, #e4e0d9 50%, #f0ede8 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
-    flex-shrink: 0;
-  }
-
-  .search-skeleton-text {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .search-skeleton-line {
-    height: 10px;
-    border-radius: 4px;
-    background: linear-gradient(90deg, #f0ede8 25%, #e4e0d9 50%, #f0ede8 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
-  }
-
-  .search-skeleton-line--long  { width: 75%; }
-  .search-skeleton-line--short { width: 40%; }
-
-  @keyframes shimmer {
-    to { background-position: -200% 0; }
-  }
-
-  /* Results list */
-  .search-results-list {
-    list-style: none;
-    margin: 0;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .search-result-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.12s;
-  }
-
-  .search-result-item:hover,
-  .search-result-item--active {
-    background: #f5f3ef;
-  }
-
-  .search-result-img {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    background: #edeae4;
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .search-result-img-placeholder {
-    color: #bbb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-  }
-
-  .search-result-name {
-    flex: 1;
-    font-size: 13.5px;
-    color: #1a1a1a;
-    font-weight: 400;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .search-highlight {
-    background: none;
-    color: #1a1a1a;
-    font-weight: 600;
-  }
-
-  .search-result-arrow {
-    color: #bbb;
-    flex-shrink: 0;
-    transition: color 0.12s, transform 0.12s;
-  }
-
-  .search-result-item:hover .search-result-arrow,
-  .search-result-item--active .search-result-arrow {
-    color: #555;
-    transform: translateX(2px);
-  }
-
-  /* View all */
-  .search-view-all {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 10px 16px;
-    border: none;
-    border-top: 1px solid #f0ede8;
-    background: transparent;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    color: #555;
-    cursor: pointer;
-    transition: background 0.12s, color 0.12s;
-    text-align: center;
-  }
-
-  .search-view-all:hover {
-    background: #faf9f6;
-    color: #1a1a1a;
-  }
-
-  /* Messages */
-  .search-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 20px 16px;
-    text-align: center;
-    font-size: 13.5px;
-    color: #888;
-  }
-
-  .search-message--error {
-    flex-direction: row;
-    justify-content: center;
-    color: #c0392b;
-    padding: 14px 16px;
-  }
-
-  .search-message--empty p {
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .search-message--empty strong {
-    color: #1a1a1a;
-  }
-`;

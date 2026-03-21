@@ -1,3 +1,5 @@
+import SearchBar from './SearchBar';
+
 const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
@@ -5,36 +7,28 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex flex-shrink-0 items-center">
-            <span className="text-2xl font-bold tracking-tight text-blue-600">
-              HEADER<span className="text-gray-800">TẠM</span>
-            </span>
+            <a href="/">
+              <span className="text-text-primary text-2xl font-bold tracking-tight">
+                Shop<span className="text-primary">FS</span>
+              </span>
+            </a>
           </div>
+
+          <SearchBar />
 
           {/* Navigation - Desktop */}
           <nav className="hidden space-x-8 md:flex">
             <a
-              href="#"
+              href="/"
               className="font-medium text-gray-600 transition-colors hover:text-blue-600"
             >
               Trang chủ
             </a>
             <a
-              href="#"
+              href="/products"
               className="font-medium text-gray-600 transition-colors hover:text-blue-600"
             >
               Sản phẩm
-            </a>
-            <a
-              href="#"
-              className="font-medium text-gray-600 transition-colors hover:text-blue-600"
-            >
-              Dịch vụ
-            </a>
-            <a
-              href="#"
-              className="font-medium text-gray-600 transition-colors hover:text-blue-600"
-            >
-              Liên hệ
             </a>
           </nav>
 
