@@ -4,39 +4,31 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/ui/carousel';
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, Box, Users, ShieldCheck, Heart } from 'lucide-react';
+import { Box, Users, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/currency';
-import { ProductCard } from '@/components/product/ProductCard';
 import { ProductGrid } from '../product/ProductGrid';
+import { QuantityInput } from '@/components/product/QuantityInput';
+import { VariantSelector } from '@/components/product/VariantSelector'; // 👈 thêm
 
 export default function ProductDetailClient({ product, relatedProducts = [] }) {
   const colors = [...new Set(product.variants.map((v) => v.color))];
   const sizes = [...new Set(product.variants.map((v) => v.size))];
 
-  const primaryImage =
-    product.images.find((img) => img.is_primary)?.url || product.images[0]?.url;
-
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
+
   useEffect(() => {
     if (!api) return;
-
-    // Set index
     setCurrent(api.selectedScrollSnap());
-
-    // Cập nhật current index
     api.on('select', () => {
       setCurrent(api.selectedScrollSnap());
     });
   }, [api]);
 
-  // click vào thumbnail
   const handleThumbnailClick = (index) => {
     if (!api) return;
     api.scrollTo(index);
@@ -44,8 +36,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
 
   const [selectedColor, setSelectedColor] = useState(colors[0] || '');
   const [selectedSize, setSelectedSize] = useState(sizes[0] || '');
+  const [quantity, setQuantity] = useState(1);
 
-  // Lấy giá trị hiển thị
   const displayPrice = product.sale_price || product.base_price;
   const originalPrice = product.sale_price ? product.base_price : 36000;
 
@@ -53,8 +45,8 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
     <div className="container mx-auto max-w-7xl px-4 py-8">
       {/* Product Section */}
       <div className="mb-20 grid grid-cols-1 gap-12 lg:grid-cols-2">
+        {/* Left: Images */}
         <div className="flex w-full flex-col gap-6 overflow-hidden">
-          {/* Main Image Carousel */}
           <Carousel setApi={setApi} className="w-full">
             <CarouselContent>
               {product.images.map((image, index) => (
@@ -69,11 +61,6 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
                 </CarouselItem>
               ))}
             </CarouselContent>
-
-            {/* <div className="hidden sm:block">
-              <CarouselPrevious className="left-4" />
-              <CarouselNext className="right-4" />
-            </div> */}
           </Carousel>
 
           <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-2">
@@ -115,67 +102,45 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
             )}
           </div>
 
-          {/* Colors */}
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-3">
-              {colors.map((color) => (
-                <Button
-                  variant={selectedColor === color ? 'primary' : 'secondary'}
-                  size="lg"
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={cn(
-                    'px-6 py-5 transition-colors',
-                    selectedColor === color ? 'font-semibold' : 'font-medium',
-                  )}
-                >
-                  {color}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sizes */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-3">
-              {sizes.map((size) => (
-                <Button
-                  variant={selectedSize === size ? 'primary' : 'secondary'}
-                  size="lg"
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={cn(
-                    'px-6 py-5 transition-colors',
-                    selectedSize === size ? 'font-semibold' : 'font-medium',
-                  )}
-                >
-                  Size {size}
-                </Button>
-              ))}
-            </div>
-          </div>
+          {/* 👇 Variant Selector */}
+          <VariantSelector
+            variants={product.variants}
+            selectedColor={selectedColor}
+            selectedSize={selectedSize}
+            onColorChange={setSelectedColor}
+            onSizeChange={setSelectedSize}
+          />
 
           {/* Description */}
           <p className="text-text-muted mb-8 leading-relaxed">
             {product.product_description}
           </p>
 
-          {/* Actions */}
-          <div className="mb-10 flex gap-4">
-            <Button
-              variant="secondary"
-              size="lg"
-              className="h-12 flex-1 font-medium"
-            >
-              Thêm vào Wishlist
-            </Button>
-            <Button
-              variant="primary"
-              size="lg"
-              className="h-12 flex-1 font-medium"
-            >
-              Thêm vào giỏ hàng
-            </Button>
+          {/* Quantity + Actions */}
+          <div className="mb-10 flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <span className="text-text-muted text-sm font-medium">
+                Số lượng
+              </span>
+              <QuantityInput value={quantity} onChange={setQuantity} />
+            </div>
+
+            <div className="flex gap-4">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="h-12 flex-1 font-medium"
+              >
+                Thêm vào Wishlist
+              </Button>
+              <Button
+                variant="primary"
+                size="lg"
+                className="h-12 flex-1 font-medium"
+              >
+                Thêm vào giỏ hàng
+              </Button>
+            </div>
           </div>
 
           {/* Meta Info */}
@@ -226,7 +191,7 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
               dùng tạm GetAllProduct
             </span>
           </h2>
-          <ProductGrid products={relatedProducts}></ProductGrid>
+          <ProductGrid products={relatedProducts} />
         </div>
       )}
     </div>
