@@ -28,15 +28,13 @@ export const API_ENDPOINTS = {
   // ── Categories ─────────────────────────────────────────────────────────────
   CATEGORIES: {
     LIST: '/categories',
-    DETAIL: (id) => `/categories/${id}`,
-    BY_SLUG: (slug) => `/categories/slug/${slug}`,
+    BY_SLUG: (slug) => `/categories/${slug}`,
   },
 
   // ── Brands ─────────────────────────────────────────────────────────────────
   BRANDS: {
     LIST: '/brands',
-    DETAIL: (id) => `/brands/${id}`,
-    BY_SLUG: (slug) => `/brands/slug/${slug}`,
+    BY_ID: (id) => `/brands/${id}/products`,
   },
 
   // ── Cart ───────────────────────────────────────────────────────────────────

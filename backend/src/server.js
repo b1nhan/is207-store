@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import app from './app.js';
 import { connectDB } from './database/connection.js';
+import { logger } from './utils/logger.js';
 
 const PORT = process.env.PORT || 8080;
 
@@ -11,8 +12,7 @@ const startServer = async () => {
 
   // ─── Start HTTP Server ──────────────────────────────────────────────────────
   app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
-    // console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+    logger.info(`Server is running on http://localhost:${PORT}`);
   });
 };
 

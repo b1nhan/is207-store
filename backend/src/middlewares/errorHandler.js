@@ -1,5 +1,6 @@
 import AppError from '../utils/AppError.js';
 import { sendError } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Global error handler middleware.
@@ -12,8 +13,7 @@ import { sendError } from '../utils/response.js';
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   // Log lỗi ra console (sau này có thể thay bằng logger.js)
-  console.error(`[ERROR] ${req.method} ${req.originalUrl}`, err);
-
+  logger.error(`${req.method} ${req.originalUrl}`, err);
   if (err instanceof AppError) {
     return sendError(res, {
       message: err.message,
