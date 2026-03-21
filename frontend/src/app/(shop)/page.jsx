@@ -3,6 +3,7 @@ import { CategorySectionWrapper } from '@/components/homepage/CategorySectionWra
 import ProductSection from '@/components/homepage/ProductSection';
 import { productService } from '@/services/productService';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
+import { ProductGridSection } from '@/components/productPage/ProductGridSection';
 
 export default async function HomePage() {
   let newArrivals = [],

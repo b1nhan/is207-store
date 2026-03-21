@@ -1,3 +1,4 @@
+import React from 'react'; // Thêm dòng này để dùng React.Fragment
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,21 +10,22 @@ import {
 
 export default function Breadcrumbs({ items }) {
   return (
-    <Breadcrumb>
+    <Breadcrumb className="ml-[10vw]">
       <BreadcrumbList>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
 
           return (
-            <BreadcrumbItem key={item.label}>
-              {isLast || !item.href ? (
-                <BreadcrumbPage>{item.label}</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
-              )}
-
+            <React.Fragment key={item.label}>
+              <BreadcrumbItem>
+                {isLast || !item.href ? (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
               {!isLast && <BreadcrumbSeparator />}
-            </BreadcrumbItem>
+            </React.Fragment>
           );
         })}
       </BreadcrumbList>
