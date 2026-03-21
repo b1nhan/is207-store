@@ -2,12 +2,18 @@ import { HeroSection, HeroSection2 } from '@/components/homepage/HeroSection';
 import { CategorySectionWrapper } from '@/components/homepage/CategorySectionWrapper';
 import ProductSection from '@/components/homepage/ProductSection';
 import { productService } from '@/services/productService';
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 export default async function HomePage() {
   let newArrivals = [],
     bestSellers = [],
     featured = [],
     discount = [];
+
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Shop', href: '/shop' },
+  ];
 
   try {
     // Fetch song song, nếu 1 cái lỗi không ảnh hưởng cái khác
@@ -34,6 +40,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-16 pb-20">
+      <Breadcrumbs items={breadcrumbItems} />
       <HeroSection />
       <CategorySectionWrapper />
       <HeroSection2 />
