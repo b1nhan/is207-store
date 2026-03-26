@@ -1,4 +1,7 @@
 {
   "name": "is207-store",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "embla-carousel-react": "^8.6.0"
+  }
 }

@@ -4,6 +4,7 @@ import ProductSection from '@/components/homepage/ProductSection';
 import { productService } from '@/services/productService';
 //demo
 import { ProductGridSection } from '@/components/productPage/ProductGridSection';
+import Hnk from '@/components/phanHNK/Hnk';
 
 export default async function HomePage() {
   let newArrivals = [],
@@ -46,6 +47,7 @@ export default async function HomePage() {
         giamgia={discount}
       />
       <ProductGridSection />
+      <Hnk />
     </div>
   );
 }
