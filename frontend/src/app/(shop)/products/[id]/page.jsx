@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { productService } from '@/services/productService';
+
 import ProductDetailClient from '@/components/productPage/productDetail';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
