@@ -10,6 +10,7 @@ class CategoryService {
     const formattedItems = items.map((item) => ({
       category_id: item.category_id,
       category_name: item.category_name,
+      product_count: item.product_count,
       slug: item.slug,
     }));
 
