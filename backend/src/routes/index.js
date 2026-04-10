@@ -7,6 +7,7 @@ import { Router } from 'express';
 import productRoutes from './productRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import brandRoutes from './brandRoutes.js';
+import authRoutes from './authRoutes.js';
 
 // const cartRoutes     = require("./cartRoutes");
 // const orderRoutes    = require("./orderRoutes");
@@ -21,9 +22,9 @@ const routes = Router();
 routes.use('/products', productRoutes);
 routes.use('/categories', categoryRoutes);
 routes.use('/brands', brandRoutes);
+routes.use('/auth', authRoutes);
 
 // Giai đoạn 2 — Auth
-// router.use("/auth",       authRoutes);
 
 // Giai đoạn 3 — Admin (upload ảnh dùng chung cho admin)
 // router.use("/upload",     uploadRoutes);
