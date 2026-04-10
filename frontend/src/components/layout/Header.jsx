@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { title: 'Trang chủ', href: '/' },
   { title: 'Sản phẩm', href: '/products' },
   { title: 'Danh mục', href: '/' },
+  { title: 'Đăng ký', href: '/register' },
 ];
 
 const DROPDOWN_ITEMS = [{ title: 'Profile', href: '/', icon: UserIcon }];
