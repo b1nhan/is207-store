@@ -48,8 +48,17 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 - Token expired → try refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 1. Check if the error is a 401
+    // 2. IMPORTANT: Check if the request was NOT for login or refresh
+    const isAuthRequest =
+      originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/refresh');
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRequest
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -66,6 +75,8 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+
+        // Use a clean axios instance (or the global one) to avoid the interceptor loop
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
           { refreshToken },
@@ -73,6 +84,8 @@ axiosInstance.interceptors.response.use(
 
         const { accessToken } = response.data.data;
         localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+
+        // Update the instance header for future requests
         axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
         processQueue(null, accessToken);
@@ -81,8 +94,12 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+
         if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login';
+          // Only redirect if we aren't already on the login page
+          if (!window.location.pathname.includes('/auth/login')) {
+            window.location.href = '/auth/login';
+          }
         }
         return Promise.reject(refreshError);
       } finally {
@@ -90,12 +107,9 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Normalize error message
+    // Standard error normalization
     const message =
-      error.response?.data?.message ||
-      error.message ||
-      'Đã xảy ra lỗi, vui lòng thử lại';
-
+      error.response?.data?.message || error.message || 'Đã xảy ra lỗi';
     return Promise.reject({ ...error, message });
   },
 );

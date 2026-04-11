@@ -2,7 +2,7 @@ import { HeroSection, HeroSection2 } from '@/components/homepage/HeroSection';
 import { CategorySectionWrapper } from '@/components/homepage/CategorySectionWrapper';
 import ProductSection from '@/components/homepage/ProductSection';
 import { productService } from '@/services/productService';
-//demo
+import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import { ProductGridSection } from '@/components/productPage/ProductGridSection';
 
 export default async function HomePage() {
