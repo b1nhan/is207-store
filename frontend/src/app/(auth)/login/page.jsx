@@ -4,19 +4,6 @@ import authService from '@/services/authService';
 import Link from 'next/link';
 
 export default async function LoginPage() {
-  try {
-    //   const { data } = await brandService.getBrand();
-    //   console.log(data);
-    const response = await authService.login({
-      email: 'huyhuy@gmail.com',
-      password: '123123123',
-    });
-    //console.log(email, password);
-    console.log('Login response:', response);
-  } catch (error) {
-    console.error('Login error:', error);
-  }
-  ////////////////////
   const handleSubmit = async (e) => {
     e.preventDefault();
 
