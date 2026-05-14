@@ -37,7 +37,7 @@ class CategoryService {
     ]);
 
     if (!categoryInfo) {
-      throw new AppError(ERROR_CODES.NOT_FOUND, 'Danh mục không tồn tại', 404);
+      throw new AppError('Danh mục không tồn tại', 404, ERROR_CODES.CATEGORY.NOT_FOUND);
     }
 
     const formattedItems = items.map((item) => ({

@@ -20,9 +20,9 @@ const REQUIRED_VARS = [
   // 'JWT_REFRESH_EXPIRES_IN',
   // ─── Cloudinary ───────────────────────────────────────────────────────────
   // Uncomment khi làm Upload
-  // "CLOUDINARY_CLOUD_NAME",
-  // "CLOUDINARY_API_KEY",
-  // "CLOUDINARY_API_SECRET",
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET',
   'CLIENT_URL',
 ];
 
@@ -61,9 +61,9 @@ const env = {
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
 
   // ─── Cloudinary ───────────────────────────────────────────────────────────
-  // CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
-  // CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
-  // CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 };
 
 export default env;
