@@ -10,6 +10,9 @@ import brandRoutes from './brandRoutes.js';
 import authRoutes from './authRoutes.js';
 import uploadRoutes from './uploadRoutes.js';
 import adminRoutes from './adminRoutes.js';
+import cartRoutes from './cartRoutes.js';
+import voucherRoutes from './voucherRoutes.js';
+import orderRoutes from './orderRoutes.js';
 
 // const cartRoutes     = require("./cartRoutes");
 // const orderRoutes    = require("./orderRoutes");
@@ -33,10 +36,10 @@ routes.use('/upload', uploadRoutes);
 routes.use('/admin', adminRoutes);
 
 // Giai đoạn 4 — Cart & Order (yêu cầu auth)
-// router.use("/cart",       cartRoutes);
-// router.use("/orders",     orderRoutes);
+routes.use('/cart', cartRoutes);
+routes.use('/orders', orderRoutes);
 
 // Giai đoạn 5 — Voucher
-// router.use("/vouchers",   voucherRoutes);
+routes.use('/vouchers', voucherRoutes);
 
 export { routes };

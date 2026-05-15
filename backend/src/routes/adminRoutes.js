@@ -4,6 +4,10 @@ import requireAdmin from '../middlewares/requireAdmin.js';
 import validate from '../middlewares/validate.js';
 
 import adminProductController from '../controllers/admin/adminProductController.js';
+import categoryController from '../controllers/categoryController.js';
+import brandController from '../controllers/brandController.js';
+import voucherController from '../controllers/voucherController.js';
+
 import {
   createProductSchema,
   updateProductSchema,
@@ -11,6 +15,13 @@ import {
   updateVariantSchema,
   updateStatusSchema,
 } from '../validations/productValidations.js';
+import {
+  createCategorySchema,
+  updateCategorySchema,
+  createBrandSchema,
+  updateBrandSchema,
+} from '../validations/categoryValidations.js';
+import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
 
 const router = Router();
 
@@ -79,5 +90,75 @@ router.post(
   validate(createVariantSchema),
   adminProductController.addVariant,
 );
+
+// ─── Categories ─────────────────────────────────────────────────────────────────────
+
+// GET    /admin/categories         — not needed (public route exists)
+// GET    /admin/categories/:id     — lấy chi tiết 1 danh mục
+// POST   /admin/categories         — tạo mới
+// PUT    /admin/categories/:id     — cập nhật
+// DELETE /admin/categories/:id     — xóa (guard: không có sản phẩm)
+
+router.get('/categories/:id', verifyToken, requireAdmin, categoryController.getCategoryById);
+
+router.post(
+  '/categories',
+  verifyToken,
+  requireAdmin,
+  validate(createCategorySchema),
+  categoryController.createCategory,
+);
+
+router.put(
+  '/categories/:id',
+  verifyToken,
+  requireAdmin,
+  validate(updateCategorySchema),
+  categoryController.updateCategory,
+);
+
+router.delete('/categories/:id', verifyToken, requireAdmin, categoryController.deleteCategory);
+
+// ─── Brands ────────────────────────────────────────────────────────────────────────
+
+// GET    /admin/brands             — not needed (public route exists)
+// GET    /admin/brands/:id         — lấy chi tiết 1 thương hiệu
+// POST   /admin/brands             — tạo mới
+// PUT    /admin/brands/:id         — cập nhật
+// DELETE /admin/brands/:id         — xóa (guard: không có sản phẩm)
+
+router.get('/brands/:id', verifyToken, requireAdmin, brandController.getBrandById);
+
+router.post(
+  '/brands',
+  verifyToken,
+  requireAdmin,
+  validate(createBrandSchema),
+  brandController.createBrand,
+);
+
+router.put(
+  '/brands/:id',
+  verifyToken,
+  requireAdmin,
+  validate(updateBrandSchema),
+  brandController.updateBrand,
+);
+
+router.delete('/brands/:id', verifyToken, requireAdmin, brandController.deleteBrand);
+
+// ─── Vouchers (Admin CRUD) ────────────────────────────────────────────────────
+
+// GET    /admin/vouchers        — tất cả vouchers, có pagination
+// GET    /admin/vouchers/:id    — chi tiết một voucher
+// POST   /admin/vouchers        — tạo voucher mới
+// PUT    /admin/vouchers/:id    — cập nhật
+// DELETE /admin/vouchers/:id    — soft delete (set is_active=0)
+
+router.get('/vouchers', verifyToken, requireAdmin, voucherController.getAll);
+router.get('/vouchers/:id', verifyToken, requireAdmin, voucherController.getById);
+router.post('/vouchers', verifyToken, requireAdmin, validate(createVoucherSchema), voucherController.create);
+router.put('/vouchers/:id', verifyToken, requireAdmin, validate(updateVoucherSchema), voucherController.update);
+router.delete('/vouchers/:id', verifyToken, requireAdmin, voucherController.delete);
 
 export default router;
