@@ -6,7 +6,9 @@ import validate from '../middlewares/validate.js';
 import adminProductController from '../controllers/admin/adminProductController.js';
 import categoryController from '../controllers/categoryController.js';
 import brandController from '../controllers/brandController.js';
-import voucherController from '../controllers/voucherController.js';
+import adminVoucherController from '../controllers/admin/adminVoucherController.js';
+import adminOrderController from '../controllers/admin/adminOrderController.js';
+import adminDashboardController from '../controllers/admin/adminDashboardController.js';
 
 import {
   createProductSchema,
@@ -22,6 +24,7 @@ import {
   updateBrandSchema,
 } from '../validations/categoryValidations.js';
 import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
+import { updateOrderStatusSchema } from '../validations/orderValidations.js';
 
 const router = Router();
 
@@ -155,10 +158,30 @@ router.delete('/brands/:id', verifyToken, requireAdmin, brandController.deleteBr
 // PUT    /admin/vouchers/:id    — cập nhật
 // DELETE /admin/vouchers/:id    — soft delete (set is_active=0)
 
-router.get('/vouchers', verifyToken, requireAdmin, voucherController.getAll);
-router.get('/vouchers/:id', verifyToken, requireAdmin, voucherController.getById);
-router.post('/vouchers', verifyToken, requireAdmin, validate(createVoucherSchema), voucherController.create);
-router.put('/vouchers/:id', verifyToken, requireAdmin, validate(updateVoucherSchema), voucherController.update);
-router.delete('/vouchers/:id', verifyToken, requireAdmin, voucherController.delete);
+router.get('/vouchers', verifyToken, requireAdmin, adminVoucherController.getAllVouchers);
+router.get('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController.getVoucherById);
+router.post('/vouchers', verifyToken, requireAdmin, validate(createVoucherSchema), adminVoucherController.createVoucher);
+router.put('/vouchers/:id', verifyToken, requireAdmin, validate(updateVoucherSchema), adminVoucherController.updateVoucher);
+router.delete('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController.deleteVoucher);
+
+// ─── Orders (Admin) ────────────────────────────────────────────────────────────
+
+// GET    /admin/orders              — danh sách đơn hàng
+// GET    /admin/orders/:id          — chi tiết đơn hàng
+// PATCH  /admin/orders/:id/status   — cập nhật trạng thái đơn hàng
+
+router.get('/orders', verifyToken, requireAdmin, adminOrderController.getAllOrders);
+router.get('/orders/:id', verifyToken, requireAdmin, adminOrderController.getOrderById);
+router.patch('/orders/:id/status', verifyToken, requireAdmin, validate(updateOrderStatusSchema), adminOrderController.updateOrderStatus);
+
+// ─── Dashboard (Admin) ─────────────────────────────────────────────────────────
+
+// GET    /admin/dashboard/summary        — thống kê tổng quan
+// GET    /admin/dashboard/revenue        — thống kê doanh thu
+// GET    /admin/dashboard/top-products   — thống kê sản phẩm bán chạy
+
+router.get('/dashboard/summary', verifyToken, requireAdmin, adminDashboardController.getSummary);
+router.get('/dashboard/revenue', verifyToken, requireAdmin, adminDashboardController.getRevenue);
+router.get('/dashboard/top-products', verifyToken, requireAdmin, adminDashboardController.getTopProducts);
 
 export default router;

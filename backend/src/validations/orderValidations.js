@@ -16,3 +16,7 @@ export const checkoutSchema = z.object({
     .regex(/^0\d{9}$/, 'Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và có 10 chữ số)'),
   full_address: z.string().min(1, 'Địa chỉ giao hàng không được để trống'),
 });
+
+export const updateOrderStatusSchema = z.object({
+  status: z.enum(['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'returned']),
+});
