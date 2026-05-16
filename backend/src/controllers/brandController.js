@@ -1,15 +1,10 @@
 import brandService from '../services/brandService.js';
 import { sendSuccess } from '../utils/response.js';
 
-//tiếp nhận yêu cầu từ user và trả lời
-//ví dụ nếu user bấm vô sp thì nó sẽ gọi service và bảo service lấy ra
-//sau đó dùng sendSuccess để đóng gói lại và gửi về frontend
 class BrandController {
   getAllBrands = async (req, res, next) => {
     try {
       const result = await brandService.getAllBrands();
-      // console.log(req.query);
-      // let onlyforfixbug = req.query;
       sendSuccess(res, {
         data: result,
         message: 'Lấy danh sách brand thành công',
@@ -25,7 +20,72 @@ class BrandController {
       const result = await brandService.getAllProductsByBrand(id, req.query);
       sendSuccess(res, {
         data: result,
-        message: `Lấy danh sách sản phẩm của danh mục ${result.brand.brand_name} thành công`,
+        message: `Lấy danh sách sản phẩm của thương hiệu ${result.brand.brand_name} thành công`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ─── Admin ───────────────────────────────────────────────────────────────────
+
+  /**
+   * GET /admin/brands/:id
+   */
+  getBrandById = async (req, res, next) => {
+    try {
+      const brand = await brandService.getBrandById(req.params.id);
+      sendSuccess(res, {
+        data: brand,
+        message: 'Lấy thông tin thương hiệu thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * POST /admin/brands
+   * Body validated by createBrandSchema
+   */
+  createBrand = async (req, res, next) => {
+    try {
+      const brand = await brandService.createBrand(req.body);
+      sendSuccess(res, {
+        data: brand,
+        message: 'Tạo thương hiệu thành công',
+        status: 201,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * PUT /admin/brands/:id
+   * Body validated by updateBrandSchema
+   */
+  updateBrand = async (req, res, next) => {
+    try {
+      const brand = await brandService.updateBrand(req.params.id, req.body);
+      sendSuccess(res, {
+        data: brand,
+        message: 'Cập nhật thương hiệu thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * DELETE /admin/brands/:id
+   */
+  deleteBrand = async (req, res, next) => {
+    try {
+      await brandService.deleteBrand(req.params.id);
+      sendSuccess(res, {
+        data: null,
+        message: 'Xóa thương hiệu thành công',
       });
     } catch (error) {
       next(error);

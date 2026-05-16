@@ -37,7 +37,7 @@ class CategoryService {
     ]);
 
     if (!categoryInfo) {
-      throw new AppError(ERROR_CODES.NOT_FOUND, 'Danh mục không tồn tại', 404);
+      throw new AppError('Danh mục không tồn tại', 404, ERROR_CODES.CATEGORY.NOT_FOUND);
     }
 
     const formattedItems = items.map((item) => ({
@@ -63,6 +63,70 @@ class CategoryService {
       items: formattedItems,
       pagination: getPaginationData(total, currentPage, limit),
     };
+  }
+
+  // ─── Admin write operations ───────────────────────────────────────────────────
+
+  async getCategoryById(id) {
+    const category = await categoryRepository.findById(id);
+    if (!category) {
+      throw new AppError('Danh mục không tồn tại', 404, ERROR_CODES.CATEGORY.NOT_FOUND);
+    }
+    return category;
+  }
+
+  async createCategory(dto) {
+    // Kiểm tra trùng tên
+    const existingName = await categoryRepository.findByName(dto.category_name);
+    if (existingName) {
+      throw new AppError('Tên danh mục đã tồn tại', 409, ERROR_CODES.CATEGORY.NAME_ALREADY_EXISTS);
+    }
+    // Kiểm tra trùng slug
+    const existingSlug = await categoryRepository.findBySlugAdmin(dto.slug);
+    if (existingSlug) {
+      throw new AppError('Slug danh mục đã tồn tại', 409, ERROR_CODES.CATEGORY.SLUG_ALREADY_EXISTS);
+    }
+    return categoryRepository.create(dto);
+  }
+
+  async updateCategory(id, dto) {
+    // Kiểm tra category tồn tại
+    const category = await categoryRepository.findById(id);
+    if (!category) {
+      throw new AppError('Danh mục không tồn tại', 404, ERROR_CODES.CATEGORY.NOT_FOUND);
+    }
+    // Kiểm tra trùng tên (bỏ qua chính nó)
+    if (dto.category_name) {
+      const existingName = await categoryRepository.findByName(dto.category_name, id);
+      if (existingName) {
+        throw new AppError('Tên danh mục đã tồn tại', 409, ERROR_CODES.CATEGORY.NAME_ALREADY_EXISTS);
+      }
+    }
+    // Kiểm tra trùng slug (bỏ qua chính nó)
+    if (dto.slug) {
+      const existingSlug = await categoryRepository.findBySlugAdmin(dto.slug, id);
+      if (existingSlug) {
+        throw new AppError('Slug danh mục đã tồn tại', 409, ERROR_CODES.CATEGORY.SLUG_ALREADY_EXISTS);
+      }
+    }
+    return categoryRepository.update(id, dto);
+  }
+
+  async deleteCategory(id) {
+    // Kiểm tra tồn tại
+    const category = await categoryRepository.findById(id);
+    if (!category) {
+      throw new AppError('Danh mục không tồn tại', 404, ERROR_CODES.CATEGORY.NOT_FOUND);
+    }
+    // Kiểm tra còn sản phẩm không
+    if (Number(category.product_count) > 0) {
+      throw new AppError(
+        'Không thể xóa danh mục còn chứa sản phẩm',
+        409,
+        ERROR_CODES.CATEGORY.HAS_PRODUCTS,
+      );
+    }
+    await categoryRepository.delete(id);
   }
 }
 

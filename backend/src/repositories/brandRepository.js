@@ -55,6 +55,52 @@ class BrandRepository {
 
     return { items: rows, total: totalRows[0].total };
   }
+
+  // ─── Admin write operations ───────────────────────────────────────────────────
+
+  async findByIdAdmin(brand_id) {
+    const db = getDB();
+    const [rows] = await db.query(
+      `SELECT brand_id, brand_name,
+              (SELECT COUNT(*) FROM products p WHERE p.brand_id = b.brand_id) as product_count
+       FROM brands b
+       WHERE b.brand_id = ?`,
+      [brand_id],
+    );
+    return rows[0] || null;
+  }
+
+  async findByName(brand_name, excludeId = null) {
+    const db = getDB();
+    let query = `SELECT brand_id FROM brands WHERE brand_name = ?`;
+    const params = [brand_name];
+    if (excludeId) {
+      query += ` AND brand_id != ?`;
+      params.push(excludeId);
+    }
+    const [rows] = await db.query(query, params);
+    return rows[0] || null;
+  }
+
+  async create({ brand_name }) {
+    const db = getDB();
+    const [result] = await db.query(
+      `INSERT INTO brands (brand_name) VALUES (?)`,
+      [brand_name],
+    );
+    return this.findByIdAdmin(result.insertId);
+  }
+
+  async update(brand_id, { brand_name }) {
+    const db = getDB();
+    await db.query(`UPDATE brands SET brand_name = ? WHERE brand_id = ?`, [brand_name, brand_id]);
+    return this.findByIdAdmin(brand_id);
+  }
+
+  async delete(brand_id) {
+    const db = getDB();
+    await db.query(`DELETE FROM brands WHERE brand_id = ?`, [brand_id]);
+  }
 }
 
 export default new BrandRepository();
