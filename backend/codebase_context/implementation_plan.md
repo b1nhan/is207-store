@@ -7,18 +7,16 @@
 
 ## Tổng quan thứ tự
 
-```
-Phase 0: Bugfix & Constants         (prerequisite cho mọi thứ)
-Phase 1: Upload / Cloudinary        (prerequisite cho Admin Products)
-Phase 2: Admin Products CRUD        (prerequisite cho Admin CRUD)
-Phase 3: Admin Category/Brand CRUD  (dùng chung upload)
-Phase 4: Cart                       (prerequisite cho Checkout)
-Phase 5: Vouchers                   (prerequisite cho Checkout)
-Phase 6: Orders / Checkout          (depends on Cart + Vouchers)
-Phase 7: Admin Orders               (depends on Orders)
-Phase 8: Admin Dashboard            (depends on Orders)
-Phase 9: Admin Vouchers             (dùng chung voucher logic)
-```
+- [x] Phase 0: Bugfix & Constants         (prerequisite cho mọi thứ)
+- [x] Phase 1: Upload / Cloudinary        (prerequisite cho Admin Products)
+- [x] Phase 2: Admin Products CRUD        (prerequisite cho Admin CRUD)
+- [x] Phase 3: Admin Category/Brand CRUD  (dùng chung upload)
+- [x] Phase 4: Cart                       (prerequisite cho Checkout)
+- [x] Phase 5: Vouchers                   (prerequisite cho Checkout)
+- [x] Phase 6: Orders / Checkout          (depends on Cart + Vouchers)
+- [x] Phase 7: Admin Orders               (depends on Orders)
+- [x] Phase 8: Admin Dashboard            (depends on Orders)
+- [x] Phase 9: Admin Vouchers             (dùng chung voucher logic)
 
 ---
 

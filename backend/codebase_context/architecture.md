@@ -15,79 +15,79 @@ src/
 ├── config/                # Cấu hình môi trường và external services
 │   ├── env.js             # Load & validate biến môi trường
 │   ├── corsOptions.js     # CORS whitelist config
-│   └── cloudinary.js      # Cloudinary SDK init (EMPTY)
+│   └── cloudinary.js      # Cloudinary SDK init ✅
 ├── constants/             # Hằng số toàn ứng dụng
 │   ├── errorCode.js       # ERROR_CODES theo domain (AUTH, PRODUCT, CART…)
 │   ├── userRole.js        # UserRole.ADMIN / UserRole.USER
-│   ├── orderStatus.js     # (EMPTY)
-│   └── voucherType.js     # (EMPTY)
+│   ├── orderStatus.js     # Trạng thái đơn hàng ✅
+│   └── voucherType.js     # Phân loại voucher ✅
 ├── middlewares/           # Express middlewares
 │   ├── verifyToken.js     # Xác thực JWT Bearer token → req.user
 │   ├── requireAdmin.js    # Kiểm tra role admin (dùng sau verifyToken)
 │   ├── validate.js        # Zod schema factory → validate req.body
 │   ├── errorHandler.js    # Global error handler (cuối pipeline)
 │   ├── notFound.js        # 404 handler
-│   └── uploadMiddleware.js# Multer config (EMPTY)
+│   └── uploadMiddleware.js# Multer config ✅
 ├── routes/                # Route definitions
 │   ├── index.js           # Router gốc, mount tất cả sub-routers
 │   ├── authRoutes.js      ✅
 │   ├── productRoutes.js   ✅
 │   ├── categoryRoutes.js  ✅
 │   ├── brandRoutes.js     ✅
-│   ├── cartRoutes.js      ❌ EMPTY
-│   ├── orderRoutes.js     ❌ EMPTY
-│   ├── voucherRoutes.js   ❌ EMPTY
-│   ├── uploadRoutes.js    ❌ EMPTY
-│   └── adminRoutes.js     ❌ EMPTY
+│   ├── cartRoutes.js      ✅
+│   ├── orderRoutes.js     ✅
+│   ├── voucherRoutes.js   ✅
+│   ├── uploadRoutes.js    ✅
+│   └── adminRoutes.js     ✅
 ├── controllers/           # Nhận HTTP request, gọi service, trả response
 │   ├── authController.js  ✅
 │   ├── productController.js ✅
 │   ├── categoryController.js ✅
 │   ├── brandController.js ✅
-│   ├── cartController.js  ❌ EMPTY
-│   ├── orderController.js ❌ EMPTY
-│   ├── uploadController.js❌ EMPTY
-│   ├── voucherController.js❌ EMPTY
+│   ├── cartController.js  ✅
+│   ├── orderController.js ✅
+│   ├── uploadController.js✅
+│   ├── voucherController.js✅
 │   └── admin/
-│       ├── adminProductController.js   ❌ EMPTY
-│       ├── adminOrderController.js     ❌ EMPTY
-│       ├── adminVoucherController.js   ❌ EMPTY
-│       └── adminDashboardController.js ❌ EMPTY
+│       ├── adminProductController.js   ✅
+│       ├── adminOrderController.js     ✅
+│       ├── adminVoucherController.js   ✅
+│       └── adminDashboardController.js ✅
 ├── services/              # Business logic layer
 │   ├── authService.js     ✅
 │   ├── productService.js  ✅
-│   ├── categoryService.js ✅ (có bug nhỏ trong AppError args)
-│   ├── brandService.js    ✅ (có bug nhỏ)
-│   ├── cartService.js     ❌ EMPTY
-│   ├── orderService.js    ❌ EMPTY
-│   ├── uploadService.js   ❌ EMPTY
-│   ├── voucherService.js  ❌ EMPTY
+│   ├── categoryService.js ✅
+│   ├── brandService.js    ✅
+│   ├── cartService.js     ✅
+│   ├── orderService.js    ✅
+│   ├── uploadService.js   ✅
+│   ├── voucherService.js  ✅
 │   └── admin/
-│       ├── adminProductService.js    ❌ EMPTY
-│       ├── adminOrderService.js      ❌ EMPTY
-│       ├── adminVoucherService.js    ❌ EMPTY
-│       └── adminDashboardService.js  ❌ EMPTY
+│       ├── adminProductService.js    ✅
+│       ├── adminOrderService.js      ✅
+│       ├── adminVoucherService.js    ✅
+│       └── adminDashboardService.js  ✅
 ├── repositories/          # Data access layer — raw SQL queries
 │   ├── userRepository.js        ✅
 │   ├── productRepository.js     ✅
 │   ├── categoryRepository.js    ✅
 │   ├── brandRepository.js       ✅
-│   ├── cartRepository.js        ❌ EMPTY
-│   ├── orderRepository.js       ❌ EMPTY
-│   ├── orderItemRepository.js   ❌ EMPTY
-│   ├── productImageRepository.js❌ EMPTY
-│   ├── productVariantRepository.js❌ EMPTY
-│   ├── voucherRepository.js     ❌ EMPTY
+│   ├── cartRepository.js        ✅
+│   ├── orderRepository.js       ✅
+│   ├── orderItemRepository.js   ✅
+│   ├── productImageRepository.js✅
+│   ├── productVariantRepository.js✅
+│   ├── voucherRepository.js     ✅
 │   └── admin/
-│       ├── adminProductRepository.js   ❌ EMPTY
-│       ├── adminOrderRepository.js     ❌ EMPTY
-│       └── adminDashboardRepository.js ❌ EMPTY
+│       ├── adminProductRepository.js   ✅
+│       ├── adminOrderRepository.js     ✅
+│       └── adminDashboardRepository.js ✅
 ├── validations/           # Zod schemas
 │   ├── authValdiation.js       ✅ (registerSchema, loginSchema, changePasswordSchema)
-│   ├── cardValidations.js      ❌ EMPTY (typo: "card" thay vì "cart")
-│   ├── orderValidations.js     ❌ EMPTY
-│   ├── productValidations.js   ❌ EMPTY
-│   └── voucherValidations.js   ❌ EMPTY
+│   ├── cartValidations.js      ✅
+│   ├── orderValidations.js     ✅
+│   ├── productValidations.js   ✅
+│   └── voucherValidations.js   ✅
 ├── utils/                 # Tiện ích dùng chung
 │   ├── AppError.js        ✅ Custom Error class
 │   ├── response.js        ✅ sendSuccess() / sendError()
@@ -233,12 +233,7 @@ throw new AppError(message, statusCode, errorCode, errors?)
 
 | # | Vấn đề | Nơi | Mức độ |
 |---|---|---|---|
-| 1 | Hầu hết file cart/order/voucher/upload/admin **trống rỗng** | Toàn bộ các module chưa implement | 🔴 Critical |
-| 2 | Routes cart/order/voucher/upload/admin **bị comment out** | `routes/index.js` | 🔴 Critical |
-| 3 | `config/cloudinary.js` **trống** — chưa init SDK | `config/cloudinary.js` | 🔴 Critical |
-| 4 | `AppError` **args sai thứ tự** trong categoryService | `categoryService.js:40` — `new AppError(ERROR_CODES.NOT_FOUND, 'Danh mục không tồn tại', 404)` | 🟠 Medium |
-| 5 | `productRepository` **count query không filter** theo search/category/brand | `productRepository.js:70-73` | 🟡 Minor |
-| 6 | `sale_price` **hardcode `null`** — không query từ promotions | `productService.js:23` | 🟡 Minor |
-| 7 | `brandService.findAll({})` **truyền object** nhưng repo không nhận param | `brandService.js:12` | 🟡 Minor |
-| 8 | **Typo** `cardValidations.js` thay vì `cartValidations.js` | `src/validations/` | 🟡 Minor |
-| 9 | `orderStatus.js` và `voucherType.js` tồn tại nhưng **rỗng** | `src/constants/` | 🟡 Minor |
+| 1 | `sale_price` **hardcode `null`** — không query từ promotions | `productService.js:23` | 🟡 Minor |
+| 2 | `brandService.findAll({})` **truyền object** nhưng repo không nhận param | `brandService.js:12` | 🟡 Minor |
+
+> Các vấn đề critical (chưa implement phase 1-9) và bug AppError, lỗi pagination count, typos đã được xử lý trong các đợt cập nhật gần đây.

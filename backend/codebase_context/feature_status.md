@@ -1,7 +1,7 @@
 # Feature Status — IS207 Clothing Store Backend
 
 > **Đối chiếu giữa API Spec và code thực tế**  
-> Cập nhật lần cuối: 2026-05-04
+> Cập nhật lần cuối: 2026-05-16
 
 ---
 
@@ -32,10 +32,10 @@
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
 | `GET` | `/categories` | ✅ | Trả tất cả category + product_count (chỉ ACTIVE products) |
-| `GET` | `/categories/:slug` | ⚠️ | Logic đúng nhưng **bug AppError args** (`new AppError(ERROR_CODES, message, status)` — sai thứ tự), category không tồn tại sẽ trả lỗi sai |
-| `POST` | `/categories` | ❌ | Chưa implement (admin endpoint) |
-| `PUT` | `/categories/:id` | ❌ | Chưa implement (admin endpoint) |
-| `DELETE` | `/categories/:id` | ❌ | Chưa implement (admin endpoint) |
+| `GET` | `/categories/:slug` | ✅ | Hoạt động tốt, trả danh sách sản phẩm theo danh mục |
+| `POST` | `/categories` | ✅ | Admin endpoint hoàn thành, validate đầy đủ |
+| `PUT` | `/categories/:id` | ✅ | Admin endpoint hoàn thành |
+| `DELETE` | `/categories/:id` | ✅ | Admin endpoint hoàn thành, chặn xoá khi có products |
 
 ---
 
@@ -43,7 +43,7 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `GET` | `/products` | ⚠️ | Filter (search, category, brand, gender, price) hoạt động, nhưng **count query cho pagination không áp dụng filters** → totalItems sai khi filter |
+| `GET` | `/products` | ✅ | Filter (search, category, brand, gender, price) & pagination hoạt động đúng |
 | `GET` | `/products/:id` | ✅ | Trả đủ: product info, images[], variants[], brand, category |
 | `GET` | `/products/search` | ✅ | Autocomplete, giới hạn 10 kết quả, min 2 ký tự |
 
@@ -56,11 +56,9 @@
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
 | `GET` | `/brands` | ✅ | Trả danh sách brand + product_count |
-| `POST` | `/brands` | ❌ | Chưa implement |
-| `PUT` | `/brands/:id` | ❌ | Chưa implement |
-| `DELETE` | `/brands/:id` | ❌ | Chưa implement |
-
-> **Lưu ý:** `brandService.getAllBrands()` gọi `BrandRepository.findAll({})` nhưng `findAll()` không nhận param (không gây lỗi nhưng là code smell).
+| `POST` | `/brands` | ✅ | Admin endpoint hoàn thành |
+| `PUT` | `/brands/:id` | ✅ | Admin endpoint hoàn thành |
+| `DELETE` | `/brands/:id` | ✅ | Admin endpoint hoàn thành |
 
 ---
 
@@ -68,8 +66,8 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `POST` | `/upload/image` | ❌ | `uploadController.js`, `uploadService.js`, `uploadMiddleware.js`, `config/cloudinary.js` đều rỗng |
-| `DELETE` | `/upload/image` | ❌ | Chưa implement |
+| `POST` | `/upload/image` | ✅ | Tích hợp Cloudinary và Multer hoàn tất |
+| `DELETE` | `/upload/image` | ✅ | Hoàn thành |
 
 ---
 
@@ -77,13 +75,11 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `GET` | `/cart` | ❌ | `cartController.js`, `cartService.js`, `cartRepository.js` đều rỗng |
-| `POST` | `/cart` | ❌ | Chưa implement |
-| `PUT` | `/cart/:itemId` | ❌ | Chưa implement |
-| `DELETE` | `/cart/:itemId` | ❌ | Chưa implement |
-| `DELETE` | `/cart` | ❌ | Chưa implement |
-
-> Route `cartRoutes.js` rỗng và chưa được mount trong `routes/index.js`.
+| `GET` | `/cart` | ✅ | Trả giỏ hàng và danh sách items |
+| `POST` | `/cart` | ✅ | Thêm item vào giỏ hàng, check stock |
+| `PUT` | `/cart/:itemId` | ✅ | Cập nhật số lượng |
+| `DELETE` | `/cart/:itemId` | ✅ | Xoá item khỏi giỏ hàng |
+| `DELETE` | `/cart` | ✅ | Clear toàn bộ giỏ hàng |
 
 ---
 
@@ -91,15 +87,13 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `POST` | `/vouchers/apply` | ❌ | `voucherController.js`, `voucherService.js`, `voucherRepository.js` đều rỗng |
-| `GET` | `/vouchers/active` | ❌ | Chưa implement |
-| `GET` | `/vouchers` | ❌ | Chưa implement (admin) |
-| `GET` | `/vouchers/:id` | ❌ | Chưa implement (admin) |
-| `POST` | `/vouchers` | ❌ | Chưa implement (admin) |
-| `PUT` | `/vouchers/:id` | ❌ | Chưa implement (admin) |
-| `DELETE` | `/vouchers/:id` | ❌ | Chưa implement (admin) |
-
-> Route `voucherRoutes.js` rỗng và chưa được mount trong `routes/index.js`.
+| `POST` | `/vouchers/apply` | ✅ | Core logic kiểm tra tính hợp lệ và apply voucher hoàn tất |
+| `GET` | `/vouchers/active` | ✅ | Lấy voucher người dùng có thể dùng |
+| `GET` | `/vouchers` | ✅ | Admin list vouchers |
+| `GET` | `/vouchers/:id` | ✅ | Admin get voucher detail |
+| `POST` | `/vouchers` | ✅ | Admin create voucher |
+| `PUT` | `/vouchers/:id` | ✅ | Admin update voucher |
+| `DELETE` | `/vouchers/:id` | ✅ | Admin delete voucher |
 
 ---
 
@@ -107,12 +101,10 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `POST` | `/orders/checkout` | ❌ | `orderController.js`, `orderService.js`, `orderRepository.js`, `orderItemRepository.js` đều rỗng |
-| `GET` | `/orders` | ❌ | Chưa implement |
-| `GET` | `/orders/:id` | ❌ | Chưa implement |
-| `POST` | `/orders/:id/cancel` | ❌ | Chưa implement |
-
-> Route `orderRoutes.js` rỗng và chưa được mount. DB có stored procedure `sp_place_order` nhưng chưa được gọi.
+| `POST` | `/orders/checkout` | ✅ | Xử lý atomic transaction cho checkout hoàn tất |
+| `GET` | `/orders` | ✅ | Lấy danh sách đơn hàng |
+| `GET` | `/orders/:id` | ✅ | Chi tiết đơn hàng |
+| `POST` | `/orders/:id/cancel` | ✅ | Huỷ đơn hàng bởi user, khôi phục stock |
 
 ---
 
@@ -122,32 +114,30 @@
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `GET` | `/admin/products` | ❌ | `adminProductController.js`, `adminProductService.js`, `adminProductRepository.js` đều rỗng |
-| `GET` | `/admin/products/:id` | ❌ | Chưa implement |
-| `POST` | `/admin/products` | ❌ | Chưa implement |
-| `PUT` | `/admin/products/:id` | ❌ | Chưa implement |
-| `PATCH` | `/admin/products/:id/status` | ❌ | Chưa implement |
-| `POST` | `/admin/products/:id/variants` | ❌ | Chưa implement |
-| `PUT` | `/admin/products/variants/:variantId` | ❌ | Chưa implement |
-| `DELETE` | `/admin/products/variants/:variantId` | ❌ | Chưa implement |
+| `GET` | `/admin/products` | ✅ | Hoàn thành |
+| `GET` | `/admin/products/:id` | ✅ | Hoàn thành |
+| `POST` | `/admin/products` | ✅ | Hoàn thành |
+| `PUT` | `/admin/products/:id` | ✅ | Hoàn thành |
+| `PATCH` | `/admin/products/:id/status` | ✅ | Hoàn thành |
+| `POST` | `/admin/products/:id/variants` | ✅ | Hoàn thành |
+| `PUT` | `/admin/products/variants/:variantId` | ✅ | Hoàn thành |
+| `DELETE` | `/admin/products/variants/:variantId` | ✅ | Hoàn thành |
 
 ### Admin Orders
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `GET` | `/admin/orders` | ❌ | `adminOrderController.js`, `adminOrderService.js`, `adminOrderRepository.js` đều rỗng |
-| `GET` | `/admin/orders/:id` | ❌ | Chưa implement |
-| `PATCH` | `/admin/orders/:id/status` | ❌ | Chưa implement |
+| `GET` | `/admin/orders` | ✅ | Hoàn thành |
+| `GET` | `/admin/orders/:id` | ✅ | Hoàn thành |
+| `PATCH` | `/admin/orders/:id/status` | ✅ | Cập nhật status order, quản lý logic transition |
 
 ### Admin Dashboard
 
 | Method | Endpoint | Status | Ghi chú |
 |---|---|---|---|
-| `GET` | `/admin/dashboard/summary` | ❌ | `adminDashboardController.js`, `adminDashboardService.js`, `adminDashboardRepository.js` đều rỗng |
-| `GET` | `/admin/dashboard/revenue` | ❌ | Chưa implement |
-| `GET` | `/admin/dashboard/top-products` | ❌ | Chưa implement |
-
-> `adminRoutes.js` rỗng và chưa được mount trong `routes/index.js`.
+| `GET` | `/admin/dashboard/summary` | ✅ | Thống kê tổng quan hoạt động |
+| `GET` | `/admin/dashboard/revenue` | ✅ | Doanh thu hoạt động |
+| `GET` | `/admin/dashboard/top-products` | ✅ | Sản phẩm bán chạy hoạt động |
 
 ---
 
@@ -155,23 +145,20 @@
 
 | Trạng thái | Số endpoint | Tỷ lệ |
 |---|---|---|
-| ✅ Hoàn thành | 10 | ~22% |
-| ⚠️ Dang dở | 4 | ~9% |
-| ❌ Chưa làm | 31 | ~69% |
+| ✅ Hoàn thành | 45 | 100% |
+| ⚠️ Dang dở | 0 | 0% |
+| ❌ Chưa làm | 0 | 0% |
 | **Tổng** | **45** | 100% |
 
 ### Các module hoàn thành:
 - ✅ **Auth** (6/6 endpoints) — fully functional
-- ✅ **Categories GET** (2/5 endpoints) — read-only working
-- ✅ **Products GET** (3/3 endpoints) — read-only working (có bug pagination count)
-- ✅ **Brands GET** (1/4 endpoints) — read-only working
-
-### Các module chưa implement:
-- ❌ **Cart** (0/5)
-- ❌ **Orders** (0/4)
-- ❌ **Vouchers** (0/7)
-- ❌ **Upload** (0/2)
-- ❌ **Admin Products** (0/8)
-- ❌ **Admin Orders** (0/3)
-- ❌ **Admin Dashboard** (0/3)
-- ❌ **Admin CRUD** cho Category/Brand (0/6)
+- ✅ **Categories** (5/5 endpoints) — fully functional
+- ✅ **Products** (3/3 endpoints) — fully functional
+- ✅ **Brands** (4/4 endpoints) — fully functional
+- ✅ **Cart** (5/5 endpoints) — fully functional
+- ✅ **Orders** (4/4 endpoints) — fully functional
+- ✅ **Vouchers** (7/7 endpoints) — fully functional
+- ✅ **Upload** (2/2 endpoints) — fully functional
+- ✅ **Admin Products** (8/8 endpoints) — fully functional
+- ✅ **Admin Orders** (3/3 endpoints) — fully functional
+- ✅ **Admin Dashboard** (3/3 endpoints) — fully functional
