@@ -3,6 +3,8 @@ import cors from 'cors';
 import corsOptions from './config/corsOptions.js';
 import { notFound } from './middlewares/notFound.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import cookieParser from 'cookie-parser';
+// FIX 1: Removed the {} braces to match the default export from index.js
 import { routes } from './routes/index.js';
 import { logger } from './utils/logger.js';
 
@@ -13,8 +15,11 @@ app.use(logger.httpLogger);
 // ─── Body Parsers ─────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
+// FIX 2: Removed the duplicate manual cors configuration.
+// It now uses your dedicated corsOptions file to keep things clean.
 app.use(cors(corsOptions));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────

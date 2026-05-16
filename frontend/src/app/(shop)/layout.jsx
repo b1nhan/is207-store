@@ -6,7 +6,7 @@ export default function ShopLayout({ children }) {
     <>
       <div id="home" />
       <Header />
-      <main className="relative z-0 mx-auto mt-20 min-h-[calc(100vh-80px)] w-full">
+      <main className="relative z-0 mx-auto min-h-[calc(100vh-80px)] w-full">
         {children}
       </main>
       <Footer />

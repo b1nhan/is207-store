@@ -6,8 +6,14 @@ import { Router } from 'express';
 // const authRoutes     = require("./authRoutes");
 import productRoutes from './productRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
+import brandRoutes from './brandRoutes.js';
+import authRoutes from './authRoutes.js';
+import uploadRoutes from './uploadRoutes.js';
+import adminRoutes from './adminRoutes.js';
+import cartRoutes from './cartRoutes.js';
+import voucherRoutes from './voucherRoutes.js';
+import orderRoutes from './orderRoutes.js';
 
-// const brandRoutes    = require("./brandRoutes");
 // const cartRoutes     = require("./cartRoutes");
 // const orderRoutes    = require("./orderRoutes");
 // const voucherRoutes  = require("./voucherRoutes");
@@ -20,20 +26,20 @@ const routes = Router();
 // Giai đoạn 1 — Public API
 routes.use('/products', productRoutes);
 routes.use('/categories', categoryRoutes);
-// router.use("/brands",     brandRoutes);
+routes.use('/brands', brandRoutes);
+routes.use('/auth', authRoutes);
 
 // Giai đoạn 2 — Auth
-// router.use("/auth",       authRoutes);
 
 // Giai đoạn 3 — Admin (upload ảnh dùng chung cho admin)
-// router.use("/upload",     uploadRoutes);
-// router.use("/admin",      adminRoutes);
+routes.use('/upload', uploadRoutes);
+routes.use('/admin', adminRoutes);
 
 // Giai đoạn 4 — Cart & Order (yêu cầu auth)
-// router.use("/cart",       cartRoutes);
-// router.use("/orders",     orderRoutes);
+routes.use('/cart', cartRoutes);
+routes.use('/orders', orderRoutes);
 
 // Giai đoạn 5 — Voucher
-// router.use("/vouchers",   voucherRoutes);
+routes.use('/vouchers', voucherRoutes);
 
 export { routes };

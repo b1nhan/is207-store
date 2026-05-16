@@ -121,7 +121,7 @@
   --focus: var(--cb-500);
   --ring: oklch(0.708 0 0);
   --ring-offset: #ffffff;
-  --border: oklch(0.922 0 0);
+  --border: #c0d8fd;
   --divider: var(--cb-100);
   --success: #16a34a;
   --success-bg: #f0fdf4;
