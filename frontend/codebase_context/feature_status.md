@@ -29,23 +29,27 @@ Dựa trên API Spec và trạng thái codebase Frontend hiện tại (`src/app`
   - Có hàm trong Service nhưng hoàn toàn chưa có trang UI chi tiết sản phẩm.
 
 ### 4. Cart (Giỏ hàng)
-- **Các chức năng Giỏ hàng (Get, Add, Update, Remove)**: ❌ **Chưa làm**
-  - Thư mục `src/app/(shop)/cart/page.jsx` đang là file trống 0 bytes.
-  - File `cartService.js` và `cartStore.js` cũng đang trống.
+- **Các chức năng Giỏ hàng (Get, Add, Update, Remove)**: ✅ **Hoàn thành**
+  - Đã có state `cartStore.js` kết nối `cartService.js`.
+  - UI Giỏ hàng tại `src/app/(shop)/cart/page.jsx` đã đầy đủ tính năng.
 
 ### 5. Orders & Checkout (Đơn hàng & Thanh toán)
-- **Checkout & Quản lý đơn hàng**: ❌ **Chưa làm**
-  - Các thư mục `/checkout`, `/orders` tồn tại nhưng chưa có nội dung. File `orderService.js` trống.
+- **Checkout & Quản lý đơn hàng**: ✅ **Hoàn thành**
+  - Đã triển khai `orderService.js`.
+  - Trang `/checkout` hiển thị form điền thông tin và áp dụng voucher.
+  - Trang `/orders` (Lịch sử) và `/orders/[id]` (Chi tiết) đã hiển thị đầy đủ thông tin trạng thái đơn và cho phép hủy.
 
 ### 6. Vouchers (Mã giảm giá)
-- **Áp dụng Voucher & Lấy danh sách Voucher**: ❌ **Chưa làm**
-  - File `voucherService.js` trống. Chưa có UI giỏ hàng để áp dụng voucher.
+- **Áp dụng Voucher & Lấy danh sách Voucher**: ✅ **Hoàn thành**
+  - Đã triển khai `voucherService.js` và UI áp dụng voucher vào `checkout/page.jsx`.
 
 ### 7. Admin (Quản trị viên) & Image Upload
-- **Upload Ảnh (`/upload/image`)**: ❌ **Chưa làm**
-- **Admin Dashboard, Products, Orders, Vouchers**: ❌ **Chưa làm**
-  - Các file `adminProductService.js`, `adminOrderService.js`, `adminVoucherService.js`, `adminDashboardService.js` hoàn toàn trống 0 bytes.
-  - Trang `/admin` trống.
+- **Upload Ảnh (`/upload/image`)**: ✅ **Hoàn thành**
+  - Đã có `uploadService.js`.
+- **Admin Dashboard, Products, Orders, Vouchers**: ✅ **Hoàn thành**
+  - Đã thiết lập `AdminGuard` và `AdminSidebar` bảo vệ route `/admin`.
+  - Đã tạo các file Service: `adminDashboardService.js`, `adminProductService.js`, `adminOrderService.js`, `adminVoucherService.js`.
+  - Đã có các trang quản trị Dashboard, Products (bao gồm thêm/sửa, upload ảnh), Orders (cập nhật trạng thái), Vouchers (thêm, xóa).
 
 ---
 
