@@ -48,6 +48,9 @@ class ProductRepository {
       params.push(maxPrice);
     }
 
+    // Lưu filterParams (chỉ cho WHERE) trước khi thêm LIMIT/OFFSET
+    const filterParams = [...params];
+
     // Sort mapping to prevent SQL Injection
     const allowedSortBy = ['price', 'createdAt', 'name'];
     const sortMap = {
@@ -66,11 +69,21 @@ class ProductRepository {
     const db = getDB();
     const [rows] = await db.query(query, params);
 
-    // Query total for pagination
-    const [totalRows] = await db.query(
-      `SELECT COUNT(*) as total FROM products WHERE status = 1`,
-      [],
-    );
+    // Count query áp dụng cùng bộ filter (không có LIMIT/OFFSET)
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      WHERE p.status = 1
+      ${search ? 'AND p.product_name LIKE ?' : ''}
+      ${category ? 'AND c.slug = ?' : ''}
+      ${brand_id ? 'AND p.brand_id = ?' : ''}
+      ${gender ? 'AND p.gender = ?' : ''}
+      ${minPrice ? 'AND p.base_price >= ?' : ''}
+      ${maxPrice ? 'AND p.base_price <= ?' : ''}
+    `;
+    const [totalRows] = await db.query(countQuery, filterParams);
 
     return { items: rows, total: totalRows[0].total };
   }
