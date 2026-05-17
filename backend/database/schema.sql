@@ -294,3 +294,60 @@ ALTER TABLE product_variants ADD INDEX idx_variants_product (product_id);
 ALTER TABLE voucher_usages ADD INDEX idx_usage_user_voucher (user_id, voucher_id);
 
 ALTER TABLE promotions ADD INDEX idx_promo_status_date (status, start_date, end_date);
+
+CREATE TABLE `campaigns` (
+  `campaign_id`   INT NOT NULL AUTO_INCREMENT,
+  `name`          VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description`   TEXT COLLATE utf8mb4_unicode_ci,
+  `campaign_type` ENUM('PERCENTAGE','FIXED_PRICE','TIER_DISCOUNT','FREESHIP')
+                  COLLATE utf8mb4_unicode_ci NOT NULL,
+  `start_date`    DATETIME NOT NULL,
+  `end_date`      DATETIME NOT NULL,
+  `status`        TINYINT DEFAULT 1
+                  COMMENT '1=active, 0=inactive',
+  `created_by`    INT DEFAULT NULL,
+  `created_at`    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`campaign_id`),
+  KEY `idx_campaign_status_date` (`status`, `start_date`, `end_date`),
+  CONSTRAINT `fk_campaign_creator`
+    FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_products` (
+  `campaign_id`  INT NOT NULL,
+  `product_id`   INT NOT NULL,
+  PRIMARY KEY (`campaign_id`, `product_id`),
+  CONSTRAINT `fk_cp_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cp_product`
+    FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_config` (
+  `campaign_id`    INT NOT NULL,
+  `discount_value` DECIMAL(12,2) NOT NULL
+                   COMMENT 'PERCENTAGE: % giảm (vd: 50). FIXED_PRICE: mức giá đồng giá (vd: 99000)',
+  PRIMARY KEY (`campaign_id`),
+  CONSTRAINT `fk_cc_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_tiers` (
+  `tier_id`           INT NOT NULL AUTO_INCREMENT,
+  `campaign_id`       INT NOT NULL,
+  `min_order_value`   DECIMAL(12,2) NOT NULL
+                      COMMENT 'Ngưỡng tổng tiền các sản phẩm trong campaign',
+  `discount_value`    DECIMAL(12,2) NOT NULL
+                      COMMENT '% giảm khi đạt ngưỡng này',
+  PRIMARY KEY (`tier_id`),
+  KEY `idx_tier_campaign` (`campaign_id`, `min_order_value`),
+  CONSTRAINT `fk_ct_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `orders`
+  ADD COLUMN `campaign_id`            INT DEFAULT NULL AFTER `voucher_id`,
+  ADD COLUMN `campaign_discount_total` DECIMAL(12,2) DEFAULT '0.00' AFTER `discount_total`,
+  ADD CONSTRAINT `fk_order_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`);
