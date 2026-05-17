@@ -10,6 +10,7 @@ import { z } from 'zod';
 export const checkoutSchema = z.object({
   address_id: z.number().int().positive().optional(),
   voucher_code: z.string().min(1).max(20).optional(),
+  campaign_id: z.number().int().positive().optional(),
   receiver_name: z.string().min(1, 'Tên người nhận không được để trống').max(100),
   receiver_phone: z
     .string()

@@ -105,6 +105,19 @@ const ERROR_CODES = {
     CODE_ALREADY_EXISTS: 'VOUCHER_CODE_ALREADY_EXISTS', // 409 - Mã voucher đã tồn tại
   },
 
+  // ─── CAMPAIGN ──────────────────────────────────────────────────────────────
+  CAMPAIGN: {
+    NOT_FOUND: 'CAMPAIGN_NOT_FOUND', // 404 - Campaign không tồn tại
+    ALREADY_ACTIVE: 'CAMPAIGN_ALREADY_ACTIVE', // 422 - Campaign đang chạy, không thể chỉnh sửa
+    CANNOT_DELETE: 'CAMPAIGN_CANNOT_DELETE', // 422 - Không thể xóa campaign đã active hoặc kết thúc
+    DATE_INVALID: 'CAMPAIGN_DATE_INVALID', // 400 - Ngày bắt đầu/kết thúc không hợp lệ
+    CONFIG_REQUIRED: 'CAMPAIGN_CONFIG_REQUIRED', // 400 - Thiếu config cho PERCENTAGE/FIXED_PRICE
+    TIERS_REQUIRED: 'CAMPAIGN_TIERS_REQUIRED', // 400 - Thiếu tiers cho TIER_DISCOUNT
+    TIERS_DUPLICATE: 'CAMPAIGN_TIERS_DUPLICATE', // 400 - Trùng min_order_value trong tiers
+    PRODUCTS_REQUIRED: 'CAMPAIGN_PRODUCTS_REQUIRED', // 400 - Thiếu product_ids
+    PRODUCT_NOT_FOUND: 'CAMPAIGN_PRODUCT_NOT_FOUND', // 404 - product_id không tồn tại
+  },
+
   // ─── UPLOAD ────────────────────────────────────────────────────────────────
   UPLOAD: {
     NO_FILE: 'UPLOAD_NO_FILE', // 400 - Không có file được gửi lên

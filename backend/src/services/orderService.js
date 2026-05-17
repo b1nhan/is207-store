@@ -2,6 +2,7 @@ import { getDB } from '../database/connection.js';
 import cartRepository from '../repositories/cartRepository.js';
 import orderRepository from '../repositories/orderRepository.js';
 import orderItemRepository from '../repositories/orderItemRepository.js';
+import campaignRepository from '../repositories/campaignRepository.js';
 import voucherService from './voucherService.js';
 import AppError from '../utils/AppError.js';
 import { ERROR_CODES } from '../constants/errorCode.js';
@@ -71,17 +72,99 @@ class OrderService {
       0,
     );
 
+    // ── 4.5. Apply campaign ──────────────────────────────────────────────────
+    let appliedCampaign = null;
+    let campaignDiscountTotal = 0;
+    let isFreeship = false;
+
+    const activeCampaigns = await campaignRepository.findActiveCampaigns();
+    
+    if (activeCampaigns.length > 0) {
+      let bestCampaign = null;
+      let maxEffectiveDiscount = -1;
+      let bestDiscountTotal = 0;
+      let bestFreeship = false;
+
+      for (const campaign of activeCampaigns) {
+        let discount = 0;
+        let freeship = false;
+        const campaignProductIds = campaign.products.map(p => p.product_id);
+        const appliesToAll = campaignProductIds.length === 0;
+
+        const applicableItems = items.filter(item => 
+          appliesToAll || campaignProductIds.includes(item.product_id)
+        );
+
+        if (applicableItems.length > 0) {
+          if (campaign.campaign_type === 'PERCENTAGE') {
+            const pct = campaign.config.discount_value;
+            applicableItems.forEach(item => {
+              discount += (Number(item.unit_price) * (pct / 100)) * item.quantity;
+            });
+          } else if (campaign.campaign_type === 'FIXED_PRICE') {
+            const fixedPrice = campaign.config.discount_value;
+            applicableItems.forEach(item => {
+              const originalPrice = Number(item.unit_price);
+              if (originalPrice > fixedPrice) {
+                discount += (originalPrice - fixedPrice) * item.quantity;
+              }
+            });
+          } else if (campaign.campaign_type === 'TIER_DISCOUNT') {
+            const totalApplicableValue = applicableItems.reduce(
+              (sum, item) => sum + (Number(item.unit_price) * item.quantity), 0
+            );
+            const applicableTiers = campaign.tiers
+              .filter(t => totalApplicableValue >= t.min_order_value)
+              .sort((a, b) => b.min_order_value - a.min_order_value);
+              
+            if (applicableTiers.length > 0) {
+              discount = totalApplicableValue * (applicableTiers[0].discount_value / 100);
+            }
+          } else if (campaign.campaign_type === 'FREESHIP') {
+            freeship = true;
+          }
+        }
+
+        const effectiveDiscount = discount + (freeship ? SHIPPING_FEE : 0);
+        
+        if (dto.campaign_id && campaign.campaign_id === dto.campaign_id) {
+          bestCampaign = campaign;
+          bestDiscountTotal = discount;
+          bestFreeship = freeship;
+          break;
+        }
+
+        if (!dto.campaign_id && effectiveDiscount > maxEffectiveDiscount) {
+          maxEffectiveDiscount = effectiveDiscount;
+          bestCampaign = campaign;
+          bestDiscountTotal = discount;
+          bestFreeship = freeship;
+        }
+      }
+
+      if (dto.campaign_id && (!bestCampaign || (bestDiscountTotal === 0 && !bestFreeship))) {
+        throw new AppError('Campaign không hợp lệ hoặc không áp dụng được cho đơn hàng này', 400, ERROR_CODES.ORDER.BAD_REQUEST);
+      } else if (bestCampaign && (bestDiscountTotal > 0 || bestFreeship)) {
+        appliedCampaign = bestCampaign;
+        campaignDiscountTotal = bestDiscountTotal;
+        isFreeship = bestFreeship;
+      }
+    }
+
     // ── 5. Apply voucher nếu có ──────────────────────────────────────────────
     let voucherResult = null;
+    const subtotalAfterCampaign = Math.max(0, subtotal - campaignDiscountTotal);
+    
     if (dto.voucher_code) {
       voucherResult = await voucherService.applyVoucher(userId, {
         code: dto.voucher_code,
-        subtotal,
+        subtotal: subtotalAfterCampaign,
       });
     }
 
     const discountTotal = voucherResult ? voucherResult.discount_amount : 0;
-    const totalAmount = Math.max(0, subtotal - discountTotal) + SHIPPING_FEE;
+    const finalShippingFee = isFreeship ? 0 : SHIPPING_FEE;
+    const totalAmount = Math.max(0, subtotalAfterCampaign - discountTotal) + finalShippingFee;
 
     // ── 6. Transaction: tất cả DB writes ────────────────────────────────────
     const conn = await db.getConnection();
@@ -95,9 +178,11 @@ class OrderService {
           address_id: dto.address_id || null,
           voucher_id: voucherResult ? voucherResult.voucher_id : null,
           voucher_code_snapshot: voucherResult ? voucherResult.code : null,
+          campaign_id: appliedCampaign ? appliedCampaign.campaign_id : null,
           subtotal,
           discount_total: discountTotal,
-          shipping_fee: SHIPPING_FEE,
+          campaign_discount_total: campaignDiscountTotal,
+          shipping_fee: finalShippingFee,
           total_amount: totalAmount,
         },
         conn,
@@ -248,6 +333,7 @@ class OrderService {
       ...order,
       subtotal: Number(order.subtotal),
       discount_total: Number(order.discount_total),
+      campaign_discount_total: Number(order.campaign_discount_total),
       shipping_fee: Number(order.shipping_fee),
       total_amount: Number(order.total_amount),
       items: items.map((item) => ({

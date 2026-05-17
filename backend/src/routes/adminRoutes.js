@@ -9,6 +9,7 @@ import brandController from '../controllers/brandController.js';
 import adminVoucherController from '../controllers/admin/adminVoucherController.js';
 import adminOrderController from '../controllers/admin/adminOrderController.js';
 import adminDashboardController from '../controllers/admin/adminDashboardController.js';
+import adminCampaignController from '../controllers/admin/adminCampaignController.js';
 
 import {
   createProductSchema,
@@ -25,6 +26,7 @@ import {
 } from '../validations/categoryValidations.js';
 import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
 import { updateOrderStatusSchema } from '../validations/orderValidations.js';
+import { createCampaignSchema, updateCampaignSchema, statusCampaignSchema } from '../validations/campaignValidations.js';
 
 const router = Router();
 
@@ -183,5 +185,14 @@ router.patch('/orders/:id/status', verifyToken, requireAdmin, validate(updateOrd
 router.get('/dashboard/summary', verifyToken, requireAdmin, adminDashboardController.getSummary);
 router.get('/dashboard/revenue', verifyToken, requireAdmin, adminDashboardController.getRevenue);
 router.get('/dashboard/top-products', verifyToken, requireAdmin, adminDashboardController.getTopProducts);
+
+// ─── Campaigns (Admin CRUD) ───────────────────────────────────────────────────
+
+router.get('/campaigns', verifyToken, requireAdmin, adminCampaignController.getAllCampaigns);
+router.get('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.getCampaignById);
+router.post('/campaigns', verifyToken, requireAdmin, validate(createCampaignSchema), adminCampaignController.createCampaign);
+router.put('/campaigns/:id', verifyToken, requireAdmin, validate(updateCampaignSchema), adminCampaignController.updateCampaign);
+router.patch('/campaigns/:id/status', verifyToken, requireAdmin, validate(statusCampaignSchema), adminCampaignController.updateStatus);
+router.delete('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.deleteCampaign);
 
 export default router;
