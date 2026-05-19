@@ -16,6 +16,18 @@ const adminProductService = {
   updateStatus: (id, status) => {
     return axios.patch(`/admin/products/${id}/status`, { status });
   },
+  // ─── Image Management ────────────────────────────────────────────────────────
+  addImage: (productId, file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return axios.post(`/admin/products/${productId}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (productId, imageId) => {
+    return axios.delete(`/admin/products/${productId}/images/${imageId}`);
+  },
+  // ─── Variants ────────────────────────────────────────────────────────────────
   addVariant: (productId, data) => {
     return axios.post(`/admin/products/${productId}/variants`, data);
   },

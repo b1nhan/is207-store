@@ -2,6 +2,7 @@ import { Router } from 'express';
 import verifyToken from '../middlewares/verifyToken.js';
 import requireAdmin from '../middlewares/requireAdmin.js';
 import validate from '../middlewares/validate.js';
+import upload from '../middlewares/uploadMiddleware.js';
 
 import adminProductController from '../controllers/admin/adminProductController.js';
 import categoryController from '../controllers/categoryController.js';
@@ -94,6 +95,23 @@ router.post(
   requireAdmin,
   validate(createVariantSchema),
   adminProductController.addVariant,
+);
+
+// POST   /admin/products/:id/images    — thêm ảnh cho sản phẩm
+// DELETE /admin/products/:id/images/:imageId — xóa ảnh
+router.post(
+  '/products/:id/images',
+  verifyToken,
+  requireAdmin,
+  upload.single('image'),
+  adminProductController.addImage,
+);
+
+router.delete(
+  '/products/:id/images/:imageId',
+  verifyToken,
+  requireAdmin,
+  adminProductController.deleteImage,
 );
 
 // ─── Categories ─────────────────────────────────────────────────────────────────────

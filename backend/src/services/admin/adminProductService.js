@@ -1,5 +1,7 @@
 import adminProductRepository from '../../repositories/admin/adminProductRepository.js';
 import productVariantRepository from '../../repositories/productVariantRepository.js';
+import productImageRepository from '../../repositories/productImageRepository.js';
+import uploadService from '../uploadService.js';
 import AppError from '../../utils/AppError.js';
 import { ERROR_CODES } from '../../constants/errorCode.js';
 import { getPagination, getPaginationData } from '../../utils/pagination.js';
@@ -132,6 +134,55 @@ class AdminProductService {
     }
     await adminProductRepository.updateStatus(id, status);
     return { product_id: Number(id), status };
+  }
+
+  // ─── Images ────────────────────────────────────────────────────────────────
+
+  /**
+   * Thêm ảnh cho sản phẩm (upload lên Cloudinary, lưu DB).
+   */
+  async addImage(productId, file) {
+    if (!file) {
+      throw new AppError('Không có file ảnh', 400, ERROR_CODES.UPLOAD.NO_FILE);
+    }
+    const product = await adminProductRepository.findById(productId);
+    if (!product) {
+      throw new AppError('Sản phẩm không tồn tại', 404, ERROR_CODES.PRODUCT.NOT_FOUND);
+    }
+    const { buffer, mimetype } = file;
+    const uploadResult = await uploadService.uploadImage(buffer, mimetype, 'products');
+
+    // If this is the first image, mark as primary
+    const existingImages = await productImageRepository.findByProductId(productId);
+    const isPrimary = existingImages.length === 0;
+
+    const imageId = await productImageRepository.create(productId, {
+      image_url: uploadResult.url,
+      public_id: uploadResult.publicId,
+      is_primary: isPrimary,
+      sort_order: existingImages.length,
+    });
+    return {
+      image_id: imageId,
+      image_url: uploadResult.url,
+      public_id: uploadResult.publicId,
+      is_primary: isPrimary,
+      sort_order: existingImages.length,
+    };
+  }
+
+  /**
+   * Xóa ảnh khỏi Cloudinary và DB.
+   */
+  async deleteImage(productId, imageId) {
+    const image = await productImageRepository.findById(imageId);
+    if (!image || String(image.product_id) !== String(productId)) {
+      throw new AppError('Ảnh không tồn tại hoặc không thuộc sản phẩm này', 404, ERROR_CODES.PRODUCT.NOT_FOUND);
+    }
+    if (image.public_id) {
+      await uploadService.deleteImage(image.public_id);
+    }
+    await productImageRepository.delete(imageId);
   }
 
   // ─── Variants ────────────────────────────────────────────────────────────────

@@ -1,20 +1,21 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Check } from 'lucide-react';
+import { X, ChevronDown, Check, Upload, Trash2, ImagePlus, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import adminProductService from '@/services/adminProductService';
 import adminCategoryService from '@/services/adminCategoryService';
 import adminBrandService from '@/services/adminBrandService';
 
-/* ─── Multi-select dropdown component ─── */
+/* ─── Multi-select dropdown ─── */
 function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, required }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
-    const handleClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
@@ -77,12 +78,176 @@ function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, r
   );
 }
 
+/* ─── Image Upload Panel ─── */
+function ImageUploadPanel({ productId, existingImages, onImagesChange, isEdit }) {
+  const [pendingFiles, setPendingFiles] = useState([]); // { file, preview }[]
+  const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const newPending = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      id: `${file.name}-${Date.now()}-${Math.random()}`,
+    }));
+    setPendingFiles((prev) => [...prev, ...newPending]);
+    // Reset input so the same file can be re-selected
+    e.target.value = '';
+  };
+
+  const removePending = (id) => {
+    setPendingFiles((prev) => {
+      const item = prev.find((p) => p.id === id);
+      if (item) URL.revokeObjectURL(item.preview);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
+  // Upload all pending files (called before form submit if in edit mode)
+  // In create mode, we return the files list to be uploaded after product is created
+  const uploadPending = async (pid) => {
+    if (pendingFiles.length === 0) return [];
+    setUploading(true);
+    const uploaded = [];
+    try {
+      for (const pending of pendingFiles) {
+        const result = await adminProductService.addImage(pid, pending.file);
+        uploaded.push(result.data || result);
+      }
+      setPendingFiles([]);
+      return uploaded;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteExisting = async (imageId) => {
+    if (!productId) return;
+    setDeletingId(imageId);
+    try {
+      await adminProductService.deleteImage(productId, imageId);
+      onImagesChange(existingImages.filter((img) => img.image_id !== imageId));
+    } catch (err) {
+      alert(err.message || 'Không thể xóa ảnh');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Expose uploadPending to parent via ref-like approach
+  // We do this by calling it from the parent's submit handler
+  useEffect(() => {
+    if (onImagesChange.__setPendingUploader) {
+      onImagesChange.__setPendingUploader(uploadPending);
+    }
+  });
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Hình ảnh sản phẩm</label>
+
+      {/* Existing images (edit mode) */}
+      {isEdit && existingImages.length > 0 && (
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">Ảnh hiện tại:</p>
+          <div className="flex flex-wrap gap-2">
+            {existingImages.map((img) => (
+              <div key={img.image_id} className="relative group">
+                <img
+                  src={img.image_url}
+                  alt="product"
+                  className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                />
+                {img.is_primary === 1 && (
+                  <div className="absolute top-1 left-1 bg-yellow-400 rounded-full p-0.5">
+                    <Star size={10} className="text-white fill-white" />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteExisting(img.image_id)}
+                  disabled={deletingId === img.image_id}
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                >
+                  {deletingId === img.image_id ? (
+                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <X size={12} />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pending (new) image previews */}
+      {pendingFiles.length > 0 && (
+        <div className="mb-3">
+          <p className="text-xs text-gray-500 mb-2">Ảnh sẽ được tải lên:</p>
+          <div className="flex flex-wrap gap-2">
+            {pendingFiles.map((p) => (
+              <div key={p.id} className="relative group">
+                <img
+                  src={p.preview}
+                  alt="preview"
+                  className="w-20 h-20 object-cover rounded-lg border-2 border-dashed border-indigo-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePending(p.id)}
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Upload button */}
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors w-full justify-center"
+      >
+        <ImagePlus size={16} />
+        {uploading ? 'Đang tải ảnh...' : 'Chọn ảnh (có thể chọn nhiều)'}
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+      <p className="text-xs text-gray-400 mt-1">Hỗ trợ JPG, PNG, WEBP. Ảnh đầu tiên sẽ là ảnh đại diện.</p>
+
+      {/* Return pending files count info */}
+      {pendingFiles.length > 0 && !isEdit && (
+        <p className="text-xs text-indigo-600 mt-1">
+          {pendingFiles.length} ảnh sẽ được tải lên sau khi tạo sản phẩm.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ─── Main Modal ─── */
 export default function ProductFormModal({ isEdit = false, productId = null, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+
+  // Ref to call image upload from child
+  const pendingUploaderRef = useRef(null);
 
   const [formData, setFormData] = useState({
     product_name: '',
@@ -91,8 +256,8 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     gender: 'unisex',
     base_price: '',
     slug: '',
-    category_ids: [],   // multi-select
-    brand_ids: [],      // multi-select
+    category_ids: [],
+    brand_ids: [],
   });
 
   /* Load categories & brands on mount */
@@ -126,7 +291,6 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
           gender: p.gender || 'unisex',
           base_price: p.base_price || '',
           slug: p.slug || '',
-          // Support single or multi category/brand from response
           category_ids: p.categories
             ? p.categories.map((c) => c.category_id)
             : p.category?.category_id
@@ -138,6 +302,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
             ? [p.brand.brand_id]
             : [],
         });
+        setExistingImages(p.images || []);
       })
       .catch((err) => {
         console.error(err);
@@ -175,19 +340,29 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
         gender: formData.gender,
         base_price: Number(formData.base_price),
         slug: formData.slug,
-        // Send first selected value if backend accepts single; adapt if backend supports array
         category_id: formData.category_ids.length > 0 ? formData.category_ids[0] : undefined,
         brand_id: formData.brand_ids.length > 0 ? formData.brand_ids[0] : undefined,
-        // Also send arrays for possible multi-support
         category_ids: formData.category_ids.length > 0 ? formData.category_ids : undefined,
         brand_ids: formData.brand_ids.length > 0 ? formData.brand_ids : undefined,
       };
 
+      let targetProductId = productId;
+
       if (isEdit) {
         await adminProductService.updateProduct(productId, payload);
+        // Upload any pending new images for the existing product
+        if (pendingUploaderRef.current) {
+          await pendingUploaderRef.current(productId);
+        }
       } else {
-        await adminProductService.createProduct(payload);
+        const createRes = await adminProductService.createProduct(payload);
+        targetProductId = createRes.data?.product_id;
+        // Upload pending images for the newly created product
+        if (targetProductId && pendingUploaderRef.current) {
+          await pendingUploaderRef.current(targetProductId);
+        }
       }
+
       onSuccess?.();
     } catch (error) {
       console.error('Failed to save product', error);
@@ -202,6 +377,12 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
+
+  // Create a stable callback ref for ImageUploadPanel to register its uploader
+  const imagesChangeHandler = (imgs) => setExistingImages(imgs);
+  imagesChangeHandler.__setPendingUploader = (fn) => {
+    pendingUploaderRef.current = fn;
+  };
 
   return (
     /* Backdrop */
@@ -351,6 +532,14 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                   onChange={handleInput}
                 />
               </div>
+
+              {/* Image Upload */}
+              <ImageUploadPanel
+                productId={productId}
+                existingImages={existingImages}
+                onImagesChange={imagesChangeHandler}
+                isEdit={isEdit}
+              />
             </form>
           )}
         </div>
