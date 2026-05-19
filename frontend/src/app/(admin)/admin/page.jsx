@@ -28,12 +28,15 @@ export default function AdminDashboardPage() {
         const [summaryRes, revenueRes, topProductsRes] = await Promise.all([
           adminDashboardService.getSummary(),
           adminDashboardService.getRevenue(),
-          adminDashboardService.getTopProducts(),
+          adminDashboardService.getTopProducts({ limit: 10 }),
         ]);
         
-        setSummary(summaryRes.data || summaryRes);
-        setRevenue(revenueRes.data || revenueRes);
-        setTopProducts(topProductsRes.data || topProductsRes);
+        // Axios interceptor returns response.data (JSON body):
+        // { success: true, data: <payload> }
+        // So .data = actual payload
+        setSummary(summaryRes.data);
+        setRevenue(Array.isArray(revenueRes.data) ? revenueRes.data : []);
+        setTopProducts(Array.isArray(topProductsRes.data) ? topProductsRes.data : []);
       } catch (error) {
         console.error('Failed to fetch dashboard data', error);
       } finally {

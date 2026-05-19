@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
 import { Button } from '@/components/ui/button';
 
 export default function AdminVouchersPage() {
   const [vouchers, setVouchers] = useState([]);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,9 +16,13 @@ export default function AdminVouchersPage() {
   }, []);
 
   const fetchVouchers = async () => {
+    setLoading(true);
     try {
       const response = await adminVoucherService.getAllVouchers();
-      setVouchers(response.data?.vouchers || response.data || []);
+      // Backend: voucherService.getAll() returns { vouchers, pagination }
+      // Axios interceptor unwraps to response.data = { vouchers, pagination }
+      setVouchers(response.data?.vouchers || []);
+      if (response.data?.pagination) setPagination(response.data.pagination);
     } catch (error) {
       console.error('Failed to fetch vouchers', error);
     } finally {
@@ -32,7 +37,7 @@ export default function AdminVouchersPage() {
       fetchVouchers();
     } catch (error) {
       console.error('Failed to delete voucher', error);
-      alert('Xóa thất bại');
+      alert(error.response?.data?.message || error.message || 'Xóa thất bại');
     }
   };
 
@@ -77,14 +82,14 @@ export default function AdminVouchersPage() {
               </tr>
             ) : (
               vouchers.map((voucher) => (
-                <tr key={voucher.id} className="border-b border-gray-50 hover:bg-gray-50">
+                <tr key={voucher.voucher_id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4 font-medium text-blue-600">{voucher.code}</td>
                   <td className="p-4">
-                    {voucher.discount_type === 'PERCENT'
+                    {voucher.discount_type === 'PERCENTAGE'
                       ? `${voucher.discount_value}%`
-                      : `${voucher.discount_value.toLocaleString()}₫`}
+                      : `${Number(voucher.discount_value).toLocaleString('vi-VN')}₫`}
                   </td>
-                  <td className="p-4">{voucher.min_order_value?.toLocaleString()}₫</td>
+                  <td className="p-4">{Number(voucher.min_order_value).toLocaleString('vi-VN')}₫</td>
                   <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       voucher.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -93,10 +98,12 @@ export default function AdminVouchersPage() {
                     </span>
                   </td>
                   <td className="p-4 text-sm text-gray-500">
-                    {new Date(voucher.expiration_date).toLocaleDateString('vi-VN')}
+                    {voucher.expiry_date
+                      ? new Date(voucher.expiry_date).toLocaleDateString('vi-VN')
+                      : '—'}
                   </td>
                   <td className="p-4 text-right space-x-2">
-                    <Button variant="outline" size="icon" onClick={() => handleDelete(voucher.id)}>
+                    <Button variant="outline" size="icon" onClick={() => handleDelete(voucher.voucher_id)}>
                       <Trash2 size={16} className="text-red-500" />
                     </Button>
                   </td>

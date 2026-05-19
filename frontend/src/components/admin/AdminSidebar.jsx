@@ -2,15 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, Tag, LogOut, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Tag, LogOut, ArrowLeft, Megaphone, Layers, ShoppingBag } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 import { STORAGE_KEYS } from '@/constants';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/admin/products', icon: Package, label: 'Products' },
+  { href: '/admin/categories', icon: Layers, label: 'Categories' },
+  { href: '/admin/brands', icon: ShoppingBag, label: 'Brands' },
   { href: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   { href: '/admin/vouchers', icon: Tag, label: 'Vouchers' },
+  { href: '/admin/campaigns', icon: Megaphone, label: 'Campaigns' },
 ];
 
 export default function AdminSidebar() {

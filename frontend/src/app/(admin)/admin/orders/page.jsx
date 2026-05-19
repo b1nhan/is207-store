@@ -14,8 +14,7 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     try {
       const response = await adminOrderService.getAllOrders();
-      console.log(response)
-      setOrders(response.data?.orders || response.data || []);
+      setOrders(response.data?.orders || []);
     } catch (error) {
       console.error('Failed to fetch orders', error);
     } finally {
@@ -24,13 +23,13 @@ export default function AdminOrdersPage() {
   };
 
   const handleStatusChange = async (id, newStatus) => {
-    if (!confirm(`Xác nhận chuyển trạng thái đơn hàng thành ${newStatus}?`)) return;
+    if (!confirm(`Xác nhận chuyển trạng thái đơn hàng thành "${newStatus}"?`)) return;
     try {
       await adminOrderService.updateOrderStatus(id, newStatus);
       fetchOrders();
     } catch (error) {
       console.error('Failed to update status', error);
-      alert(error.response?.data?.message || 'Cập nhật thất bại');
+      alert(error.response?.data?.message || error.message || 'Cập nhật thất bại');
     }
   };
 
@@ -44,14 +43,17 @@ export default function AdminOrdersPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
-      case 'SHIPPED': return 'bg-purple-100 text-purple-800';
-      case 'DELIVERED': return 'bg-green-100 text-green-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending':   return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
+      case 'shipping':  return 'bg-purple-100 text-purple-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'returned':  return 'bg-orange-100 text-orange-800';
+      default:          return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const TERMINAL_STATUSES = ['delivered', 'cancelled', 'returned'];
 
   return (
     <div className="space-y-6">
@@ -78,13 +80,15 @@ export default function AdminOrdersPage() {
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="p-4">#{order.id}</td>
+                <tr key={order.order_id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="p-4">#{order.order_id}</td>
                   <td className="p-4">
                     <div>{order.user_email}</div>
-                    <div className="text-xs text-gray-500">{order.phone}</div>
+                    <div className="text-xs text-gray-500">{order.receiver_phone}</div>
                   </td>
-                  <td className="p-4 font-medium">{order.final_amount?.toLocaleString()}₫</td>
+                  <td className="p-4 font-medium">
+                    {Number(order.total_amount).toLocaleString('vi-VN')}₫
+                  </td>
                   <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {order.status}
@@ -95,16 +99,16 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="p-4">
                     <select
-                      className="border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                      className="border border-gray-300 rounded px-2 py-1 text-sm bg-white disabled:opacity-50"
                       value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                      disabled={['DELIVERED', 'CANCELLED'].includes(order.status)}
+                      onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
+                      disabled={TERMINAL_STATUSES.includes(order.status)}
                     >
-                      <option value="PENDING">PENDING</option>
-                      <option value="CONFIRMED">CONFIRMED</option>
-                      <option value="SHIPPED">SHIPPED</option>
-                      <option value="DELIVERED">DELIVERED</option>
-                      <option value="CANCELLED">CANCELLED</option>
+                      <option value="pending">pending</option>
+                      <option value="confirmed">confirmed</option>
+                      <option value="shipping">shipping</option>
+                      <option value="delivered">delivered</option>
+                      <option value="cancelled">cancelled</option>
                     </select>
                   </td>
                 </tr>
