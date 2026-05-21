@@ -30,7 +30,10 @@ export default function AdminDashboardPage() {
           adminDashboardService.getRevenue(),
           adminDashboardService.getTopProducts({ limit: 10 }),
         ]);
-        
+        console.log("sum", summaryRes.data)
+        console.log("revenue", revenueRes.data)
+        console.log("tProduct", topProductsRes.data)
+
         // Axios interceptor returns response.data (JSON body):
         // { success: true, data: <payload> }
         // So .data = actual payload
@@ -56,10 +59,30 @@ export default function AdminDashboardPage() {
   }
 
   const statCards = [
-    { title: 'Total Revenue', value: `${summary?.totalRevenue?.toLocaleString() || 0}₫`, icon: DollarSign, color: 'bg-green-100 text-green-600' },
-    { title: 'Total Orders', value: summary?.totalOrders || 0, icon: ShoppingCart, color: 'bg-blue-100 text-blue-600' },
-    { title: 'Total Products', value: summary?.totalProducts || 0, icon: Package, color: 'bg-purple-100 text-purple-600' },
-    { title: 'Total Users', value: summary?.totalUsers || 0, icon: Users, color: 'bg-orange-100 text-orange-600' },
+    {
+      title: 'Doanh thu',
+      value: `${parseFloat(summary?.total_revenue || 0).toLocaleString('vi-VN')}₫`,
+      icon: DollarSign,
+      color: 'bg-green-100 text-green-600',
+    },
+    {
+      title: 'Tổng đơn hàng',
+      value: summary?.total_orders ?? 0,
+      icon: ShoppingCart,
+      color: 'bg-blue-100 text-blue-600',
+    },
+    {
+      title: 'Đơn chờ xử lý',
+      value: summary?.pending_orders ?? 0,
+      icon: Package,
+      color: 'bg-yellow-100 text-yellow-600',
+    },
+    {
+      title: 'Tổng người dùng',
+      value: summary?.total_users ?? 0,
+      icon: Users,
+      color: 'bg-orange-100 text-orange-600',
+    },
   ];
 
   return (
@@ -85,17 +108,26 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Charts section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+      <div className="flex flex-col gap-6 mt-8">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold mb-4">Revenue Overview</h3>
-          <div className="h-80">
+          <div className="h-80 mx-auto">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenue}>
+              <LineChart
+                data={revenue.map(r => ({ ...r, revenue: parseFloat(r.revenue) }))}
+                margin={{ top: 5, right: 20, left: 20, bottom: 5 }} >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                <YAxis tickFormatter={(v) => v.toLocaleString('vi-VN')} />
+                <Tooltip formatter={(value) => [`${value.toLocaleString('vi-VN')}₫`, 'Doanh thu']} />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 8 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -105,12 +137,26 @@ export default function AdminDashboardPage() {
           <h3 className="text-lg font-bold mb-4">Top Selling Products</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topProducts} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <BarChart
+                data={topProducts.map(p => ({
+                  name: p.product_name,
+                  sold_quantity: parseInt(p.sold_quantity, 10),
+                  total_revenue: parseFloat(p.total_revenue),
+                }))}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="totalSold" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 12 }} />
+                <Tooltip
+                  formatter={(value, name) => {
+                    if (name === 'sold_quantity') return [value, 'Đã bán'];
+                    if (name === 'total_revenue') return [`${value.toLocaleString('vi-VN')}₫`, 'Doanh thu'];
+                    return [value, name];
+                  }}
+                />
+                <Bar dataKey="sold_quantity" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

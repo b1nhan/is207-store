@@ -17,6 +17,9 @@ export function VariantSelector({
     <>
       {/* Colors */}
       <div className="mb-4">
+        <p className="mb-1 text-md font-semibold text-gray-700">
+          Màu sắc
+        </p>
         <div className="flex flex-wrap gap-3">
           {colors.map((color) => (
             <Button
@@ -37,6 +40,9 @@ export function VariantSelector({
 
       {/* Sizes */}
       <div className="mb-8">
+        <p className="mb-1 text-md font-semibold text-gray-700">
+          Size
+        </p>
         <div className="flex flex-wrap gap-3">
           {sizes.map((size) => (
             <Button

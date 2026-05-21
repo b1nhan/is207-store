@@ -12,15 +12,16 @@ import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/currency';
 import { ProductGrid } from '../product/ProductGrid';
 import { QuantityInput } from '@/components/product/QuantityInput';
-import { VariantSelector } from '@/components/product/VariantSelector'; // 👈 thêm
+import { VariantSelector } from '@/components/product/VariantSelector';
+import ProductImageGallery from '@/components/product/ProductImageGallery';
+import ProductActions from '../product/ProductActions';
 
 export default function ProductDetailClient({ product, relatedProducts = [] }) {
   const colors = [...new Set(product.variants.map((v) => v.color))];
   const sizes = [...new Set(product.variants.map((v) => v.size))];
-
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
-
+  console.log(product)
   useEffect(() => {
     if (!api) return;
     setCurrent(api.selectedScrollSnap());
@@ -39,60 +40,29 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
   const [quantity, setQuantity] = useState(1);
 
   const displayPrice = product.sale_price || product.base_price;
-  const originalPrice = product.sale_price ? product.base_price : 36000;
+  const isSale = product.sale_price && product.sale_price < product.base_price;
+  const originalPrice = isSale ? product.base_price : null;
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       {/* Product Section */}
       <div className="mb-20 grid grid-cols-1 gap-12 lg:grid-cols-2">
         {/* Left: Images */}
-        <div className="flex w-full flex-col gap-6 overflow-hidden">
-          <Carousel setApi={setApi} className="w-full">
-            <CarouselContent>
-              {product.images.map((image, index) => (
-                <CarouselItem key={image.image_id}>
-                  <div className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-white p-8">
-                    <img
-                      src={image.url}
-                      alt={`${product.product_name} - Hình ${index + 1}`}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-
-          <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-2">
-            {product.images.map((image, index) => (
-              <Button
-                key={image.image_id}
-                onClick={() => handleThumbnailClick(index)}
-                className={cn(
-                  'border-border rounded-ld flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden border-1 p-2 transition-all',
-                  current === index
-                    ? 'border-primary border-2 opacity-100'
-                    : 'opacity-50 hover:opacity-75',
-                )}
-              >
-                <img
-                  src={image.url}
-                  alt={`Thumbnail ${index + 1}`}
-                  className="h-full w-full object-contain"
-                />
-              </Button>
-            ))}
-          </div>
+        <div>
+          <ProductImageGallery
+            thumbnail={product.thumbnail}
+            images={product.images}
+          />
         </div>
 
         {/* Right: Product Info */}
         <div className="flex flex-col">
-          <h1 className="text-text-primary mb-4 text-2xl font-bold md:text-3xl">
+          <h1 className="text-text-primary mb-4 text-2xl font-medium md:text-3xl">
             {product.product_name}
           </h1>
 
           <div className="mb-8 flex items-center gap-4">
-            <span className="text-text-primary text-3xl font-medium">
+            <span className="text-text-primary text-3xl font-bold">
               {formatCurrency(displayPrice)}
             </span>
             {originalPrice && (
@@ -102,49 +72,16 @@ export default function ProductDetailClient({ product, relatedProducts = [] }) {
             )}
           </div>
 
-          {/* 👇 Variant Selector */}
-          <VariantSelector
-            variants={product.variants}
-            selectedColor={selectedColor}
-            selectedSize={selectedSize}
-            onColorChange={setSelectedColor}
-            onSizeChange={setSelectedSize}
-          />
-
           {/* Description */}
           <p className="text-text-muted mb-8 leading-relaxed">
             {product.product_description}
           </p>
 
-          {/* Quantity + Actions */}
-          <div className="mb-10 flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <span className="text-text-muted text-sm font-medium">
-                Số lượng
-              </span>
-              <QuantityInput value={quantity} onChange={setQuantity} />
-            </div>
+          <ProductActions product={product} />
 
-            <div className="flex gap-4">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="h-12 flex-1 font-medium"
-              >
-                Thêm vào Wishlist
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                className="h-12 flex-1 font-medium"
-              >
-                Thêm vào giỏ hàng
-              </Button>
-            </div>
-          </div>
 
           {/* Meta Info */}
-          <div className="grid grid-cols-3 gap-4 py-3">
+          <div className="mt-6 grid grid-cols-3 gap-4 py-3">
             <div className="flex items-center gap-3">
               <div className="bg-secondary text-primary flex h-10 w-10 items-center justify-center rounded-lg">
                 <Box className="h-5 w-5" />

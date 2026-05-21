@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, Check, Upload, Trash2, ImagePlus, Star } from 'lucide-react';
+import { X, ChevronDown, Check, Upload, Trash2, ImagePlus, Star, Plus, Pencil, Save, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import adminProductService from '@/services/adminProductService';
 import adminCategoryService from '@/services/adminCategoryService';
@@ -238,6 +238,217 @@ function ImageUploadPanel({ productId, existingImages, onImagesChange, isEdit })
   );
 }
 
+/* ─── Empty variant form state ─── */
+const EMPTY_VARIANT = { color: '', size: '', stock_quantity: '', variant_price: '', sku: '' };
+
+/* ─── Variant Section ─── */
+function VariantSection({ productId, variants, setVariants }) {
+  // editingId: variant_id being edited, or 'new' for a new row
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(EMPTY_VARIANT);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const startAdd = () => {
+    setEditingId('new');
+    setEditForm(EMPTY_VARIANT);
+  };
+
+  const startEdit = (v) => {
+    setEditingId(v.variant_id);
+    setEditForm({
+      color: v.color || '',
+      size: v.size || '',
+      stock_quantity: v.stock_quantity ?? '',
+      variant_price: v.variant_price ?? '',
+      sku: v.sku || '',
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm(EMPTY_VARIANT);
+  };
+
+  const handleSave = async () => {
+    if (!editForm.size && !editForm.color) {
+      alert('Vui lòng nhập ít nhất Size hoặc Màu sắc');
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = {
+        color: editForm.color || undefined,
+        size: editForm.size || undefined,
+        stock_quantity: editForm.stock_quantity !== '' ? Number(editForm.stock_quantity) : 0,
+        variant_price: editForm.variant_price !== '' ? Number(editForm.variant_price) : undefined,
+        sku: editForm.sku || undefined,
+      };
+
+      if (editingId === 'new') {
+        const res = await adminProductService.addVariant(productId, payload);
+        setVariants((prev) => [...prev, res.data]);
+      } else {
+        const res = await adminProductService.updateVariant(editingId, payload);
+        setVariants((prev) =>
+          prev.map((v) => (v.variant_id === editingId ? res.data : v))
+        );
+      }
+      cancelEdit();
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || 'Lưu variant thất bại');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (variantId) => {
+    if (!confirm('Xác nhận xóa variant này?')) return;
+    setDeletingId(variantId);
+    try {
+      await adminProductService.deleteVariant(variantId);
+      setVariants((prev) => prev.filter((v) => v.variant_id !== variantId));
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || 'Xóa variant thất bại');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const inputCls =
+    'w-full border border-gray-300 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition';
+
+  return (
+    <div className="mt-1">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-800">Biến thể sản phẩm</h3>
+        {!editingId && productId && (
+          <button
+            type="button"
+            onClick={startAdd}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 transition"
+          >
+            <Plus size={13} />
+            Thêm variant
+          </button>
+        )}
+        {!productId && (
+          <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+            Lưu sản phẩm trước để thêm variant
+          </span>
+        )}
+      </div>
+
+      {/* Table */}
+      <div className="rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-gray-50 text-gray-500 uppercase tracking-wide">
+              <th className="px-3 py-2 text-left font-medium">Màu</th>
+              <th className="px-3 py-2 text-left font-medium">Size</th>
+              <th className="px-3 py-2 text-right font-medium">Tồn kho</th>
+              <th className="px-3 py-2 text-right font-medium">Giá riêng</th>
+              <th className="px-3 py-2 text-left font-medium">SKU</th>
+              <th className="px-3 py-2 text-center font-medium">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {variants.length === 0 && editingId !== 'new' && (
+              <tr>
+                <td colSpan={6} className="px-3 py-5 text-center text-gray-400 italic">
+                  Chưa có variant nào
+                </td>
+              </tr>
+            )}
+
+            {variants.map((v) =>
+              editingId === v.variant_id ? (
+                /* ── Inline edit row ── */
+                <tr key={v.variant_id} className="bg-indigo-50">
+                  <td className="px-2 py-2"><input className={inputCls} value={editForm.color} onChange={(e) => setEditForm(p => ({ ...p, color: e.target.value }))} placeholder="Màu sắc" /></td>
+                  <td className="px-2 py-2"><input className={inputCls} value={editForm.size} onChange={(e) => setEditForm(p => ({ ...p, size: e.target.value }))} placeholder="Size" /></td>
+                  <td className="px-2 py-2"><input className={inputCls} type="number" min="0" value={editForm.stock_quantity} onChange={(e) => setEditForm(p => ({ ...p, stock_quantity: e.target.value }))} placeholder="0" /></td>
+                  <td className="px-2 py-2"><input className={inputCls} type="number" min="0" value={editForm.variant_price} onChange={(e) => setEditForm(p => ({ ...p, variant_price: e.target.value }))} placeholder="(theo SP)" /></td>
+                  <td className="px-2 py-2"><input className={inputCls} value={editForm.sku} onChange={(e) => setEditForm(p => ({ ...p, sku: e.target.value }))} placeholder="SKU" /></td>
+                  <td className="px-2 py-2">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button type="button" onClick={handleSave} disabled={saving} className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition" title="Lưu">
+                        {saving ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" /> : <Save size={13} />}
+                      </button>
+                      <button type="button" onClick={cancelEdit} disabled={saving} className="p-1 rounded bg-gray-200 text-gray-600 hover:bg-gray-300 transition" title="Hủy">
+                        <XCircle size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                /* ── Normal display row ── */
+                <tr key={v.variant_id} className="hover:bg-gray-50 transition">
+                  <td className="px-3 py-2.5 text-gray-700">{v.color || <span className="text-gray-300">—</span>}</td>
+                  <td className="px-3 py-2.5">
+                    <span className="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 font-medium">{v.size || '—'}</span>
+                  </td>
+                  <td className="px-3 py-2.5 text-right font-medium text-gray-800">{v.stock_quantity ?? 0}</td>
+                  <td className="px-3 py-2.5 text-right text-gray-600">
+                    {v.variant_price ? v.variant_price.toLocaleString('vi-VN') + ' ₫' : <span className="text-gray-300">—</span>}
+                  </td>
+                  <td className="px-3 py-2.5 font-mono text-gray-500">{v.sku || <span className="text-gray-300">—</span>}</td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(v)}
+                        disabled={!!editingId}
+                        className="p-1 rounded text-indigo-600 hover:bg-indigo-50 disabled:opacity-40 transition"
+                        title="Sửa"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(v.variant_id)}
+                        disabled={!!editingId || deletingId === v.variant_id}
+                        className="p-1 rounded text-red-500 hover:bg-red-50 disabled:opacity-40 transition"
+                        title="Xóa"
+                      >
+                        {deletingId === v.variant_id
+                          ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                          : <Trash2 size={13} />}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            )}
+
+            {/* New variant row */}
+            {editingId === 'new' && (
+              <tr className="bg-indigo-50">
+                <td className="px-2 py-2"><input className={inputCls} value={editForm.color} onChange={(e) => setEditForm(p => ({ ...p, color: e.target.value }))} placeholder="Màu sắc" /></td>
+                <td className="px-2 py-2"><input className={inputCls} value={editForm.size} onChange={(e) => setEditForm(p => ({ ...p, size: e.target.value }))} placeholder="Size" /></td>
+                <td className="px-2 py-2"><input className={inputCls} type="number" min="0" value={editForm.stock_quantity} onChange={(e) => setEditForm(p => ({ ...p, stock_quantity: e.target.value }))} placeholder="0" /></td>
+                <td className="px-2 py-2"><input className={inputCls} type="number" min="0" value={editForm.variant_price} onChange={(e) => setEditForm(p => ({ ...p, variant_price: e.target.value }))} placeholder="(theo SP)" /></td>
+                <td className="px-2 py-2"><input className={inputCls} value={editForm.sku} onChange={(e) => setEditForm(p => ({ ...p, sku: e.target.value }))} placeholder="SKU" /></td>
+                <td className="px-2 py-2">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <button type="button" onClick={handleSave} disabled={saving} className="p-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition" title="Lưu">
+                      {saving ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" /> : <Save size={13} />}
+                    </button>
+                    <button type="button" onClick={cancelEdit} disabled={saving} className="p-1 rounded bg-gray-200 text-gray-600 hover:bg-gray-300 transition" title="Hủy">
+                      <XCircle size={13} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Modal ─── */
 export default function ProductFormModal({ isEdit = false, productId = null, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -245,6 +456,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
+  const [variants, setVariants] = useState([]);
 
   // Ref to call image upload from child
   const pendingUploaderRef = useRef(null);
@@ -294,15 +506,16 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
           category_ids: p.categories
             ? p.categories.map((c) => c.category_id)
             : p.category?.category_id
-            ? [p.category.category_id]
-            : [],
+              ? [p.category.category_id]
+              : [],
           brand_ids: p.brands
             ? p.brands.map((b) => b.brand_id)
             : p.brand?.brand_id
-            ? [p.brand.brand_id]
-            : [],
+              ? [p.brand.brand_id]
+              : [],
         });
         setExistingImages(p.images || []);
+        setVariants(p.variants || []);
       })
       .catch((err) => {
         console.error(err);
@@ -392,7 +605,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     >
       {/* Modal card */}
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col"
+        className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col"
         style={{ animation: 'modalIn 0.18s ease' }}
       >
         {/* Header */}
@@ -540,6 +753,15 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 onImagesChange={imagesChangeHandler}
                 isEdit={isEdit}
               />
+
+              {/* Variants */}
+              <div className="border-t border-gray-100 pt-5">
+                <VariantSection
+                  productId={productId}
+                  variants={variants}
+                  setVariants={setVariants}
+                />
+              </div>
             </form>
           )}
         </div>
@@ -553,8 +775,8 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
             {saving
               ? 'Đang lưu...'
               : isEdit
-              ? 'Lưu thay đổi'
-              : 'Thêm Sản phẩm'}
+                ? 'Lưu thay đổi'
+                : 'Thêm Sản phẩm'}
           </Button>
         </div>
       </div>
