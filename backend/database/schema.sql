@@ -294,3 +294,102 @@ ALTER TABLE product_variants ADD INDEX idx_variants_product (product_id);
 ALTER TABLE voucher_usages ADD INDEX idx_usage_user_voucher (user_id, voucher_id);
 
 ALTER TABLE promotions ADD INDEX idx_promo_status_date (status, start_date, end_date);
+
+CREATE TABLE `campaigns` (
+  `campaign_id`   INT NOT NULL AUTO_INCREMENT,
+  `name`          VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description`   TEXT COLLATE utf8mb4_unicode_ci,
+  `campaign_type` ENUM('PERCENTAGE','FIXED_PRICE','TIER_DISCOUNT','FREESHIP')
+                  COLLATE utf8mb4_unicode_ci NOT NULL,
+  `start_date`    DATETIME NOT NULL,
+  `end_date`      DATETIME NOT NULL,
+  `status`        TINYINT DEFAULT 1
+                  COMMENT '1=active, 0=inactive',
+  `created_by`    INT DEFAULT NULL,
+  `created_at`    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`campaign_id`),
+  KEY `idx_campaign_status_date` (`status`, `start_date`, `end_date`),
+  CONSTRAINT `fk_campaign_creator`
+    FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_products` (
+  `campaign_id`  INT NOT NULL,
+  `product_id`   INT NOT NULL,
+  PRIMARY KEY (`campaign_id`, `product_id`),
+  CONSTRAINT `fk_cp_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cp_product`
+    FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_config` (
+  `campaign_id`    INT NOT NULL,
+  `discount_value` DECIMAL(12,2) NOT NULL
+                   COMMENT 'PERCENTAGE: % giảm (vd: 50). FIXED_PRICE: mức giá đồng giá (vd: 99000)',
+  PRIMARY KEY (`campaign_id`),
+  CONSTRAINT `fk_cc_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `campaign_tiers` (
+  `tier_id`           INT NOT NULL AUTO_INCREMENT,
+  `campaign_id`       INT NOT NULL,
+  `min_order_value`   DECIMAL(12,2) NOT NULL
+                      COMMENT 'Ngưỡng tổng tiền các sản phẩm trong campaign',
+  `discount_value`    DECIMAL(12,2) NOT NULL
+                      COMMENT '% giảm khi đạt ngưỡng này',
+  PRIMARY KEY (`tier_id`),
+  KEY `idx_tier_campaign` (`campaign_id`, `min_order_value`),
+  CONSTRAINT `fk_ct_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `orders`
+  ADD COLUMN `campaign_id`            INT DEFAULT NULL AFTER `voucher_id`,
+  ADD COLUMN `campaign_discount_total` DECIMAL(12,2) DEFAULT '0.00' AFTER `discount_total`,
+  ADD CONSTRAINT `fk_order_campaign`
+    FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`);
+
+-- =============================================
+-- STEP 1: Drop bảng cũ (chấp nhận mất data)
+-- =============================================
+
+-- Phải drop FK ở orders trước
+ALTER TABLE `orders` DROP FOREIGN KEY `fk_order_address`;
+ALTER TABLE `orders` DROP COLUMN `address_id`;
+
+DROP TABLE IF EXISTS `addresses`;
+
+
+-- =============================================
+-- STEP 2: Tạo bảng shipping_profiles
+-- =============================================
+
+CREATE TABLE `shipping_profiles` (
+  `profile_id`     INT NOT NULL AUTO_INCREMENT,
+  `user_id`        INT NOT NULL,
+  `receiver_name`  VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `receiver_phone` VARCHAR(20)  COLLATE utf8mb4_unicode_ci NOT NULL,
+  `full_address`   TEXT         COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label`          VARCHAR(50)  COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'VD: Nhà riêng, Văn phòng',
+  `is_default`     TINYINT      DEFAULT 0,
+  `created_at`     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`profile_id`),
+  KEY `idx_user_default` (`user_id`, `is_default`),
+  CONSTRAINT `fk_profile_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================
+-- STEP 3: Thêm profile_id vào orders
+-- =============================================
+
+ALTER TABLE `orders`
+  ADD COLUMN `profile_id` INT DEFAULT NULL AFTER `user_id`,
+  ADD KEY `fk_order_profile` (`profile_id`),
+  ADD CONSTRAINT `fk_order_profile`
+    FOREIGN KEY (`profile_id`) REFERENCES `shipping_profiles` (`profile_id`)
+    ON DELETE SET NULL;

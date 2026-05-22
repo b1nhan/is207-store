@@ -1,27 +1,26 @@
 import { notFound } from 'next/navigation';
 import { productService } from '@/services/productService';
-
 import ProductDetailClient from '@/components/productPage/productDetail';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
-    const { data } = await productService.getProduct(id);
-    if (!data) return { title: 'Không tìm thấy sản phẩm' };
-
+    const res = await productService.getProduct(id);
+    const product = res.data;
     return {
-      title: `${data.product_name} | Shop-FS`,
-      description: data.product_description,
+      title: `${product.product_name} | Cerulean Blue`,
+      description: product.description || 'Chi tiết sản phẩm Cerulean Blue',
     };
   } catch (error) {
-    return { title: 'Lỗi tải trang' };
+    return {
+      title: 'Không tìm thấy sản phẩm',
+    };
   }
 }
 
 export default async function ProductDetailPage({ params }) {
   const { id } = await params;
-
   try {
     // Gọi song song 2 API để tối ưu thời gian load
     const [productRes, relatedRes] = await Promise.all([
@@ -37,15 +36,9 @@ export default async function ProductDetailPage({ params }) {
     const product = productRes.data;
     const relatedProducts = relatedRes?.data?.items || relatedRes?.data || [];
     // ^ Tuỳ thuộc vào cấu trúc trả về của mảng related products
-    const breadcrumbItems = [
-      { label: 'Home', href: '/' },
-      { label: 'Products', href: '/products' },
-      { label: product.product_name, href: '' },
-    ];
 
     return (
       <main className="bg-background min-h-screen">
-        <Breadcrumbs items={breadcrumbItems} />
         <ProductDetailClient
           product={product}
           relatedProducts={relatedProducts}

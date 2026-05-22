@@ -44,3 +44,16 @@ export const changePasswordSchema = z.object({
     .min(1, 'Mật khẩu hiện tại là bắt buộc'),
   new_password: passwordSchema,
 });
+
+export const updateProfileSchema = z.object({
+  full_name: z
+    .string()
+    .max(100, 'Tên tối đa 100 ký tự')
+    .optional()
+    .or(z.literal('')),
+  phone: z
+    .string()
+    .regex(/^0\d{9}$/, 'Số điện thoại phải có 10 số, bắt đầu bằng 0')
+    .optional()
+    .or(z.literal('')),
+});

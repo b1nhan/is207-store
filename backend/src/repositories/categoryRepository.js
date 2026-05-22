@@ -73,6 +73,76 @@ class CategoryRepository {
     );
     return rows[0] || null;
   }
+
+  // ─── Admin write operations ───────────────────────────────────────────────────
+
+  async findById(category_id) {
+    const db = getDB();
+    const [rows] = await db.query(
+      `SELECT category_id, category_name, slug,
+              (SELECT COUNT(*) FROM products p WHERE p.category_id = c.category_id) as product_count
+       FROM categories c
+       WHERE c.category_id = ?`,
+      [category_id],
+    );
+    return rows[0] || null;
+  }
+
+  async findByName(category_name, excludeId = null) {
+    const db = getDB();
+    let query = `SELECT category_id FROM categories WHERE category_name = ?`;
+    const params = [category_name];
+    if (excludeId) {
+      query += ` AND category_id != ?`;
+      params.push(excludeId);
+    }
+    const [rows] = await db.query(query, params);
+    return rows[0] || null;
+  }
+
+  async findBySlugAdmin(slug, excludeId = null) {
+    const db = getDB();
+    let query = `SELECT category_id FROM categories WHERE slug = ?`;
+    const params = [slug];
+    if (excludeId) {
+      query += ` AND category_id != ?`;
+      params.push(excludeId);
+    }
+    const [rows] = await db.query(query, params);
+    return rows[0] || null;
+  }
+
+  async create({ category_name, slug }) {
+    const db = getDB();
+    const [result] = await db.query(
+      `INSERT INTO categories (category_name, slug) VALUES (?, ?)`,
+      [category_name, slug],
+    );
+    return this.findById(result.insertId);
+  }
+
+  async update(category_id, { category_name, slug }) {
+    const db = getDB();
+    const fields = [];
+    const params = [];
+    if (category_name !== undefined) {
+      fields.push('category_name = ?');
+      params.push(category_name);
+    }
+    if (slug !== undefined) {
+      fields.push('slug = ?');
+      params.push(slug);
+    }
+    if (fields.length === 0) return this.findById(category_id);
+    params.push(category_id);
+    await db.query(`UPDATE categories SET ${fields.join(', ')} WHERE category_id = ?`, params);
+    return this.findById(category_id);
+  }
+
+  async delete(category_id) {
+    const db = getDB();
+    await db.query(`DELETE FROM categories WHERE category_id = ?`, [category_id]);
+  }
 }
 
 export default new CategoryRepository();

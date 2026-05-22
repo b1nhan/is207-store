@@ -58,6 +58,57 @@ class BrandService {
       pagination: getPaginationData(total, currentPage, limit),
     };
   }
+
+  // ─── Admin write operations ───────────────────────────────────────────────────
+
+  async getBrandById(id) {
+    const brand = await BrandRepository.findByIdAdmin(id);
+    if (!brand) {
+      throw new AppError('Thương hiệu không tồn tại', 404, ERROR_CODES.BRAND.NOT_FOUND);
+    }
+    return brand;
+  }
+
+  async createBrand(dto) {
+    const existing = await BrandRepository.findByName(dto.brand_name);
+    if (existing) {
+      throw new AppError('Tên thương hiệu đã tồn tại', 409, ERROR_CODES.BRAND.NAME_ALREADY_EXISTS);
+    }
+    return BrandRepository.create(dto);
+  }
+
+  async updateBrand(id, dto) {
+    // Kiểm tra tồn tại
+    const brand = await BrandRepository.findByIdAdmin(id);
+    if (!brand) {
+      throw new AppError('Thương hiệu không tồn tại', 404, ERROR_CODES.BRAND.NOT_FOUND);
+    }
+    // Kiểm tra trùng tên (bỏ qua chính nó)
+    if (dto.brand_name) {
+      const existing = await BrandRepository.findByName(dto.brand_name, id);
+      if (existing) {
+        throw new AppError('Tên thương hiệu đã tồn tại', 409, ERROR_CODES.BRAND.NAME_ALREADY_EXISTS);
+      }
+    }
+    return BrandRepository.update(id, dto);
+  }
+
+  async deleteBrand(id) {
+    // Kiểm tra tồn tại
+    const brand = await BrandRepository.findByIdAdmin(id);
+    if (!brand) {
+      throw new AppError('Thương hiệu không tồn tại', 404, ERROR_CODES.BRAND.NOT_FOUND);
+    }
+    // Kiểm tra còn sản phẩm không
+    if (Number(brand.product_count) > 0) {
+      throw new AppError(
+        'Không thể xóa thương hiệu còn chứa sản phẩm',
+        409,
+        ERROR_CODES.BRAND.HAS_PRODUCTS,
+      );
+    }
+    await BrandRepository.delete(id);
+  }
 }
 
 export default new BrandService();

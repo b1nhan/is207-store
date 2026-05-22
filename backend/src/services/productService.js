@@ -70,6 +70,22 @@ class ProductService {
     if (!q || q.length < 2) return [];
     return await productRepository.searchAutocomplete(q);
   }
+
+  async getRelatedProducts(id, limit = 8) {
+    const rows = await productRepository.findRelated(Number(id), Number(limit));
+    return rows.map((item) => ({
+      product_id: item.product_id,
+      product_name: item.product_name,
+      base_price: item.base_price,
+      sale_price: item.sale_price ?? null,
+      brand_name: item.brand_name,
+      category_slug: item.category_slug,
+      gender: item.gender,
+      thumbnail: item.thumbnail,
+      has_variants: true,
+      status: 'ACTIVE',
+    }));
+  }
 }
 
 export default new ProductService();

@@ -11,7 +11,7 @@ export const findById = async (userId) => {
   const pool = getDB();
   const [rows] = await pool.query(
     `SELECT u.user_id, u.username, u.email, u.password_hash,
-            u.full_name, u.phone, u.date_of_birth, u.created_at,
+            u.full_name, u.phone, u.created_at,
             r.role_name AS role
      FROM users u
      JOIN roles r ON u.role_id = r.role_id
@@ -103,4 +103,17 @@ export const updatePassword = async (userId, newPasswordHash) => {
     newPasswordHash,
     userId,
   ]);
+};
+
+/**
+ * Cập nhật thông tin profile (full_name, phone) cho user.
+ * @param {number} userId
+ * @param {{ full_name?: string, phone?: string }} data
+ */
+export const updateProfile = async (userId, { full_name, phone }) => {
+  const pool = getDB();
+  await pool.query(
+    `UPDATE users SET full_name = ?, phone = ?, updated_at = NOW() WHERE user_id = ?`,
+    [full_name ?? null, phone ?? null, userId],
+  );
 };
