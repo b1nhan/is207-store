@@ -1,22 +1,27 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
 import voucherService from '@/services/voucherService';
 import shippingProfileService from '@/services/shippingProfileService';
+import { campaignService } from '@/services/campaignService';
 import AddShippingProfileModal from '@/components/AddShippingProfileModal';
 import { Button } from '@/components/ui/button';
 import {
   CreditCardIcon,
   MapPinIcon,
   TicketIcon,
+  TagIcon,
   PlusCircleIcon,
   RefreshCwIcon,
   Loader2Icon,
   CheckCircle2Icon,
+  ZapIcon,
+  PencilIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,8 +59,9 @@ export default function CheckoutPage() {
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [profilesError, setProfilesError] = useState('');
   const [selectedProfileId, setSelectedProfileId] = useState(null);
-  const [setAsDefault, setSetAsDefault] = useState(false);
+  const [isSettingDefault, setIsSettingDefault] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null); // profile đang edit
 
   // ─── Voucher state ──────────────────────────────────────────────────────────
   const [voucherCode, setVoucherCode] = useState('');
@@ -63,9 +69,87 @@ export default function CheckoutPage() {
   const [voucherError, setVoucherError] = useState('');
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
 
+  // ─── Campaign state ─────────────────────────────────────────────────────────
+  const [activeCampaigns, setActiveCampaigns] = useState([]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // ─── Fetch active campaigns ──────────────────────────────────────────────────
+  useEffect(() => {
+    campaignService.getActiveCampaigns()
+      .then((res) => {
+        // campaignService dùng api helper (axiosInstance đã unwrap) → res = { success, message, data }
+        const list = Array.isArray(res) ? res : (res?.data ?? []);
+        setActiveCampaigns(list);
+      })
+      .catch(() => setActiveCampaigns([]));
+  }, []);
+
+  // ─── Tính campaign discount (mirror backend logic) ──────────────────────────
+  const { appliedCampaign, campaignDiscountAmount, isFreeship } = useMemo(() => {
+    if (!activeCampaigns.length || !items.length) {
+      return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
+    }
+
+    const SHIP = SHIPPING_FEE;
+    let bestCampaign = null;
+    let maxEffective = -1;
+    let bestDiscount = 0;
+    let bestFreeship = false;
+
+    for (const campaign of activeCampaigns) {
+      let discount = 0;
+      let freeship = false;
+      const campaignProductIds = (campaign.products ?? []).map((p) => p.product_id);
+      const appliesToAll = campaignProductIds.length === 0;
+
+      const applicable = items.filter(
+        (item) => appliesToAll || campaignProductIds.includes(item.product_id),
+      );
+
+      if (applicable.length > 0) {
+        if (campaign.campaign_type === 'PERCENTAGE') {
+          const pct = campaign.config?.discount_value ?? 0;
+          applicable.forEach((item) => {
+            discount += (Number(item.unit_price) * (pct / 100)) * item.quantity;
+          });
+        } else if (campaign.campaign_type === 'FIXED_PRICE') {
+          const fixedPrice = campaign.config?.discount_value ?? 0;
+          applicable.forEach((item) => {
+            const orig = Number(item.unit_price);
+            if (orig > fixedPrice) discount += (orig - fixedPrice) * item.quantity;
+          });
+        } else if (campaign.campaign_type === 'TIER_DISCOUNT') {
+          const totalVal = applicable.reduce(
+            (s, item) => s + Number(item.unit_price) * item.quantity, 0,
+          );
+          const tiers = (campaign.tiers ?? [])
+            .filter((t) => totalVal >= t.min_order_value)
+            .sort((a, b) => b.min_order_value - a.min_order_value);
+          if (tiers.length > 0) {
+            discount = totalVal * (tiers[0].discount_value / 100);
+          }
+        } else if (campaign.campaign_type === 'FREESHIP') {
+          freeship = true;
+        }
+      }
+
+      const effective = discount + (freeship ? SHIP : 0);
+      if (effective > maxEffective) {
+        maxEffective = effective;
+        bestCampaign = campaign;
+        bestDiscount = discount;
+        bestFreeship = freeship;
+      }
+    }
+
+    if (!bestCampaign || (bestDiscount === 0 && !bestFreeship)) {
+      return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
+    }
+    return { appliedCampaign: bestCampaign, campaignDiscountAmount: bestDiscount, isFreeship: bestFreeship };
+  }, [activeCampaigns, items]);
 
   // ─── Fetch profiles ─────────────────────────────────────────────────────────
   const fetchProfiles = useCallback(async () => {
@@ -103,12 +187,48 @@ export default function CheckoutPage() {
   // ─── Handlers ───────────────────────────────────────────────────────────────
   const handleProfileSelect = (id) => {
     setSelectedProfileId(id);
-    setSetAsDefault(false); // reset checkbox khi đổi profile
   };
 
-  const handleModalSuccess = (newProfile) => {
-    setProfiles((prev) => [...prev, newProfile]);
-    setSelectedProfileId(newProfile.profile_id);
+  const handleSetDefault = async (profileId) => {
+    setIsSettingDefault(true);
+    const toastId = toast.loading('Đang đặt làm địa chỉ mặc định...');
+    try {
+      await shippingProfileService.setDefault(profileId);
+      // Cập nhật local state
+      setProfiles((prev) =>
+        prev.map((p) => ({ ...p, is_default: p.profile_id === profileId }))
+      );
+      toast.success('Đã đặt làm địa chỉ mặc định!', { id: toastId });
+    } catch (err) {
+      toast.error(err?.message || 'Không thể đặt địa chỉ mặc định. Vui lòng thử lại.', { id: toastId });
+    } finally {
+      setIsSettingDefault(false);
+    }
+  };
+
+  const handleModalSuccess = (profile) => {
+    if (editingProfile) {
+      // Edit: cập nhật profile trong list, nếu is_default thì unset các cái khác
+      setProfiles((prev) => {
+        const updated = prev.map((p) =>
+          p.profile_id === profile.profile_id
+            ? profile
+            : profile.is_default ? { ...p, is_default: false } : p
+        );
+        return updated;
+      });
+      setSelectedProfileId(profile.profile_id);
+    } else {
+      // Add new: nếu is_default thì unset các cái cũ
+      setProfiles((prev) => {
+        const updated = profile.is_default
+          ? prev.map((p) => ({ ...p, is_default: false }))
+          : prev;
+        return [...updated, profile];
+      });
+      setSelectedProfileId(profile.profile_id);
+    }
+    setEditingProfile(null);
     setIsModalOpen(false);
   };
 
@@ -120,10 +240,13 @@ export default function CheckoutPage() {
     setIsApplyingVoucher(true);
     setVoucherError('');
     try {
-      const response = await voucherService.applyVoucher({ code: voucherCode.trim(), subtotal });
-      setAppliedVoucher(response.data);
+      // axiosInstance interceptor unwraps response → response.data (HTTP body = { success, message, data })
+      // voucherService đã `.data` một lần nữa → trả về chính voucher object { voucher_id, code, discount_amount, ... }
+      const voucherData = await voucherService.applyVoucher({ code: voucherCode.trim(), subtotal });
+      setAppliedVoucher(voucherData);
     } catch (err) {
-      setVoucherError(err.response?.data?.message || 'Mã giảm giá không hợp lệ');
+      // axios interceptor normalize error thành { ...error, message }
+      setVoucherError(err.message || err.response?.data?.message || 'Mã giảm giá không hợp lệ');
       setAppliedVoucher(null);
     } finally {
       setIsApplyingVoucher(false);
@@ -142,12 +265,6 @@ export default function CheckoutPage() {
     setError('');
 
     try {
-      // Nếu user muốn đặt làm default và profile đó chưa phải default → gọi PATCH trước
-      const selectedProfile = profiles.find((p) => p.profile_id === selectedProfileId);
-      if (setAsDefault && selectedProfile && !selectedProfile.is_default) {
-        await shippingProfileService.setDefault(selectedProfileId);
-      }
-
       const data = {
         profile_id: selectedProfileId,
         ...(appliedVoucher && { voucher_code: appliedVoucher.code }),
@@ -194,18 +311,19 @@ export default function CheckoutPage() {
     );
   }
 
-  const discountAmount = appliedVoucher ? appliedVoucher.discount_amount : 0;
-  const totalAmount = Math.max(0, subtotal - discountAmount) + SHIPPING_FEE;
+  const subtotalAfterCampaign = Math.max(0, subtotal - campaignDiscountAmount);
+  const voucherDiscountAmount = appliedVoucher ? appliedVoucher.discount_amount : 0;
+  const finalShippingFee = isFreeship ? 0 : SHIPPING_FEE;
+  const totalAmount = Math.max(0, subtotalAfterCampaign - voucherDiscountAmount) + finalShippingFee;
   const selectedProfile = profiles.find((p) => p.profile_id === selectedProfileId);
-
-  console.log(profiles)
 
   return (
     <>
       <AddShippingProfileModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setEditingProfile(null); }}
         onSuccess={handleModalSuccess}
+        initialData={editingProfile}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -318,6 +436,15 @@ export default function CheckoutPage() {
                               {profile.full_address}
                             </p>
                           </div>
+                          {/* Edit button */}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); setEditingProfile(profile); setIsModalOpen(true); }}
+                            title="Chỉnh sửa"
+                            className="flex-shrink-0 p-1.5 rounded-lg text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors mt-0.5"
+                          >
+                            <PencilIcon size={14} />
+                          </button>
                         </label>
                       );
                     })}
@@ -327,23 +454,25 @@ export default function CheckoutPage() {
                 {/* Checkbox đặt làm mặc định */}
                 {!profilesLoading && selectedProfile && (
                   <div className="mt-4 pt-4 border-t border-divider">
-                    <label className="flex items-center gap-2 cursor-pointer group">
+                    <label className={`flex items-center gap-2 ${selectedProfile.is_default || isSettingDefault ? 'cursor-not-allowed opacity-60' : 'cursor-pointer group'}`}>
                       <input
                         type="checkbox"
-                        checked={setAsDefault}
-                        onChange={(e) => setSetAsDefault(e.target.checked)}
-                        disabled={!!selectedProfile.is_default}
+                        checked={!!selectedProfile.is_default}
+                        onChange={() => {
+                          if (!selectedProfile.is_default && !isSettingDefault) {
+                            handleSetDefault(selectedProfile.profile_id);
+                          }
+                        }}
+                        disabled={!!selectedProfile.is_default || isSettingDefault}
                         className="accent-primary w-4 h-4 disabled:cursor-not-allowed"
                       />
                       <span
                         className={`text-sm ${selectedProfile.is_default
-                          ? 'text-text-secondary cursor-not-allowed'
+                          ? 'text-text-secondary'
                           : 'text-text-primary group-hover:text-primary transition-colors'
                           }`}
                       >
-                        {selectedProfile.is_default
-                          ? 'Đây đã là địa chỉ mặc định'
-                          : 'Đặt làm địa chỉ mặc định'}
+                        {isSettingDefault ? 'Đang cập nhật...' : 'Đặt làm địa chỉ mặc định'}
                       </span>
                     </label>
                   </div>
@@ -419,18 +548,57 @@ export default function CheckoutPage() {
                     {subtotal.toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
-                <div className="flex justify-between text-text-secondary">
-                  <span>Phí vận chuyển</span>
-                  <span className="font-medium text-text-primary">
-                    {SHIPPING_FEE.toLocaleString('vi-VN')} ₫
-                  </span>
-                </div>
-                {appliedVoucher && (
-                  <div className="flex justify-between text-green-500">
-                    <span>Giảm giá ({appliedVoucher.code})</span>
-                    <span className="font-medium">- {discountAmount.toLocaleString('vi-VN')} ₫</span>
+
+                {/* Campaign discount */}
+                {appliedCampaign && (
+                  <div className="rounded-lg bg-orange-500/8 border border-orange-500/20 px-3 py-2.5 space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-orange-500">
+                      <ZapIcon size={13} className="flex-shrink-0" />
+                      <span className="text-xs font-semibold truncate">{appliedCampaign.name}</span>
+                    </div>
+                    {campaignDiscountAmount > 0 && (
+                      <div className="flex justify-between text-orange-500">
+                        <span className="text-sm">Giảm giá campaign</span>
+                        <span className="text-sm font-semibold">- {campaignDiscountAmount.toLocaleString('vi-VN')} ₫</span>
+                      </div>
+                    )}
+                    {isFreeship && (
+                      <div className="flex justify-between text-orange-500">
+                        <span className="text-sm">Miễn phí vận chuyển</span>
+                        <span className="text-sm font-semibold">- {SHIPPING_FEE.toLocaleString('vi-VN')} ₫</span>
+                      </div>
+                    )}
                   </div>
                 )}
+
+                {/* Shipping fee */}
+                <div className="flex justify-between text-text-secondary">
+                  <span>Phí vận chuyển</span>
+                  {isFreeship ? (
+                    <span className="font-medium">
+                      <span className="line-through text-text-secondary/50 mr-1.5 text-sm">
+                        {SHIPPING_FEE.toLocaleString('vi-VN')} ₫
+                      </span>
+                      <span className="text-orange-500 font-semibold">Miễn phí</span>
+                    </span>
+                  ) : (
+                    <span className="font-medium text-text-primary">
+                      {SHIPPING_FEE.toLocaleString('vi-VN')} ₫
+                    </span>
+                  )}
+                </div>
+
+                {/* Voucher discount */}
+                {appliedVoucher && (
+                  <div className="flex justify-between text-green-500">
+                    <span className="flex items-center gap-1">
+                      <TagIcon size={13} />
+                      Voucher ({appliedVoucher.code})
+                    </span>
+                    <span className="font-medium">- {voucherDiscountAmount.toLocaleString('vi-VN')} ₫</span>
+                  </div>
+                )}
+
                 <div className="border-t border-divider pt-4 flex justify-between items-center">
                   <span className="font-semibold text-text-primary text-lg">Tổng thanh toán</span>
                   <span className="text-2xl font-bold text-primary">

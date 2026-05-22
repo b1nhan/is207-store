@@ -28,7 +28,7 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
+    <aside className="w-64 bg-gray-900 text-white h-full flex flex-col overflow-y-auto">
       <div className="p-6">
         <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
       </div>
@@ -40,9 +40,8 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-              }`}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                }`}
             >
               <Icon size={20} />
               <span>{item.label}</span>

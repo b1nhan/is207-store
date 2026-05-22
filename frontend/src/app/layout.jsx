@@ -6,6 +6,7 @@ export const metadata = {
 };
 
 import AuthGuard from '@/components/auth/AuthGuard';
+import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }) {
   return (
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
         <AuthGuard>
           {children}
         </AuthGuard>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
