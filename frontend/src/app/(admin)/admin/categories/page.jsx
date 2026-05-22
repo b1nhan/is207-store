@@ -284,6 +284,34 @@ export default function AdminCategoriesPage() {
           </Button>
         </div>
 
+        {/* Stats cards */}
+        {!loading && categories.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Tổng danh mục</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{categories.length}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Danh mục có SP</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {categories.filter((c) => Number(c.product_count) > 0).length}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Danh mục trống</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {categories.filter((c) => Number(c.product_count) === 0).length}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Tổng sản phẩm</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {categories.reduce((sum, c) => sum + Number(c.product_count || 0), 0)}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Search bar */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <div className="relative max-w-sm">

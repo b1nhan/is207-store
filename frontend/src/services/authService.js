@@ -20,6 +20,10 @@ export const authService = {
         return api.get(API_ENDPOINTS.AUTH.ME);
     },
 
+    updateProfile: async ({ full_name, phone }) => {
+        return api.patch(API_ENDPOINTS.AUTH.UPDATE_PROFILE, { full_name, phone });
+    },
+
     logout: async () => {
         return api.post(API_ENDPOINTS.AUTH.LOGOUT);
     },

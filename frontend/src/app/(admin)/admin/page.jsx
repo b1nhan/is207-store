@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import adminDashboardService from '@/services/adminDashboardService';
-import { Package, ShoppingCart, DollarSign, Users } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Users, Tags, Layers, Ticket, Megaphone, Box } from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -83,6 +83,36 @@ export default function AdminDashboardPage() {
       icon: Users,
       color: 'bg-orange-100 text-orange-600',
     },
+    {
+      title: 'Sản phẩm',
+      value: summary?.total_products ?? 0,
+      icon: Box,
+      color: 'bg-indigo-100 text-indigo-600',
+    },
+    {
+      title: 'Thương hiệu',
+      value: summary?.total_brands ?? 0,
+      icon: Tags,
+      color: 'bg-pink-100 text-pink-600',
+    },
+    {
+      title: 'Danh mục',
+      value: summary?.total_categories ?? 0,
+      icon: Layers,
+      color: 'bg-purple-100 text-purple-600',
+    },
+    {
+      title: 'Voucher',
+      value: summary?.total_vouchers ?? 0,
+      icon: Ticket,
+      color: 'bg-red-100 text-red-600',
+    },
+    {
+      title: 'Chiến dịch',
+      value: summary?.total_campaigns ?? 0,
+      icon: Megaphone,
+      color: 'bg-teal-100 text-teal-600',
+    },
   ];
 
   return (
@@ -90,7 +120,7 @@ export default function AdminDashboardPage() {
       <h1 className="text-3xl font-bold">Dashboard</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (

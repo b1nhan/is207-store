@@ -42,14 +42,14 @@ function FieldRow({ label, required, hint, children }) {
   );
 }
 
-// Product picker with search
+// Product picker — table style with checkbox & search
 function ProductPicker({ selectedIds, onChange, allProducts, loadingProducts }) {
   const [search, setSearch] = useState('');
 
-  const filtered = allProducts.filter(
-    (p) =>
-      p.name?.toLowerCase().includes(search.toLowerCase()) ||
-      String(p.product_id).includes(search)
+  const filtered = allProducts.filter((p) =>
+    (p.product_name || p.name || '')
+      .toLowerCase()
+      .includes(search.toLowerCase())
   );
 
   const toggle = (id) => {
@@ -60,52 +60,127 @@ function ProductPicker({ selectedIds, onChange, allProducts, loadingProducts }) 
     }
   };
 
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((p) => selectedIds.includes(p.product_id));
+
+  const toggleAll = () => {
+    if (allFilteredSelected) {
+      const filteredIds = new Set(filtered.map((p) => p.product_id));
+      onChange(selectedIds.filter((id) => !filteredIds.has(id)));
+    } else {
+      const next = new Set(selectedIds);
+      filtered.forEach((p) => next.add(p.product_id));
+      onChange([...next]);
+    }
+  };
+
   return (
     <div className="space-y-3">
-      <input
-        type="text"
-        placeholder="Tìm sản phẩm..."
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      {loadingProducts ? (
-        <p className="text-sm text-gray-400 py-2">Đang tải sản phẩm...</p>
-      ) : (
-        <div className="max-h-52 overflow-y-auto border border-gray-100 rounded-lg divide-y divide-gray-50">
-          {filtered.length === 0 ? (
-            <p className="p-3 text-sm text-gray-400 text-center">Không tìm thấy sản phẩm</p>
-          ) : (
-            filtered.map((p) => {
-              const checked = selectedIds.includes(p.product_id);
-              return (
-                <label
-                  key={p.product_id}
-                  className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors ${checked ? 'bg-blue-50/50' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggle(p.product_id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{p.name}</p>
-                    <p className="text-xs text-gray-400">ID #{p.product_id}</p>
-                  </div>
-                  {p.base_price != null && (
-                    <span className="text-xs text-gray-500 shrink-0">
-                      {p.base_price.toLocaleString('vi-VN')}₫
-                    </span>
-                  )}
-                </label>
-              );
-            })
-          )}
-        </div>
-      )}
+      {/* Search bar */}
+      <div className="relative">
+        <svg
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Tìm theo tên sản phẩm..."
+          className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      {/* Count badge */}
       {selectedIds.length > 0 && (
-        <p className="text-xs text-blue-600 font-medium">✓ Đã chọn {selectedIds.length} sản phẩm</p>
+        <p className="text-xs text-blue-600 font-medium">
+          ✓ Đã chọn <span className="font-bold">{selectedIds.length}</span> sản phẩm
+        </p>
+      )}
+
+      {/* Table */}
+      {loadingProducts ? (
+        <div className="flex items-center justify-center py-8 gap-2 text-sm text-gray-400">
+          <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          Đang tải danh sách sản phẩm...
+        </div>
+      ) : (
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="max-h-72 overflow-y-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  <th className="px-3 py-2.5 text-left w-10">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleAll}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      title={allFilteredSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                    />
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-medium text-gray-600 text-xs uppercase tracking-wide">#ID</th>
+                  <th className="px-3 py-2.5 text-left font-medium text-gray-600 text-xs uppercase tracking-wide">Tên sản phẩm</th>
+                  <th className="px-3 py-2.5 text-right font-medium text-gray-600 text-xs uppercase tracking-wide">Giá gốc</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-3 py-6 text-center text-sm text-gray-400">
+                      Không tìm thấy sản phẩm nào
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((p) => {
+                    const checked = selectedIds.includes(p.product_id);
+                    const name = p.product_name || p.name || '—';
+                    return (
+                      <tr
+                        key={p.product_id}
+                        onClick={() => toggle(p.product_id)}
+                        className={`cursor-pointer transition-colors hover:bg-gray-50 ${checked ? 'bg-blue-50' : ''
+                          }`}
+                      >
+                        <td className="px-3 py-2.5">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggle(p.product_id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          />
+                        </td>
+                        <td className="px-3 py-2.5 text-gray-400 font-mono text-xs">{p.product_id}</td>
+                        <td className="px-3 py-2.5">
+                          <span className={`font-medium ${checked ? 'text-blue-700' : 'text-gray-800'
+                            }`}>
+                            {name}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 text-right text-gray-600 tabular-nums">
+                          {p.base_price != null
+                            ? Number(p.base_price).toLocaleString('vi-VN') + '₫'
+                            : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-400">
+            {filtered.length} sản phẩm active
+            {search && ` · kết quả cho "${search}"`}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -217,13 +292,14 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
     };
   });
 
-  // Load all products for the picker
+  // Load active products only
   useEffect(() => {
     const fetchProducts = async () => {
       setLoadingProducts(true);
       try {
-        const res = await adminProductService.getAllProducts({ limit: 200, page: 1 });
-        const items = res.data?.data?.items || res.data?.data || res.data || [];
+        const res = await adminProductService.getAllProducts({ limit: 500, page: 1, status: 1 });
+        console.log(res)
+        const items = res.data?.items || [];
         setAllProducts(Array.isArray(items) ? items : []);
       } catch (err) {
         console.error('Failed to load products', err);

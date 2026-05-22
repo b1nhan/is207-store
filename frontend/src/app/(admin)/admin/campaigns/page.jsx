@@ -136,6 +136,34 @@ export default function AdminCampaignsPage() {
         </Link>
       </div>
 
+      {/* Stats cards */}
+      {!loading && campaigns.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Tổng Campaign</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{pagination.totalItems || campaigns.length}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đang bật (Active)</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {campaigns.filter((c) => c.status === 1).length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đang chạy</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {campaigns.filter((c) => getCampaignRunStatus(c) === 'running').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Sắp diễn ra</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {campaigns.filter((c) => getCampaignRunStatus(c) === 'upcoming').length}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[220px]">

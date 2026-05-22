@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
     ME: '/auth/me',
+    UPDATE_PROFILE: '/auth/me/profile',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
   },
@@ -58,6 +59,13 @@ export const API_ENDPOINTS = {
   VOUCHERS: {
     VALIDATE: '/vouchers/validate',
     APPLY: '/vouchers/apply',
+  },
+
+  // ── Campaigns (shop) ───────────────────────────────────────────────────────
+  CAMPAIGNS: {
+    ACTIVE: '/campaigns/active',
+    DISCOUNTED_PRODUCTS: '/campaigns/discounted-products',
+    DETAIL: (id) => `/campaigns/${id}`,
   },
 
   // ── User ───────────────────────────────────────────────────────────────────

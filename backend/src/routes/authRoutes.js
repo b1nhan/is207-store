@@ -6,7 +6,9 @@ import {
   registerSchema,
   loginSchema,
   changePasswordSchema,
+  updateProfileSchema,
 } from '../validations/authValdiation.js';
+import shippingProfileRoutes from './shippingProfileRoutes.js';
 
 const router = Router();
 
@@ -18,11 +20,21 @@ router.post('/refresh', authController.refresh);
 // ── Authenticated (cần JWT access token hợp lệ) ───────────────────────────────
 router.post('/logout', verifyToken, authController.logout);
 router.get('/me', verifyToken, authController.getMe);
+router.patch(
+  '/me/profile',
+  verifyToken,
+  validate(updateProfileSchema),
+  authController.updateProfile,
+);
 router.post(
   '/change-password',
   verifyToken,
   validate(changePasswordSchema),
   authController.changePassword,
 );
+
+// ── Shipping Profiles ────────────────────────────────────────────────────────────────
+// Sub-router được bảo vệ bởi verifyToken — áp cho toàn bộ /auth/shipping-profiles
+router.use('/shipping-profiles', verifyToken, shippingProfileRoutes);
 
 export default router;

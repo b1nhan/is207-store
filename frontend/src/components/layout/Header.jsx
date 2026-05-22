@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { title: 'Trang chủ', href: '/' },
   { title: 'Sản phẩm', href: '/products' },
   { title: 'Danh mục', href: '/' },
+  { title: 'Khuyến mãi', href: '/campaigns' },
 ];
 
 const DROPDOWN_ITEMS = [

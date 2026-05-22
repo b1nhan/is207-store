@@ -8,6 +8,14 @@ class CampaignService {
       product_id: product_id ? Number(product_id) : undefined 
     });
   }
+
+  async getCampaignById(id) {
+    return await campaignRepository.findById(Number(id));
+  }
+
+  async getDiscountedProducts(limit) {
+    return await campaignRepository.findDiscountedProducts(limit);
+  }
 }
 
 export default new CampaignService();

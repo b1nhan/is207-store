@@ -25,13 +25,14 @@ export default function AdminProductsPage() {
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  const fetchProducts = useCallback(async (page = currentPage, limit = pageSize) => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await adminProductService.getAllProducts({ page, limit });
+      const response = await adminProductService.getAllProducts({ page: currentPage, limit: pageSize });
+      console.log(response);
       const { items = [], pagination } = response.data;
       setProducts(items);
-      setTotalItems(pagination?.total ?? items.length);
+      setTotalItems(pagination?.totalItems ?? items.length);
     } catch (error) {
       console.error('Failed to fetch products', error);
     } finally {
@@ -40,8 +41,8 @@ export default function AdminProductsPage() {
   }, [currentPage, pageSize]);
 
   useEffect(() => {
-    fetchProducts(currentPage, pageSize);
-  }, [currentPage, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchProducts();
+  }, [fetchProducts]);
 
   /* ── Modal helpers ── */
   const openCreateModal = () => {
@@ -64,7 +65,7 @@ export default function AdminProductsPage() {
   const handleModalSuccess = () => {
     setModalOpen(false);
     setEditProductId(null);
-    fetchProducts(currentPage, pageSize);
+    fetchProducts();
   };
 
   /* ── Hide / Show toggle ── */
@@ -127,6 +128,28 @@ export default function AdminProductsPage() {
           </Button>
         </div>
 
+        {/* Stats cards */}
+        {!loading && totalItems > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Tổng Sản Phẩm</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{totalItems}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Đang Hiển Thị (Trang hiện tại - {currentPage}/{totalPages})</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {products.filter((p) => p.status === 1).length}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Đã Ẩn (Trang hiện tại - {currentPage}/{totalPages})</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {products.filter((p) => p.status === 0).length}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-left border-collapse">
@@ -160,9 +183,8 @@ export default function AdminProductsPage() {
                 products.map((product) => (
                   <tr
                     key={product.product_id}
-                    className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${
-                      product.status === 0 ? 'opacity-50' : ''
-                    }`}
+                    className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${product.status === 0 ? 'opacity-50' : ''
+                      }`}
                   >
                     {/* Thumbnail */}
                     <td className="p-4">
@@ -200,11 +222,10 @@ export default function AdminProductsPage() {
                     {/* Status badge */}
                     <td className="p-4 text-center">
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          product.status === 1
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-600'
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${product.status === 1
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-600'
+                          }`}
                       >
                         {product.status === 1 ? 'Hiển thị' : 'Đã ẩn'}
                       </span>
@@ -216,11 +237,10 @@ export default function AdminProductsPage() {
                         onClick={() => handleToggleStatus(product.product_id, product.status)}
                         disabled={togglingId === product.product_id}
                         title={product.status === 1 ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all disabled:opacity-50 ${
-                          product.status === 1
-                            ? 'border-orange-200 text-orange-600 hover:bg-orange-50'
-                            : 'border-green-200 text-green-600 hover:bg-green-50'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all disabled:opacity-50 ${product.status === 1
+                          ? 'border-orange-200 text-orange-600 hover:bg-orange-50'
+                          : 'border-green-200 text-green-600 hover:bg-green-50'
+                          }`}
                       >
                         {togglingId === product.product_id ? (
                           <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
@@ -291,11 +311,10 @@ export default function AdminProductsPage() {
                   <button
                     key={page}
                     onClick={() => goToPage(page)}
-                    className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${
-                      page === currentPage
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${page === currentPage
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     {page}
                   </button>

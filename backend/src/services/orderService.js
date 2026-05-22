@@ -3,6 +3,7 @@ import cartRepository from '../repositories/cartRepository.js';
 import orderRepository from '../repositories/orderRepository.js';
 import orderItemRepository from '../repositories/orderItemRepository.js';
 import campaignRepository from '../repositories/campaignRepository.js';
+import shippingProfileRepository from '../repositories/shippingProfileRepository.js';
 import voucherService from './voucherService.js';
 import AppError from '../utils/AppError.js';
 import { ERROR_CODES } from '../constants/errorCode.js';
@@ -18,7 +19,7 @@ class OrderService {
    * Toàn bộ quá trình được wrap trong một MySQL transaction để đảm bảo atomicity.
    *
    * @param {number} userId
-   * @param {{ address_id, voucher_code, receiver_name, receiver_phone, full_address }} dto
+   * @param {{ profile_id, voucher_code?, campaign_id? }} dto
    */
   async placeOrder(userId, dto) {
     const db = getDB();
@@ -49,21 +50,14 @@ class OrderService {
       }
     }
 
-    // ── 3. Validate địa chỉ giao hàng thuộc user ────────────────────────────
-    // Địa chỉ snapshot từ frontend được truyền trực tiếp (receiver_name, receiver_phone, full_address)
-    // address_id chỉ dùng để lưu tham chiếu nếu có
-    if (dto.address_id) {
-      const [addrRows] = await db.query(
-        `SELECT address_id FROM addresses WHERE address_id = ? AND user_id = ?`,
-        [dto.address_id, userId],
+    // ── 3. Validate profile_id tồn tại và thuộc user ────────────────────────
+    const profile = await shippingProfileRepository.findByIdAndUser(dto.profile_id, userId);
+    if (!profile) {
+      throw new AppError(
+        'Shipping profile không hợp lệ hoặc không thuộc về tài khoản này',
+        403,
+        ERROR_CODES.SHIPPING_PROFILE.NOT_FOUND,
       );
-      if (addrRows.length === 0) {
-        throw new AppError(
-          'Địa chỉ giao hàng không hợp lệ',
-          403,
-          ERROR_CODES.USER.ADDRESS_FORBIDDEN,
-        );
-      }
     }
 
     // ── 4. Tính subtotal ─────────────────────────────────────────────────────
@@ -175,7 +169,7 @@ class OrderService {
       const orderId = await orderRepository.create(
         {
           user_id: userId,
-          address_id: dto.address_id || null,
+          profile_id: dto.profile_id,
           voucher_id: voucherResult ? voucherResult.voucher_id : null,
           voucher_code_snapshot: voucherResult ? voucherResult.code : null,
           campaign_id: appliedCampaign ? appliedCampaign.campaign_id : null,
@@ -201,11 +195,12 @@ class OrderService {
       }));
       await orderItemRepository.createMany(orderItems, conn);
 
-      // 6c. INSERT order_shipping_address (snapshot địa chỉ)
+      // 6c. INSERT order_shipping_address (snapshot địa chỉ từ shipping_profiles)
+      // Copy dữ liệu tại thời điểm đặt hàng — không dùng FK
       await conn.query(
         `INSERT INTO order_shipping_address (order_id, receiver_name, receiver_phone, full_address)
          VALUES (?, ?, ?, ?)`,
-        [orderId, dto.receiver_name, dto.receiver_phone, dto.full_address],
+        [orderId, profile.receiver_name, profile.receiver_phone, profile.full_address],
       );
 
       // 6d. UPDATE stock: trừ tồn kho từng variant

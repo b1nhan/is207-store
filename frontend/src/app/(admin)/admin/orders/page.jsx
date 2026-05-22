@@ -213,6 +213,34 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Orders Management</h1>
 
+      {/* Stats cards */}
+      {!loading && orders.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Tổng Đơn Hàng</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{orders.length}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Chờ Xử Lý</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {orders.filter((o) => o.status === 'pending').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đang Giao Hàng</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {orders.filter((o) => o.status === 'shipping').length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đã Giao</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {orders.filter((o) => o.status === 'delivered').length}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

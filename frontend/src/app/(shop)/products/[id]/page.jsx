@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { productService } from '@/services/productService';
+import { campaignService } from '@/services/campaignService';
 import ProductDetailClient from '@/components/productPage/productDetail';
 
 export async function generateMetadata({ params }) {
@@ -22,7 +23,7 @@ export default async function ProductDetailPage({ params }) {
   const { id } = await params;
 
   let product = null;
-  let relatedProducts = [];
+  let campaigns = [];
 
   try {
     const res = await productService.getProduct(id);
@@ -36,12 +37,19 @@ export default async function ProductDetailPage({ params }) {
     notFound();
   }
 
-  try {
-    const relatedRes = await productService.getRelatedProducts(id, 6);
-    relatedProducts = relatedRes.data || [];
-  } catch (error) {
-    console.warn('Could not fetch related products:', error);
+  // Fetch campaigns áp dụng cho sản phẩm này (related products được fetch client-side)
+  const campaignRes = await campaignService
+    .getActiveCampaigns({ product_id: id })
+    .catch(() => null);
+
+  if (campaignRes) {
+    campaigns = campaignRes?.data || [];
   }
 
-  return <ProductDetailClient product={product} relatedProducts={relatedProducts} />;
+  return (
+    <ProductDetailClient
+      product={product}
+      campaigns={campaigns}
+    />
+  );
 }

@@ -37,6 +37,20 @@ class ProductController {
       next(error);
     }
   };
+
+  getRelatedProducts = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const limit = parseInt(req.query.limit, 10) || 8;
+      const data = await productService.getRelatedProducts(id, limit);
+      sendSuccess(res, {
+        data,
+        message: 'Lấy sản phẩm liên quan thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default new ProductController();

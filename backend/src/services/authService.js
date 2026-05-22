@@ -140,3 +140,26 @@ export const changePassword = async (
   const newHash = await hashPassword(new_password);
   await userRepo.updatePassword(userId, newHash);
 };
+
+// ─── Update profile ──────────────────────────────────────────────────
+
+/**
+ * Cập nhật full_name và phone cho user đang đăng nhập.
+ * @param {number} userId
+ * @param {{ full_name?: string, phone?: string }} dto
+ * @returns {object} public user fields sau khi cập nhật
+ * @throws {AppError} USER_NOT_FOUND
+ */
+export const updateProfile = async (userId, { full_name, phone }) => {
+  const user = await userRepo.findById(userId);
+  if (!user) {
+    throw new AppError('Người dùng không tồn tại', 404, 'USER_NOT_FOUND');
+  }
+
+  await userRepo.updateProfile(userId, { full_name, phone });
+
+  // Trả về data mới nhất
+  const updated = await userRepo.findById(userId);
+  const { password_hash, ...publicFields } = updated;
+  return { ...publicFields, role: publicFields.role.toUpperCase() };
+};

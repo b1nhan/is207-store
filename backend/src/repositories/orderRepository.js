@@ -10,7 +10,7 @@ class OrderRepository {
       `SELECT
         o.order_id,
         o.user_id,
-        o.address_id,
+        o.profile_id,
         o.voucher_id,
         o.voucher_code_snapshot,
         o.campaign_id,
@@ -44,7 +44,7 @@ class OrderRepository {
       `SELECT
         o.order_id,
         o.user_id,
-        o.address_id,
+        o.profile_id,
         o.voucher_id,
         o.voucher_code_snapshot,
         o.campaign_id,
@@ -113,12 +113,12 @@ class OrderRepository {
   async create(orderDto, conn) {
     const [result] = await conn.query(
       `INSERT INTO orders
-        (user_id, address_id, voucher_id, voucher_code_snapshot, campaign_id,
+        (user_id, profile_id, voucher_id, voucher_code_snapshot, campaign_id,
          subtotal, discount_total, campaign_discount_total, shipping_fee, total_amount, status, payment_status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')`,
       [
         orderDto.user_id,
-        orderDto.address_id || null,
+        orderDto.profile_id || null,
         orderDto.voucher_id || null,
         orderDto.voucher_code_snapshot || null,
         orderDto.campaign_id || null,

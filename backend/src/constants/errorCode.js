@@ -49,6 +49,12 @@ const ERROR_CODES = {
     ADDRESS_FORBIDDEN: 'USER_ADDRESS_FORBIDDEN', // 403 - Địa chỉ không thuộc user này
   },
 
+  // ─── SHIPPING PROFILE ──────────────────────────────────────────────────────
+  SHIPPING_PROFILE: {
+    NOT_FOUND: 'SHIPPING_PROFILE_NOT_FOUND', // 404 - Không tìm thấy shipping profile
+    FORBIDDEN: 'SHIPPING_PROFILE_FORBIDDEN',  // 403 - Profile không thuộc user này
+  },
+
   // ─── PRODUCT ───────────────────────────────────────────────────────────────
   PRODUCT: {
     NOT_FOUND: 'PRODUCT_NOT_FOUND', // 404 - Không tìm thấy sản phẩm
@@ -90,6 +96,7 @@ const ERROR_CODES = {
     EMPTY_CART: 'ORDER_EMPTY_CART', // 400 - Giỏ hàng trống khi checkout
     INSUFFICIENT_STOCK: 'ORDER_INSUFFICIENT_STOCK', // 400 - Không đủ hàng khi checkout
     INVALID_STATUS_TRANSITION: 'ORDER_INVALID_STATUS_TRANSITION', // 400 - Chuyển trạng thái không hợp lệ
+    BAD_REQUEST: 'ORDER_BAD_REQUEST', // 400 - Request không hợp lệ (generic)
   },
 
   // ─── VOUCHER ───────────────────────────────────────────────────────────────

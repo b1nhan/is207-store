@@ -61,6 +61,34 @@ export default function AdminVouchersPage() {
         </Link>
       </div>
 
+      {/* Stats cards */}
+      {!loading && vouchers.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Tổng Voucher</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{pagination.totalItems || vouchers.length}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đang hoạt động</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {vouchers.filter((v) => v.is_active).length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đã ngưng</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {vouchers.filter((v) => !v.is_active).length}
+            </p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <p className="text-xs text-gray-500 font-medium">Đã hết hạn</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {vouchers.filter((v) => v.expiry_date && new Date(v.expiry_date) < new Date()).length}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>

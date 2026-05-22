@@ -15,6 +15,12 @@ router.get('/search', (req, res, next) =>
   productController.searchProducts(req, res, next),
 );
 
+// @route   GET /products/:id/related
+// @desc    Sản phẩm liên quan
+router.get('/:id/related', (req, res, next) =>
+  productController.getRelatedProducts(req, res, next),
+);
+
 // @route   GET /products/:id
 // @desc    Chi tiết sản phẩm
 router.get('/:id', (req, res, next) =>

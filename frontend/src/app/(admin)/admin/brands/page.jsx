@@ -279,25 +279,25 @@ export default function AdminBrandsPage() {
         {!loading && brands.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Tổng thương hiệu</p>
+              <p className="text-xs text-gray-500 font-medium">Tổng Brand</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{brands.length}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Có sản phẩm</p>
+              <p className="text-xs text-gray-500 font-medium">Brand có sản phẩm</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
                 {brands.filter((b) => Number(b.product_count) > 0).length}
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <p className="text-xs text-gray-500 font-medium">Brand không có sản phẩm</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {brands.filter((b) => Number(b.product_count) === 0).length}
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
               <p className="text-xs text-gray-500 font-medium">Tổng sản phẩm</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
                 {brands.reduce((sum, b) => sum + Number(b.product_count || 0), 0)}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Không có SP</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {brands.filter((b) => Number(b.product_count) === 0).length}
               </p>
             </div>
           </div>
@@ -351,11 +351,10 @@ export default function AdminBrandsPage() {
                       </td>
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex items-center justify-center min-w-[2rem] px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            Number(brand.product_count) > 0
-                              ? 'bg-purple-50 text-purple-700'
-                              : 'bg-gray-100 text-gray-400'
-                          }`}
+                          className={`inline-flex items-center justify-center min-w-[2rem] px-2.5 py-0.5 rounded-full text-xs font-medium ${Number(brand.product_count) > 0
+                            ? 'bg-purple-50 text-purple-700'
+                            : 'bg-gray-100 text-gray-400'
+                            }`}
                         >
                           {brand.product_count ?? 0}
                         </span>

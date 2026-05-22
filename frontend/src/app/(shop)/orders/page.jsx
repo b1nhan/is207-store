@@ -64,6 +64,8 @@ export default function OrdersPage() {
     );
   }
 
+  console.log(orders)
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-text-primary mb-8">Lịch sử đơn hàng</h1>
@@ -96,7 +98,7 @@ export default function OrdersPage() {
                       Đơn hàng #{order.order_id}
                     </h3>
                     <p className="text-sm text-text-secondary mt-1">
-                      Ngày đặt: {formatDate(order.created_at)}
+                      Ngày đặt: {formatDate(order.order_date)}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -109,7 +111,15 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-4">
+                <div className="flex justify-between mt-4">
+                  <div>
+                    <h3 className="font-medium text-md text-text-primary">
+                      Người nhận: {order.receiver_name}
+                    </h3>
+                    <p className="text-sm text-text-secondary mt-1">
+                      SĐT: {order.receiver_phone}
+                    </p>
+                  </div>
                   <Button variant="outline" asChild>
                     <Link href={`/orders/${order.order_id}`}>Xem chi tiết</Link>
                   </Button>
