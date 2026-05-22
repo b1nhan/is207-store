@@ -149,6 +149,21 @@ class CartRepository {
     const db = getDB();
     await db.query(`DELETE FROM cart_items WHERE cart_id = ?`, [cartId]);
   }
+
+  /**
+   * Xóa các items cụ thể khỏi cart theo danh sách cart_item_id.
+   * Đảm bảo chỉ xóa items thuộc cart của user (double-check qua cart_id).
+   * Hỗ trợ connection (transaction).
+   */
+  async removeItemsByIds(cartId, itemIds, conn = null) {
+    if (!itemIds || itemIds.length === 0) return;
+    const db = conn || getDB();
+    const placeholders = itemIds.map(() => '?').join(', ');
+    await db.query(
+      `DELETE FROM cart_items WHERE cart_id = ? AND cart_item_id IN (${placeholders})`,
+      [cartId, ...itemIds],
+    );
+  }
 }
 
 export default new CartRepository();

@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import adminProductService from '@/services/adminProductService';
 import adminCategoryService from '@/services/adminCategoryService';
 import adminBrandService from '@/services/adminBrandService';
+import CategoryModal from '../../categories/CategoryModal';
+import BrandModal from '../../brands/BrandModal';
 
 /* ─── Multi-select dropdown ─── */
-function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, required }) {
+function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, required, onAdd }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -34,9 +36,20 @@ function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, r
 
   return (
     <div className="relative" ref={ref}>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
+      <div className="flex items-center justify-between mb-1">
+        <label className="block text-sm font-medium text-gray-700">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+        {onAdd && (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 font-medium transition-colors"
+          >
+            <Plus size={12} /> Thêm mới
+          </button>
+        )}
+      </div>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -458,6 +471,9 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
   const [existingImages, setExistingImages] = useState([]);
   const [variants, setVariants] = useState([]);
 
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showBrandModal, setShowBrandModal] = useState(false);
+
   // Ref to call image upload from child
   const pendingUploaderRef = useRef(null);
 
@@ -472,21 +488,28 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     brand_ids: [],
   });
 
+  const fetchCategories = async () => {
+    try {
+      const res = await adminCategoryService.getAllCategories({ limit: 100 });
+      setCategories(res.data?.items || res.data || []);
+    } catch (err) {
+      console.error('Failed to load categories', err);
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const res = await adminBrandService.getAllBrands({ limit: 100 });
+      setBrands(res.data?.items || res.data || []);
+    } catch (err) {
+      console.error('Failed to load brands', err);
+    }
+  };
+
   /* Load categories & brands on mount */
   useEffect(() => {
-    const loadOptions = async () => {
-      try {
-        const [catRes, brandRes] = await Promise.all([
-          adminCategoryService.getAllCategories({ limit: 100 }),
-          adminBrandService.getAllBrands({ limit: 100 }),
-        ]);
-        setCategories(catRes.data?.items || catRes.data || []);
-        setBrands(brandRes.data?.items || brandRes.data || []);
-      } catch (err) {
-        console.error('Failed to load options', err);
-      }
-    };
-    loadOptions();
+    fetchCategories();
+    fetchBrands();
   }, []);
 
   /* Load product data when editing */
@@ -710,6 +733,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                   onChange={(vals) => setFormData((prev) => ({ ...prev, category_ids: vals }))}
                   valueKey="category_id"
                   labelKey="category_name"
+                  onAdd={() => setShowCategoryModal(true)}
                 />
                 <MultiSelect
                   label="Thương hiệu"
@@ -718,6 +742,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                   onChange={(vals) => setFormData((prev) => ({ ...prev, brand_ids: vals }))}
                   valueKey="brand_id"
                   labelKey="brand_name"
+                  onAdd={() => setShowBrandModal(true)}
                 />
               </div>
 
@@ -780,6 +805,17 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
           </Button>
         </div>
       </div>
+
+      <CategoryModal
+        open={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSaved={fetchCategories}
+      />
+      <BrandModal
+        open={showBrandModal}
+        onClose={() => setShowBrandModal(false)}
+        onSaved={fetchBrands}
+      />
 
       {/* Modal animation */}
       <style>{`

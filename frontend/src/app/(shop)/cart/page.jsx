@@ -5,8 +5,9 @@ import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import { campaignService } from '@/services/campaignService';
 import { Button } from '@/components/ui/button';
-import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon } from 'lucide-react';
+import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon, CheckIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const SHIPPING_FEE = 30000;
 
@@ -58,11 +59,21 @@ function getItemCampaignDiscount(item, activeCampaigns) {
 }
 
 export default function CartPage() {
-  const { items, subtotal, isLoading, error, updateQuantity, removeItem, clearCart } = useCartStore();
+  const router = useRouter();
+  const { items, isLoading, error, updateQuantity, removeItem, clearCart } = useCartStore();
   const { isAuthenticated, isInitialized } = useAuthStore();
 
   const [mounted, setMounted] = useState(false);
   const [activeCampaigns, setActiveCampaigns] = useState([]);
+
+  // ── Selected item IDs (cart_item_id) ────────────────────────────────────────
+  // Mặc định chọn tất cả khi mở trang
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  // Reset selection về "chọn tất cả" mỗi khi items thay đổi (mở lại trang / fetch xong)
+  useEffect(() => {
+    setSelectedIds(new Set(items.map((i) => i.cart_item_id)));
+  }, [items]);
 
   useEffect(() => {
     setMounted(true);
@@ -78,7 +89,7 @@ export default function CartPage() {
       .catch(() => setActiveCampaigns([]));
   }, []);
 
-  // Map: product_id → campaign discount info
+  // Map: cart_item_id → campaign discount info
   const itemDiscountMap = useMemo(() => {
     const map = new Map();
     for (const item of items) {
@@ -88,18 +99,57 @@ export default function CartPage() {
     return map;
   }, [items, activeCampaigns]);
 
-  // Tổng campaign discount của toàn giỏ hàng
-  const totalCampaignDiscount = useMemo(() => {
+  // ── Computed values based on SELECTED items ──────────────────────────────────
+  const selectedItems = useMemo(
+    () => items.filter((i) => selectedIds.has(i.cart_item_id)),
+    [items, selectedIds],
+  );
+
+  const selectedSubtotal = useMemo(
+    () => selectedItems.reduce((sum, i) => sum + Number(i.unit_price) * i.quantity, 0),
+    [selectedItems],
+  );
+
+  const selectedCampaignDiscount = useMemo(() => {
     let total = 0;
-    for (const item of items) {
+    for (const item of selectedItems) {
       const info = itemDiscountMap.get(item.cart_item_id);
       if (info) total += info.discountAmount * item.quantity;
     }
     return total;
-  }, [items, itemDiscountMap]);
+  }, [selectedItems, itemDiscountMap]);
 
-  const estimatedTotal = Math.max(0, subtotal - totalCampaignDiscount);
+  const estimatedTotal = Math.max(0, selectedSubtotal - selectedCampaignDiscount);
 
+  // ── Select-all state ─────────────────────────────────────────────────────────
+  const allSelected = items.length > 0 && selectedIds.size === items.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < items.length;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map((i) => i.cart_item_id)));
+    }
+  };
+
+  const toggleItem = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // ── Checkout handler ─────────────────────────────────────────────────────────
+  const handleCheckout = () => {
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds).join(',');
+    router.push(`/checkout?selectedItems=${ids}`);
+  };
+
+  // ── Guards ───────────────────────────────────────────────────────────────────
   if (!mounted) return null;
 
   if (!isInitialized) {
@@ -145,21 +195,70 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* ── Cart Items List ── */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Danh sách sản phẩm</h2>
-              <Button variant="ghost" className="text-error hover:text-error hover:bg-error-bg" onClick={() => clearCart()}>
+            {/* Header row: select-all + clear */}
+            <div className="flex justify-between items-center mb-2 px-1">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                {/* Custom checkbox "Select All" */}
+                <span
+                  onClick={toggleSelectAll}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer
+                    ${allSelected
+                      ? 'bg-primary border-primary'
+                      : someSelected
+                        ? 'bg-primary/20 border-primary'
+                        : 'border-border bg-surface group-hover:border-primary/60'
+                    }`}
+                >
+                  {allSelected && <CheckIcon size={12} className="text-white" strokeWidth={3} />}
+                  {someSelected && <span className="w-2.5 h-0.5 bg-primary rounded-full block" />}
+                </span>
+                <span
+                  onClick={toggleSelectAll}
+                  className="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors"
+                >
+                  Chọn tất cả ({items.length})
+                </span>
+              </label>
+
+              <Button
+                variant="ghost"
+                className="text-error hover:text-error hover:bg-error-bg text-sm"
+                onClick={() => clearCart()}
+              >
                 Xóa tất cả
               </Button>
             </div>
 
             {items.map((item) => {
+              const isSelected = selectedIds.has(item.cart_item_id);
               const discount = itemDiscountMap.get(item.cart_item_id);
               const discountedPrice = discount
                 ? Number(item.unit_price) - discount.discountAmount
                 : null;
 
               return (
-                <div key={item.cart_item_id} className="flex gap-4 p-4 bg-surface rounded-2xl shadow-sm border border-card-border">
+                <div
+                  key={item.cart_item_id}
+                  className={`flex gap-4 p-4 bg-surface rounded-2xl shadow-sm border transition-all duration-200 ${
+                    isSelected
+                      ? 'border-primary/50 ring-1 ring-primary/20'
+                      : 'border-card-border opacity-70'
+                  }`}
+                >
+                  {/* Checkbox */}
+                  <div className="flex items-center flex-shrink-0 pt-1">
+                    <span
+                      onClick={() => toggleItem(item.cart_item_id)}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all
+                        ${isSelected
+                          ? 'bg-primary border-primary'
+                          : 'border-border bg-surface hover:border-primary/60'
+                        }`}
+                    >
+                      {isSelected && <CheckIcon size={12} className="text-white" strokeWidth={3} />}
+                    </span>
+                  </div>
+
                   {/* Thumbnail */}
                   <div className="w-24 h-24 flex-shrink-0 bg-secondary rounded-lg overflow-hidden relative">
                     {item.thumbnail ? (
@@ -262,30 +361,29 @@ export default function CartPage() {
             <h2 className="text-xl font-semibold mb-6 text-text-primary">Tổng đơn hàng</h2>
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-text-secondary">
-                <span>Tạm tính ({items.length} sản phẩm)</span>
-                <span className="font-medium text-text-primary">{subtotal.toLocaleString('vi-VN')} ₫</span>
+                <span>Đã chọn ({selectedIds.size}/{items.length} sản phẩm)</span>
+                <span className="font-medium text-text-primary">{selectedSubtotal.toLocaleString('vi-VN')} ₫</span>
               </div>
 
-              {/* Campaign discount summary */}
-              {totalCampaignDiscount > 0 && (
+              {/* Campaign discount summary for selected items */}
+              {selectedCampaignDiscount > 0 && (
                 <div className="rounded-lg bg-orange-500/8 border border-orange-500/20 px-3 py-2 flex justify-between items-center">
                   <span className="flex items-center gap-1.5 text-orange-500 text-sm">
                     <ZapIcon size={13} />
                     Giảm giá campaign
                   </span>
                   <span className="text-sm font-semibold text-orange-500">
-                    - {totalCampaignDiscount.toLocaleString('vi-VN')} ₫
+                    - {selectedCampaignDiscount.toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
               )}
 
-
               <div className="border-t border-divider pt-4 flex justify-between items-center">
                 <span className="font-semibold text-text-primary text-lg">Tạm tính</span>
                 <div className="text-right">
-                  {totalCampaignDiscount > 0 && (
+                  {selectedCampaignDiscount > 0 && (
                     <p className="text-xs text-text-secondary line-through">
-                      {subtotal.toLocaleString('vi-VN')} ₫
+                      {selectedSubtotal.toLocaleString('vi-VN')} ₫
                     </p>
                   )}
                   <span className="text-2xl font-bold text-primary">
@@ -294,15 +392,29 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {totalCampaignDiscount > 0 && (
+              {selectedCampaignDiscount > 0 && (
                 <p className="text-xs text-orange-500 text-center font-medium">
-                  🎉 Bạn đang tiết kiệm {totalCampaignDiscount.toLocaleString('vi-VN')} ₫ từ campaign!
+                  🎉 Bạn đang tiết kiệm {selectedCampaignDiscount.toLocaleString('vi-VN')} ₫ từ campaign!
+                </p>
+              )}
+
+              {selectedIds.size === 0 && (
+                <p className="text-xs text-text-muted text-center italic">
+                  Hãy chọn ít nhất một sản phẩm để tiến hành thanh toán.
                 </p>
               )}
             </div>
 
-            <Button className="w-full font-semibold" size="lg" asChild>
-              <Link href="/checkout">Tiến hành thanh toán</Link>
+            <Button
+              className="w-full font-semibold"
+              size="lg"
+              onClick={handleCheckout}
+              disabled={selectedIds.size === 0 || isLoading}
+            >
+              Tiến hành thanh toán
+              {selectedIds.size > 0 && (
+                <span className="ml-2 text-xs opacity-80">({selectedIds.size})</span>
+              )}
             </Button>
           </div>
         </div>

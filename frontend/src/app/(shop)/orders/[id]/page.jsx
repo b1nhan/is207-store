@@ -97,6 +97,8 @@ export default function OrderDetailPage({ params }) {
 
   const statusInfo = STATUS_MAP[order.status] || { label: order.status, color: 'bg-gray-100 text-gray-800' };
 
+  console.log(order);
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Link href="/orders" className="inline-flex items-center text-text-secondary hover:text-primary mb-6 transition-colors">
@@ -185,7 +187,7 @@ export default function OrderDetailPage({ params }) {
         </div>
         <div className="divide-y divide-border">
           {order.items?.map((item) => (
-            <div key={item.unit_price_snapshot} className="p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div key={item.order_item_id} className="p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               {/* Product Info */}
               <div className="flex-grow">
                 <Link href={`/products/${item.product_id || '#'}`} className="text-lg font-medium text-text-primary hover:text-primary transition-colors">

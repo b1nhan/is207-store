@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
@@ -47,8 +47,28 @@ function ProfileSkeleton() {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, isLoading: cartLoading, clearCartState } = useCartStore();
+  const searchParams = useSearchParams();
+  const { items, isLoading: cartLoading, removeItemsFromStore } = useCartStore();
   const { isAuthenticated, isInitialized } = useAuthStore();
+
+  // ─── Parse selectedItemIds from URL ────────────────────────────────────────
+  const selectedItemIds = useMemo(() => {
+    const raw = searchParams.get('selectedItems');
+    if (!raw) return [];
+    return raw.split(',').map(Number).filter(Boolean);
+  }, [searchParams]);
+
+  // Chỉ tính toán trên các items được chọn
+  const selectedItems = useMemo(
+    () => items.filter((i) => selectedItemIds.includes(i.cart_item_id)),
+    [items, selectedItemIds],
+  );
+
+  // subtotal của các items được chọn
+  const subtotal = useMemo(
+    () => selectedItems.reduce((sum, i) => sum + Number(i.unit_price) * i.quantity, 0),
+    [selectedItems],
+  );
 
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,7 +109,7 @@ export default function CheckoutPage() {
 
   // ─── Tính campaign discount (mirror backend logic) ──────────────────────────
   const { appliedCampaign, campaignDiscountAmount, isFreeship } = useMemo(() => {
-    if (!activeCampaigns.length || !items.length) {
+    if (!activeCampaigns.length || !selectedItems.length) {
       return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
     }
 
@@ -105,7 +125,7 @@ export default function CheckoutPage() {
       const campaignProductIds = (campaign.products ?? []).map((p) => p.product_id);
       const appliesToAll = campaignProductIds.length === 0;
 
-      const applicable = items.filter(
+      const applicable = selectedItems.filter(
         (item) => appliesToAll || campaignProductIds.includes(item.product_id),
       );
 
@@ -149,7 +169,7 @@ export default function CheckoutPage() {
       return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
     }
     return { appliedCampaign: bestCampaign, campaignDiscountAmount: bestDiscount, isFreeship: bestFreeship };
-  }, [activeCampaigns, items]);
+  }, [activeCampaigns, selectedItems]);
 
   // ─── Fetch profiles ─────────────────────────────────────────────────────────
   const fetchProfiles = useCallback(async () => {
@@ -261,17 +281,24 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (selectedItemIds.length === 0) {
+      setError('Không có sản phẩm nào được chọn để thanh toán.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
     try {
       const data = {
         profile_id: selectedProfileId,
+        selectedItemIds,
         ...(appliedVoucher && { voucher_code: appliedVoucher.code }),
       };
 
       const response = await orderService.checkout(data);
-      clearCartState();
+      // Chỉ xóa các items đã checkout khỏi store, giữ lại phần còn lại
+      removeItemsFromStore(selectedItemIds);
       router.push(`/orders/${response.data?.order_id ?? response.order_id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.');
@@ -297,6 +324,12 @@ export default function CheckoutPage() {
         </Button>
       </div>
     );
+  }
+
+  // Guard: nếu không có selectedItemIds hợp lệ → redirect về cart
+  if (mounted && isInitialized && isAuthenticated && !cartLoading && selectedItemIds.length === 0) {
+    router.replace('/cart');
+    return null;
   }
 
   if (items.length === 0 && !cartLoading) {
@@ -543,7 +576,7 @@ export default function CheckoutPage() {
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-text-secondary">
-                  <span>Tạm tính ({items.length} sản phẩm)</span>
+                  <span>Tạm tính ({selectedItems.length} sản phẩm đã chọn)</span>
                   <span className="font-medium text-text-primary">
                     {subtotal.toLocaleString('vi-VN')} ₫
                   </span>

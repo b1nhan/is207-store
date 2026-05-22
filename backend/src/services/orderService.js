@@ -30,7 +30,21 @@ class OrderService {
       throw new AppError('Giỏ hàng đang trống', 400, ERROR_CODES.ORDER.EMPTY_CART);
     }
 
-    const items = cart.items;
+    // ── 1.5. Filter theo selectedItemIds ─────────────────────────────────────
+    const { selectedItemIds } = dto;
+    // Validate: tất cả selectedItemIds phải tồn tại trong cart của user
+    const cartItemIdSet = new Set(cart.items.map((i) => i.cart_item_id));
+    const invalidIds = selectedItemIds.filter((id) => !cartItemIdSet.has(id));
+    if (invalidIds.length > 0) {
+      throw new AppError(
+        `Sản phẩm không tồn tại trong giỏ hàng: ${invalidIds.join(', ')}`,
+        400,
+        ERROR_CODES.ORDER.BAD_REQUEST,
+      );
+    }
+
+    // Chỉ xử lý các items được chọn
+    const items = cart.items.filter((i) => selectedItemIds.includes(i.cart_item_id));
 
     // ── 2. Validate từng item ────────────────────────────────────────────────
     for (const item of items) {
@@ -49,6 +63,7 @@ class OrderService {
         );
       }
     }
+
 
     // ── 3. Validate profile_id tồn tại và thuộc user ────────────────────────
     const profile = await shippingProfileRepository.findByIdAndUser(dto.profile_id, userId);
@@ -228,8 +243,8 @@ class OrderService {
         );
       }
 
-      // 6f. DELETE cart_items (clear cart sau checkout)
-      await conn.query(`DELETE FROM cart_items WHERE cart_id = ?`, [cart.cart_id]);
+      // 6f. XÓA chỉ các cart_items được chọn (giữ lại các item không checkout)
+      await cartRepository.removeItemsByIds(cart.cart_id, selectedItemIds, conn);
 
       await conn.commit();
 
