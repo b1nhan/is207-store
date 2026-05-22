@@ -1,5 +1,9 @@
 import { getDB } from '../database/connection.js';
 
+/** Normalize MySQL TINYINT(1) → JS boolean cho field is_default */
+const normalizeProfile = (row) =>
+  row ? { ...row, is_default: Boolean(row.is_default) } : null;
+
 class ShippingProfileRepository {
   /**
    * Lấy tất cả profile của một user.
@@ -16,7 +20,7 @@ class ShippingProfileRepository {
        ORDER BY is_default DESC, created_at DESC`,
       [userId],
     );
-    return rows;
+    return rows.map(normalizeProfile);
   }
 
   /**
@@ -33,7 +37,7 @@ class ShippingProfileRepository {
        WHERE profile_id = ?`,
       [profileId],
     );
-    return rows[0] || null;
+    return normalizeProfile(rows[0] || null);
   }
 
   /**
@@ -51,7 +55,7 @@ class ShippingProfileRepository {
        WHERE profile_id = ? AND user_id = ?`,
       [profileId, userId],
     );
-    return rows[0] || null;
+    return normalizeProfile(rows[0] || null);
   }
 
   /**

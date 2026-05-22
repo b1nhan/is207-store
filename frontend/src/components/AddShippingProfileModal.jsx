@@ -1,36 +1,62 @@
 'use client';
 
-import { useState } from 'react';
-import { XIcon, MapPinIcon, Loader2Icon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { XIcon, MapPinIcon, PencilIcon, Loader2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import shippingProfileService from '@/services/shippingProfileService';
 
 const PHONE_REGEX = /^0\d{9}$/;
 
-const initialForm = {
+const emptyForm = {
   receiver_name: '',
   receiver_phone: '',
   full_address: '',
   label: '',
+  is_default: false,
 };
 
 /**
- * Modal để tạo shipping profile mới.
+ * Modal để tạo hoặc chỉnh sửa shipping profile.
  *
- * @param {{ isOpen: boolean, onClose: () => void, onSuccess: (newProfile: object) => void }} props
+ * @param {{
+ *   isOpen: boolean,
+ *   onClose: () => void,
+ *   onSuccess: (profile: object) => void,
+ *   initialData?: object   // nếu có → edit mode
+ * }} props
  */
-export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) {
-  const [form, setForm] = useState(initialForm);
+export default function AddShippingProfileModal({ isOpen, onClose, onSuccess, initialData }) {
+  const isEditMode = !!initialData;
+
+  const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync form khi initialData hoặc isOpen thay đổi
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setForm({
+          receiver_name: initialData.receiver_name || '',
+          receiver_phone: initialData.receiver_phone || '',
+          full_address: initialData.full_address || '',
+          label: initialData.label || '',
+          is_default: !!initialData.is_default,
+        });
+      } else {
+        setForm(emptyForm);
+      }
+      setErrors({});
+      setServerError('');
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    // Clear lỗi của field khi user bắt đầu nhập lại
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
@@ -62,14 +88,20 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
         receiver_name: form.receiver_name.trim(),
         receiver_phone: form.receiver_phone.trim(),
         full_address: form.full_address.trim(),
-        ...(form.label.trim() && { label: form.label.trim() }),
+        label: form.label.trim() || null,
+        is_default: form.is_default,
       };
-      const response = await shippingProfileService.createProfile(payload);
-      // axiosInstance interceptor thường unwrap response.data, nên check cả hai dạng
-      const newProfile = response?.data ?? response;
-      onSuccess(newProfile);
-      setForm(initialForm);
-      setErrors({});
+
+      let profile;
+      if (isEditMode) {
+        const response = await shippingProfileService.updateProfile(initialData.profile_id, payload);
+        profile = response?.data ?? response;
+      } else {
+        const response = await shippingProfileService.createProfile(payload);
+        profile = response?.data ?? response;
+      }
+
+      onSuccess(profile);
     } catch (err) {
       setServerError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
     } finally {
@@ -78,11 +110,15 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
   };
 
   const handleClose = () => {
-    setForm(initialForm);
+    setForm(emptyForm);
     setErrors({});
     setServerError('');
     onClose();
   };
+
+  const TitleIcon = isEditMode ? PencilIcon : MapPinIcon;
+  const titleText = isEditMode ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới';
+  const submitText = isEditMode ? 'Lưu thay đổi' : 'Lưu địa chỉ';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -98,8 +134,8 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-divider">
           <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-            <MapPinIcon size={20} className="text-primary" />
-            Thêm địa chỉ mới
+            <TitleIcon size={20} className="text-primary" />
+            {titleText}
           </h2>
           <button
             onClick={handleClose}
@@ -121,7 +157,7 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
           {/* Nhãn (tuỳ chọn) */}
           <div>
             <label className="block text-sm font-medium text-text-primary mb-1">
-              Nhãn địa chỉ <span className="text-text-secondary font-normal">(tuỳ chọn)</span>
+              Ghi chú địa chỉ
             </label>
             <input
               type="text"
@@ -144,9 +180,8 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
               value={form.receiver_name}
               onChange={handleChange}
               placeholder="Nhập họ và tên đầy đủ"
-              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-primary placeholder:text-text-secondary ${
-                errors.receiver_name ? 'border-error' : 'border-border'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-primary placeholder:text-text-secondary ${errors.receiver_name ? 'border-error' : 'border-border'
+                }`}
             />
             {errors.receiver_name && (
               <p className="text-error text-xs mt-1">{errors.receiver_name}</p>
@@ -164,9 +199,8 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
               value={form.receiver_phone}
               onChange={handleChange}
               placeholder="VD: 0912345678"
-              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-primary placeholder:text-text-secondary ${
-                errors.receiver_phone ? 'border-error' : 'border-border'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-text-primary placeholder:text-text-secondary ${errors.receiver_phone ? 'border-error' : 'border-border'
+                }`}
             />
             {errors.receiver_phone && (
               <p className="text-error text-xs mt-1">{errors.receiver_phone}</p>
@@ -184,14 +218,32 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
               onChange={handleChange}
               placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
               rows={3}
-              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none text-text-primary placeholder:text-text-secondary ${
-                errors.full_address ? 'border-error' : 'border-border'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md bg-transparent focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none text-text-primary placeholder:text-text-secondary ${errors.full_address ? 'border-error' : 'border-border'
+                }`}
             />
             {errors.full_address && (
               <p className="text-error text-xs mt-1">{errors.full_address}</p>
             )}
           </div>
+
+          {/* Đặt làm địa chỉ mặc định */}
+          <label className={`flex items-center gap-2.5 pt-1 ${isEditMode && initialData?.is_default ? 'cursor-not-allowed opacity-60' : 'cursor-pointer group'
+            }`}>
+            <input
+              type="checkbox"
+              name="is_default"
+              checked={form.is_default}
+              onChange={(e) => setForm((prev) => ({ ...prev, is_default: e.target.checked }))}
+              disabled={isEditMode && !!initialData?.is_default}
+              className="accent-primary w-4 h-4 disabled:cursor-not-allowed"
+            />
+            <span className="text-sm text-text-primary group-hover:text-primary transition-colors">
+              Đặt làm địa chỉ mặc định
+              {isEditMode && initialData?.is_default && (
+                <span className="ml-1.5 text-xs text-text-secondary font-normal">(đang là mặc định)</span>
+              )}
+            </span>
+          </label>
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
@@ -211,7 +263,7 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess }) 
                   Đang lưu...
                 </span>
               ) : (
-                'Lưu địa chỉ'
+                submitText
               )}
             </Button>
           </div>

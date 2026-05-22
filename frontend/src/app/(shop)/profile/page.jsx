@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useAuthStore from '@/store/authStore';
 import useCartStore from '@/store/cartStore';
 import orderService from '@/services/orderService';
 import { authService } from '@/services/authService';
+import shippingProfileService from '@/services/shippingProfileService';
+import AddShippingProfileModal from '@/components/AddShippingProfileModal';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   UserIcon,
@@ -20,6 +23,12 @@ import {
   XIcon,
   CheckIcon,
   LoaderIcon,
+  MapPinIcon,
+  PlusCircleIcon,
+  CheckCircle2Icon,
+  Trash2Icon,
+  RefreshCwIcon,
+  Loader2Icon,
 } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 
@@ -31,6 +40,23 @@ const STATUS_MAP = {
   cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800 border-red-200' },
   returned: { label: 'Trả hàng', color: 'bg-gray-100 text-gray-800 border-gray-200' },
 };
+
+// ─── Skeleton loader cho profile list ─────────────────────────────────────────
+function ProfileSkeleton() {
+  return (
+    <div className="space-y-3 animate-pulse">
+      {[1, 2].map((i) => (
+        <div key={i} className="border border-border rounded-xl p-4 flex gap-3">
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-border rounded w-1/3" />
+            <div className="h-3 bg-border rounded w-1/4" />
+            <div className="h-3 bg-border rounded w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ─── Edit Profile Modal ───────────────────────────────────────────────────────
 
@@ -234,6 +260,14 @@ export default function ProfilePage() {
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // ─── Shipping profiles state ─────────────────────────────────────────────────
+  const [profiles, setProfiles] = useState([]);
+  const [profilesLoading, setProfilesLoading] = useState(true);
+  const [profilesError, setProfilesError] = useState('');
+  const [shippingModalOpen, setShippingModalOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null); // profile đang edit
+  const [deletingId, setDeletingId] = useState(null); // id đang xử lý xóa
+
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
       router.push('/login');
@@ -243,6 +277,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchRecentOrders();
+      fetchProfiles();
     }
   }, [isAuthenticated]);
 
@@ -259,8 +294,61 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchProfiles = useCallback(async () => {
+    setProfilesLoading(true);
+    setProfilesError('');
+    try {
+      const res = await shippingProfileService.getProfiles();
+      const list = Array.isArray(res) ? res : (res?.data ?? []);
+      setProfiles(list);
+    } catch {
+      setProfilesError('Không thể tải danh sách địa chỉ. Vui lòng thử lại.');
+    } finally {
+      setProfilesLoading(false);
+    }
+  }, []);
+
   const handleProfileSaved = (updatedUser) => {
     updateUser(updatedUser);
+  };
+
+  // ─── Shipping profile handlers ───────────────────────────────────────────────
+  const handleOpenAdd = () => {
+    setEditingProfile(null);
+    setShippingModalOpen(true);
+  };
+
+  const handleOpenEdit = (profile) => {
+    setEditingProfile(profile);
+    setShippingModalOpen(true);
+  };
+
+  const handleShippingModalSuccess = (profile) => {
+    setShippingModalOpen(false);
+    setEditingProfile(null);
+    if (editingProfile) {
+      // Update existing
+      setProfiles((prev) => prev.map((p) => (p.profile_id === profile.profile_id ? profile : p)));
+      toast.success('Đã cập nhật địa chỉ!');
+    } else {
+      // Add new
+      setProfiles((prev) => [...prev, profile]);
+      toast.success('Đã thêm địa chỉ mới!');
+    }
+  };
+
+  const handleDelete = async (profileId) => {
+    setDeletingId(profileId);
+    const toastId = toast.loading('Đang xóa địa chỉ...');
+    try {
+      await shippingProfileService.deleteProfile(profileId);
+      setProfiles((prev) => prev.filter((p) => p.profile_id !== profileId));
+      toast.success('Đã xóa địa chỉ!', { id: toastId });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Không thể xóa địa chỉ. Vui lòng thử lại.', { id: toastId });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   if (!isInitialized || !isAuthenticated) {
@@ -324,10 +412,114 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+          </div>
+
+          {/* ─── Địa chỉ giao hàng ─── */}
+          <div className="bg-surface p-6 rounded-2xl shadow-sm border border-card-border">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                <MapPinIcon className="w-5 h-5 text-primary" />
+                Địa chỉ giao hàng
+              </h3>
+              <button
+                onClick={handleOpenAdd}
+                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+              >
+                <PlusCircleIcon size={16} />
+                Thêm địa chỉ
+              </button>
+            </div>
+
+            {/* Loading */}
+            {profilesLoading && <ProfileSkeleton />}
+
+            {/* Error */}
+            {!profilesLoading && profilesError && (
+              <div className="text-center py-6 space-y-3">
+                <p className="text-error text-sm">{profilesError}</p>
+                <Button type="button" variant="outline" size="sm" onClick={fetchProfiles}>
+                  <RefreshCwIcon size={14} className="mr-1.5" />
+                  Thử lại
+                </Button>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!profilesLoading && !profilesError && profiles.length === 0 && (
+              <div className="text-center py-8 space-y-3">
+                <MapPinIcon className="w-10 h-10 text-text-muted mx-auto" />
+                <p className="text-text-secondary text-sm">Bạn chưa có địa chỉ giao hàng nào.</p>
+                <Button type="button" variant="outline" size="sm" onClick={handleOpenAdd}>
+                  <PlusCircleIcon size={14} className="mr-1.5" />
+                  Thêm địa chỉ ngay
+                </Button>
+              </div>
+            )}
+
+            {/* Profile list */}
+            {!profilesLoading && !profilesError && profiles.length > 0 && (
+              <div className="space-y-3">
+                {profiles.map((profile) => (
+                  <div
+                    key={profile.profile_id}
+                    className="flex items-start gap-3 border border-border rounded-xl p-4 hover:border-primary/40 transition-all"
+                  >
+                    {/* Profile info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {profile.label && (
+                          <span className="text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                            {profile.label}
+                          </span>
+                        )}
+                        {profile.is_default && (
+                          <span className="text-xs font-semibold bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <CheckCircle2Icon size={11} />
+                            Mặc định
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-medium text-text-primary mt-1">
+                        {profile.receiver_name}
+                        <span className="text-text-secondary font-normal ml-2 text-sm">
+                          {profile.receiver_phone}
+                        </span>
+                      </p>
+                      <p className="text-text-secondary text-sm mt-0.5 break-words">
+                        {profile.full_address}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                      <button
+                        onClick={() => handleOpenEdit(profile)}
+                        title="Chỉnh sửa"
+                        className="p-1.5 rounded-lg text-text-secondary hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <PencilIcon size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(profile.profile_id)}
+                        disabled={deletingId === profile.profile_id}
+                        title="Xóa"
+                        className="p-1.5 rounded-lg text-text-secondary hover:text-error hover:bg-error/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingId === profile.profile_id
+                          ? <Loader2Icon size={15} className="animate-spin" />
+                          : <Trash2Icon size={15} />
+                        }
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Cột phải: Thống kê & Đơn hàng gần đây */}
+        {/* Cột phải: Thống kê, Địa chỉ & Đơn hàng gần đây */}
         <div className="lg:col-span-2 space-y-6">
           {/* Thống kê nhanh */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -417,6 +609,14 @@ export default function ProfilePage() {
           onSaved={handleProfileSaved}
         />
       )}
+
+      {/* Shipping Profile Modal (create / edit) */}
+      <AddShippingProfileModal
+        isOpen={shippingModalOpen}
+        onClose={() => { setShippingModalOpen(false); setEditingProfile(null); }}
+        onSuccess={handleShippingModalSuccess}
+        initialData={editingProfile}
+      />
     </div>
   );
 }

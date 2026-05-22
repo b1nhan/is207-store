@@ -32,10 +32,10 @@ const useCartStore = create((set, get) => ({
     try {
       const response = await cartService.addToCart({ variant_id, quantity });
       set({
-        cart_id: response.data?.cart_id || null,
-        items: response.data?.items || [],
-        subtotal: response.data?.subtotal || 0,
-        totalItems: response.data?.total_items || 0,
+        cart_id: response?.cart_id || null,
+        items: response?.items || [],
+        subtotal: response?.subtotal || 0,
+        totalItems: response?.total_items || 0,
         isLoading: false,
       });
       return true; // Để báo thành công cho UI
@@ -50,10 +50,10 @@ const useCartStore = create((set, get) => ({
     try {
       const response = await cartService.updateCartItem(itemId, { quantity });
       set({
-        cart_id: response.data?.cart_id || null,
-        items: response.data?.items || [],
-        subtotal: response.data?.subtotal || 0,
-        totalItems: response.data?.total_items || 0,
+        cart_id: response?.cart_id || null,
+        items: response?.items || [],
+        subtotal: response?.subtotal || 0,
+        totalItems: response?.total_items || 0,
         isLoading: false,
       });
     } catch (error) {
@@ -66,10 +66,10 @@ const useCartStore = create((set, get) => ({
     try {
       const response = await cartService.removeCartItem(itemId);
       set({
-        cart_id: response.data?.cart_id || null,
-        items: response.data?.items || [],
-        subtotal: response.data?.subtotal || 0,
-        totalItems: response.data?.total_items || 0,
+        cart_id: response?.cart_id || null,
+        items: response?.items || [],
+        subtotal: response?.subtotal || 0,
+        totalItems: response?.total_items || 0,
         isLoading: false,
       });
     } catch (error) {
@@ -82,10 +82,10 @@ const useCartStore = create((set, get) => ({
     try {
       const response = await cartService.clearCart();
       set({
-        cart_id: response.data?.cart_id || null,
-        items: response.data?.items || [],
-        subtotal: response.data?.subtotal || 0,
-        totalItems: response.data?.total_items || 0,
+        cart_id: response?.cart_id || null,
+        items: response?.items || [],
+        subtotal: response?.subtotal || 0,
+        totalItems: response?.total_items || 0,
         isLoading: false,
       });
     } catch (error) {
