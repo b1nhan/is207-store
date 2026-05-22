@@ -351,3 +351,45 @@ ALTER TABLE `orders`
   ADD COLUMN `campaign_discount_total` DECIMAL(12,2) DEFAULT '0.00' AFTER `discount_total`,
   ADD CONSTRAINT `fk_order_campaign`
     FOREIGN KEY (`campaign_id`) REFERENCES `campaigns` (`campaign_id`);
+
+-- =============================================
+-- STEP 1: Drop bảng cũ (chấp nhận mất data)
+-- =============================================
+
+-- Phải drop FK ở orders trước
+ALTER TABLE `orders` DROP FOREIGN KEY `fk_order_address`;
+ALTER TABLE `orders` DROP COLUMN `address_id`;
+
+DROP TABLE IF EXISTS `addresses`;
+
+
+-- =============================================
+-- STEP 2: Tạo bảng shipping_profiles
+-- =============================================
+
+CREATE TABLE `shipping_profiles` (
+  `profile_id`     INT NOT NULL AUTO_INCREMENT,
+  `user_id`        INT NOT NULL,
+  `receiver_name`  VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `receiver_phone` VARCHAR(20)  COLLATE utf8mb4_unicode_ci NOT NULL,
+  `full_address`   TEXT         COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label`          VARCHAR(50)  COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'VD: Nhà riêng, Văn phòng',
+  `is_default`     TINYINT      DEFAULT 0,
+  `created_at`     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`profile_id`),
+  KEY `idx_user_default` (`user_id`, `is_default`),
+  CONSTRAINT `fk_profile_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================
+-- STEP 3: Thêm profile_id vào orders
+-- =============================================
+
+ALTER TABLE `orders`
+  ADD COLUMN `profile_id` INT DEFAULT NULL AFTER `user_id`,
+  ADD KEY `fk_order_profile` (`profile_id`),
+  ADD CONSTRAINT `fk_order_profile`
+    FOREIGN KEY (`profile_id`) REFERENCES `shipping_profiles` (`profile_id`)
+    ON DELETE SET NULL;
