@@ -20,12 +20,10 @@ class ProductService {
       product_id: item.product_id,
       product_name: item.product_name,
       base_price: item.base_price,
-      sale_price: null, // Mặc định theo yêu cầu
       category_slug: item.category_slug,
       brand_name: item.brand_name,
       gender: item.gender,
       thumbnail: item.thumbnail,
-      has_variants: true, // Có thể query thêm COUNT variants nếu cần chính xác
       status: 'ACTIVE',
     }));
 
@@ -52,7 +50,6 @@ class ProductService {
       material: product.material,
       gender: product.gender,
       base_price: product.base_price,
-      sale_price: null,
       brand: { brand_id: product.brand_id, brand_name: product.brand_name },
       category: {
         category_id: product.category_id,
@@ -77,12 +74,10 @@ class ProductService {
       product_id: item.product_id,
       product_name: item.product_name,
       base_price: item.base_price,
-      sale_price: item.sale_price ?? null,
       brand_name: item.brand_name,
       category_slug: item.category_slug,
       gender: item.gender,
       thumbnail: item.thumbnail,
-      has_variants: true,
       status: 'ACTIVE',
     }));
   }

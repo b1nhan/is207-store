@@ -102,7 +102,28 @@ const useCartStore = create((set, get) => ({
       isLoading: false,
       error: null
     });
-  }
+  },
+
+  /**
+   * Xóa một số items cụ thể khỏi store (local-only, không gọi API).
+   * Dùng sau khi checkout một phần — các item còn lại vẫn hiển thị trong giỏ.
+   * @param {number[]} itemIds - Danh sách cart_item_id cần xóa khỏi store
+   */
+  removeItemsFromStore: (itemIds) => {
+    const idSet = new Set(itemIds);
+    set((state) => {
+      const remainingItems = state.items.filter((i) => !idSet.has(i.cart_item_id));
+      const newSubtotal = remainingItems.reduce(
+        (sum, i) => sum + Number(i.unit_price) * i.quantity,
+        0,
+      );
+      return {
+        items: remainingItems,
+        subtotal: newSubtotal,
+        totalItems: remainingItems.reduce((s, i) => s + i.quantity, 0),
+      };
+    });
+  },
 }));
 
 export default useCartStore;
