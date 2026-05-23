@@ -60,11 +60,13 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Đăng ký</h2>
+    <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-lg">
+      <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
+        Đăng ký
+      </h2>
 
       {error && (
-        <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-200">
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -72,14 +74,14 @@ export default function RegisterForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Username — bắt buộc */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Username <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Chỉ gồm chữ cái, số và dấu _"
             required
             minLength={3}
@@ -89,14 +91,14 @@ export default function RegisterForm() {
 
         {/* Email — bắt buộc */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Email <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập email của bạn"
             required
           />
@@ -104,12 +106,14 @@ export default function RegisterForm() {
 
         {/* Họ và tên — optional */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Họ và tên
+          </label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập họ và tên (tuỳ chọn)"
             maxLength={100}
           />
@@ -117,52 +121,54 @@ export default function RegisterForm() {
 
         {/* Số điện thoại — optional */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Số điện thoại
+          </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="0xxxxxxxxx (tuỳ chọn)"
           />
         </div>
 
         {/* Mật khẩu — bắt buộc */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Mật khẩu <span className="text-red-500">*</span>
           </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập mật khẩu"
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
 
         {/* Xác nhận mật khẩu — bắt buộc */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             Xác nhận mật khẩu <span className="text-red-500">*</span>
           </label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập lại mật khẩu"
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
 
         <Button
           variant="primary"
           type="submit"
-          className="w-full text-lg py-6 rounded-xl mt-4"
+          className="mt-4 w-full rounded-xl py-6 text-lg"
           disabled={loading}
         >
           {loading ? 'Đang đăng ký...' : 'Đăng ký'}
@@ -171,7 +177,10 @@ export default function RegisterForm() {
 
       <p className="mt-8 text-center text-gray-600">
         Đã có tài khoản?{' '}
-        <Link href="/login" className="text-primary font-semibold hover:underline">
+        <Link
+          href="/login"
+          className="text-primary font-semibold hover:underline"
+        >
           Đăng nhập
         </Link>
       </p>
