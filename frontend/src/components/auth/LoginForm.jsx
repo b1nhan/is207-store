@@ -35,55 +35,73 @@ export default function LoginForm() {
       setUser(payload.user);
       router.push('/');
     } catch (err) {
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      const detailedMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'Đăng nhập thất bại. Vui lòng thử lại.';
+      setError(detailedMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Đăng nhập</h2>
+    <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-lg">
+      <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
+        Đăng nhập
+      </h2>
 
       {error && (
-        <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-200">
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Email
+          </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập email của bạn"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Mật khẩu
+          </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập mật khẩu"
             required
           />
         </div>
 
-        <Button variant='primary' type="submit" className="w-full text-lg py-6 rounded-xl" disabled={loading}>
+        <Button
+          variant="primary"
+          type="submit"
+          className="w-full rounded-xl py-6 text-lg"
+          disabled={loading}
+        >
           {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </Button>
       </form>
 
       <p className="mt-8 text-center text-gray-600">
         Chưa có tài khoản?{' '}
-        <Link href="/register" className="text-primary font-semibold hover:underline">
+        <Link
+          href="/register"
+          className="text-primary font-semibold hover:underline"
+        >
           Đăng ký ngay
         </Link>
       </p>
