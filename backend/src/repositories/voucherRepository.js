@@ -1,4 +1,5 @@
 import { getDB } from '../database/connection.js';
+import { toMySQLDatetime } from '../utils/dateFormat.js';
 
 class VoucherRepository {
   /**
@@ -106,8 +107,10 @@ class VoucherRepository {
   /**
    * Tạo voucher mới
    */
+
   async create(dto) {
     const db = getDB();
+
     const [result] = await db.query(
       `INSERT INTO vouchers
         (code, description, discount_type, discount_value, max_discount_amount,
@@ -122,11 +125,12 @@ class VoucherRepository {
         dto.min_order_value ?? 0,
         dto.usage_limit,
         dto.user_usage_limit ?? 1,
-        dto.start_date || null,
-        dto.expiry_date,
+        toMySQLDatetime(dto.start_date),
+        toMySQLDatetime(dto.expiry_date),
         dto.created_by || null,
       ],
     );
+
     return this.findById(result.insertId);
   }
 
@@ -155,14 +159,30 @@ class VoucherRepository {
     for (const key of allowed) {
       if (dto[key] !== undefined) {
         fields.push(`${key} = ?`);
-        values.push(key === 'code' ? dto[key].toUpperCase() : dto[key]);
+
+        if (key === 'code') {
+          values.push(dto[key].toUpperCase());
+        } else if (key === 'start_date' || key === 'expiry_date') {
+          values.push(toMySQLDatetime(dto[key]));
+        } else {
+          values.push(dto[key]);
+        }
       }
     }
 
-    if (fields.length === 0) return this.findById(id);
+    if (fields.length === 0) {
+      return this.findById(id);
+    }
 
     values.push(id);
-    await db.query(`UPDATE vouchers SET ${fields.join(', ')} WHERE voucher_id = ?`, values);
+
+    await db.query(
+      `UPDATE vouchers
+     SET ${fields.join(', ')}
+     WHERE voucher_id = ?`,
+      values,
+    );
+
     return this.findById(id);
   }
 

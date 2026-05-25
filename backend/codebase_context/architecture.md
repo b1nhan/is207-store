@@ -192,25 +192,60 @@ throw new AppError(message, statusCode, errorCode, errors?)
 
 ## 4. Database Schema — Các bảng chính
 
+### 4.1 Danh sách bảng
+
 | Bảng | Mô tả | Ghi chú |
 |---|---|---|
-| `roles` | Phân quyền: admin, user | FK từ users |
-| `users` | Tài khoản người dùng | |
-| `addresses` | Địa chỉ giao hàng của user | CASCADE on delete |
-| `brands` | Thương hiệu | |
-| `categories` | Danh mục + slug | |
-| `products` | Sản phẩm (status: 1=active, 0=hidden) | |
-| `product_images` | Ảnh sản phẩm | is_primary, sort_order |
-| `product_variants` | Biến thể (size, color, stock, variant_price override) | SKU unique |
-| `vouchers` | Mã giảm giá | PERCENTAGE/FIXED/FREESHIP |
-| `voucher_usages` | Lịch sử dùng voucher | Per user per order |
-| `orders` | Đơn hàng | status string: pending/confirmed/shipping/delivered/cancelled |
-| `order_items` | Chi tiết đơn — snapshot tên, size, color, giá | |
-| `order_shipping_address` | Địa chỉ giao hàng snapshot | |
-| `carts` | Giỏ hàng (1 user = 1 cart, UNIQUE user_id) | |
-| `cart_items` | Item trong giỏ | UNIQUE(cart_id, variant_id) |
-| `promotions` | Chiến dịch khuyến mãi | Chưa dùng trong API hiện tại |
-| `promotion_items` | Sản phẩm trong chiến dịch | |
+| `roles` | Phân quyền | `role_name` UNIQUE |
+| `users` | Tài khoản người dùng | FK → `roles`; `username`, `email` UNIQUE |
+| `addresses` | Địa chỉ giao hàng của user | FK → `users` CASCADE DELETE |
+| `brands` | Thương hiệu | `brand_name` UNIQUE |
+| `categories` | Danh mục sản phẩm | `category_name` UNIQUE, `slug` UNIQUE |
+| `products` | Sản phẩm | FK → `brands`, `categories`; `slug` UNIQUE; `status` 1=active/0=hidden; `gender` enum(men/women/unisex/kids) |
+| `product_images` | Ảnh sản phẩm | FK → `products` CASCADE; `is_primary`, `sort_order` |
+| `product_variants` | Biến thể sản phẩm | FK → `products` CASCADE; `sku` UNIQUE; `variant_price` override `base_price`; `status` 1=active |
+| `promotions` | Khuyến mãi sản phẩm trực tiếp | `discount_type` enum(PERCENTAGE/FIXED); `status` 1=active |
+| `promotion_items` | Sản phẩm trong promotion | FK → `promotions`, `products` CASCADE; `discount_type`+`discount_value` per sản phẩm |
+| `campaigns` | Chiến dịch khuyến mãi theo đơn | `campaign_type` enum(PERCENTAGE/FIXED_PRICE/TIER_DISCOUNT/FREESHIP); `status` 1=active |
+| `campaign_config` | Cấu hình giảm giá của campaign | FK → `campaigns` CASCADE; `discount_value`: % hoặc giá đồng giá |
+| `campaign_products` | Sản phẩm áp dụng campaign | FK → `campaigns`, `products` CASCADE; PK(`campaign_id`, `product_id`) |
+| `campaign_tiers` | Bậc giảm theo ngưỡng đơn hàng | FK → `campaigns` CASCADE; `min_order_value` + `discount_value` (%) |
+| `vouchers` | Mã giảm giá | `discount_type` enum(PERCENTAGE/FIXED/FREESHIP); `code` UNIQUE; có `usage_limit`, `user_usage_limit`, `max_discount_amount`, `min_order_value` |
+| `voucher_usages` | Lịch sử dùng voucher | FK → `vouchers`, `users`, `orders`; per user per order |
+| `carts` | Giỏ hàng | FK → `users` CASCADE; UNIQUE(`user_id`) — 1 user 1 cart |
+| `cart_items` | Item trong giỏ hàng | FK → `carts` CASCADE, `product_variants`; UNIQUE(`cart_id`, `variant_id`) |
+| `orders` | Đơn hàng | FK → `users`, `addresses` SET NULL, `vouchers`, `campaigns`; `status`: pending/confirmed/shipping/delivered/cancelled |
+| `order_items` | Chi tiết đơn — snapshot | FK → `orders` CASCADE, `product_variants` RESTRICT; lưu snapshot tên/size/color/giá |
+| `order_shipping_address` | Địa chỉ giao hàng snapshot | FK → `orders` CASCADE; lưu tên, SĐT, địa chỉ tại thời điểm đặt |
+
+### 4.2 Chi tiết các cột quan trọng
+
+#### `orders`
+| Cột | Kiểu | Mô tả |
+|---|---|---|
+| `status` | varchar(30) | `pending` / `confirmed` / `shipping` / `delivered` / `cancelled` |
+| `payment_status` | varchar(20) | `pending` / `paid` / ... |
+| `subtotal` | decimal(12,2) | Tổng trước giảm giá |
+| `discount_total` | decimal(12,2) | Giảm từ voucher |
+| `campaign_discount_total` | decimal(12,2) | Giảm từ campaign |
+| `shipping_fee` | decimal(12,2) | Phí vận chuyển |
+| `total_amount` | decimal(12,2) | Tổng sau tất cả giảm giá |
+| `cancelled_by` | varchar(10) | `user` hoặc `admin` |
+
+#### `campaigns` — 4 loại campaign_type
+| Loại | Bảng con | Mô tả |
+|---|---|---|
+| `PERCENTAGE` | `campaign_config` | Giảm % cố định cho các sản phẩm trong `campaign_products` |
+| `FIXED_PRICE` | `campaign_config` | Đồng giá cho các sản phẩm trong `campaign_products` |
+| `TIER_DISCOUNT` | `campaign_tiers` | Giảm % theo ngưỡng tổng tiền sản phẩm campaign |
+| `FREESHIP` | *(không cần config)* | Miễn phí ship khi đơn có sản phẩm trong `campaign_products` |
+
+#### `promotions` vs `campaigns`
+| | `promotions` / `promotion_items` | `campaigns` |
+|---|---|---|
+| Phạm vi giảm | Trực tiếp trên giá sản phẩm | Áp dụng trên đơn hàng |
+| Hiển thị | `sale_price` trên trang sản phẩm | `campaign_discount_total` trong đơn |
+| API hiện tại | ⚠️ Chưa tích hợp vào API | ⚠️ Chưa tích hợp vào API |
 
 ---
 

@@ -1,11 +1,38 @@
 import adminProductRepository from '../../repositories/admin/adminProductRepository.js';
 import productVariantRepository from '../../repositories/productVariantRepository.js';
+import productImageRepository from '../../repositories/productImageRepository.js';
+import uploadService from '../uploadService.js';
 import AppError from '../../utils/AppError.js';
 import { ERROR_CODES } from '../../constants/errorCode.js';
 import { getPagination, getPaginationData } from '../../utils/pagination.js';
 
 class AdminProductService {
   // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Sinh SKU tự động từ thông tin sản phẩm + variant.
+   * Format: {BRAND}-{PRODUCT}-{COLOR}-{SIZE}-{RAND4}
+   * Ví dụ: NIK-AIRMAX-BLK-42-A3F1
+   */
+  _generateSku(product, dto) {
+    const slugify = (str = '', maxLen = 6) =>
+      str
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Z0-9]+/g, '')
+        .slice(0, maxLen);
+
+    const brand   = slugify(product.brand_name, 4);   // VD: NIK
+    const prod    = slugify(product.product_name, 6); // VD: AIRMAX
+    const color   = slugify(dto.color, 4);             // VD: BLK
+    const size    = slugify(String(dto.size ?? ''), 4); // VD: 42
+    const rand    = Math.random().toString(16).slice(2, 6).toUpperCase(); // 4 hex chars
+
+    return [brand, prod, color, size, rand]
+      .filter(Boolean)
+      .join('-');
+  }
 
   _formatProduct(product) {
     return {
@@ -134,6 +161,55 @@ class AdminProductService {
     return { product_id: Number(id), status };
   }
 
+  // ─── Images ────────────────────────────────────────────────────────────────
+
+  /**
+   * Thêm ảnh cho sản phẩm (upload lên Cloudinary, lưu DB).
+   */
+  async addImage(productId, file) {
+    if (!file) {
+      throw new AppError('Không có file ảnh', 400, ERROR_CODES.UPLOAD.NO_FILE);
+    }
+    const product = await adminProductRepository.findById(productId);
+    if (!product) {
+      throw new AppError('Sản phẩm không tồn tại', 404, ERROR_CODES.PRODUCT.NOT_FOUND);
+    }
+    const { buffer, mimetype } = file;
+    const uploadResult = await uploadService.uploadImage(buffer, mimetype, 'products');
+
+    // If this is the first image, mark as primary
+    const existingImages = await productImageRepository.findByProductId(productId);
+    const isPrimary = existingImages.length === 0;
+
+    const imageId = await productImageRepository.create(productId, {
+      image_url: uploadResult.url,
+      public_id: uploadResult.publicId,
+      is_primary: isPrimary,
+      sort_order: existingImages.length,
+    });
+    return {
+      image_id: imageId,
+      image_url: uploadResult.url,
+      public_id: uploadResult.publicId,
+      is_primary: isPrimary,
+      sort_order: existingImages.length,
+    };
+  }
+
+  /**
+   * Xóa ảnh khỏi Cloudinary và DB.
+   */
+  async deleteImage(productId, imageId) {
+    const image = await productImageRepository.findById(imageId);
+    if (!image || String(image.product_id) !== String(productId)) {
+      throw new AppError('Ảnh không tồn tại hoặc không thuộc sản phẩm này', 404, ERROR_CODES.PRODUCT.NOT_FOUND);
+    }
+    if (image.public_id) {
+      await uploadService.deleteImage(image.public_id);
+    }
+    await productImageRepository.delete(imageId);
+  }
+
   // ─── Variants ────────────────────────────────────────────────────────────────
 
   /**
@@ -146,16 +222,19 @@ class AdminProductService {
       throw new AppError('Sản phẩm không tồn tại', 404, ERROR_CODES.PRODUCT.NOT_FOUND);
     }
 
-    // Kiểm tra SKU trùng (nếu có)
-    if (dto.sku) {
-      const skuExists = await productVariantRepository.findBySku(dto.sku);
-      if (skuExists) {
-        throw new AppError(
-          `SKU "${dto.sku}" đã được sử dụng`,
-          409,
-          ERROR_CODES.PRODUCT.VARIANT_SKU_EXISTS,
-        );
-      }
+    // Tự động sinh SKU nếu frontend không gửi
+    if (!dto.sku) {
+      dto = { ...dto, sku: this._generateSku(product, dto) };
+    }
+
+    // Kiểm tra SKU trùng
+    const skuExists = await productVariantRepository.findBySku(dto.sku);
+    if (skuExists) {
+      throw new AppError(
+        `SKU "${dto.sku}" đã được sử dụng`,
+        409,
+        ERROR_CODES.PRODUCT.VARIANT_SKU_EXISTS,
+      );
     }
 
     const insertId = await productVariantRepository.create(productId, dto);
@@ -175,8 +254,18 @@ class AdminProductService {
       );
     }
 
-    // Kiểm tra SKU trùng (loại trừ chính nó)
-    if (dto.sku) {
+    // Nếu frontend không gửi SKU, giữ nguyên SKU cũ.
+    // Nếu frontend gửi chuỗi rỗng / null, tự gen SKU mới.
+    if (dto.sku === undefined) {
+      // không chạm đến SKU
+    } else if (!dto.sku) {
+      // gửi rỗng → gen mới từ thông tin sản phẩm hiện tại
+      const product = await adminProductRepository.findById(variant.product_id);
+      dto = { ...dto, sku: this._generateSku(product, { ...variant, ...dto }) };
+    }
+
+    // Kiểm tra SKU trùng (loại trừ chính nó) nếu SKU thay đổi
+    if (dto.sku && dto.sku !== variant.sku) {
       const skuExists = await productVariantRepository.findBySku(dto.sku, variantId);
       if (skuExists) {
         throw new AppError(

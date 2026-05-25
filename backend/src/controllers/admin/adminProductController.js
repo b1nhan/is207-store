@@ -1,5 +1,6 @@
 import adminProductService from '../../services/admin/adminProductService.js';
 import { sendSuccess } from '../../utils/response.js';
+import upload from '../../middlewares/uploadMiddleware.js';
 
 class AdminProductController {
   // ─── Products ────────────────────────────────────────────────────────────────
@@ -79,6 +80,33 @@ class AdminProductController {
         data: result,
         message: `Cập nhật trạng thái sản phẩm thành công`,
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  // ─── Images ──────────────────────────────────────────────────────────────────
+
+  /**
+   * POST /admin/products/:id/images
+   * multipart/form-data, field: "image"
+   */
+  addImage = async (req, res, next) => {
+    try {
+      const result = await adminProductService.addImage(req.params.id, req.file);
+      sendSuccess(res, { data: result, message: 'Thêm ảnh thành công', status: 201 });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * DELETE /admin/products/:id/images/:imageId
+   */
+  deleteImage = async (req, res, next) => {
+    try {
+      await adminProductService.deleteImage(req.params.id, req.params.imageId);
+      sendSuccess(res, { data: null, message: 'Xóa ảnh thành công' });
     } catch (error) {
       next(error);
     }

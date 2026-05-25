@@ -10,13 +10,15 @@ class OrderRepository {
       `SELECT
         o.order_id,
         o.user_id,
-        o.address_id,
+        o.profile_id,
         o.voucher_id,
         o.voucher_code_snapshot,
+        o.campaign_id,
         o.order_date,
         o.status,
         o.subtotal,
         o.discount_total,
+        o.campaign_discount_total,
         o.shipping_fee,
         o.total_amount,
         o.payment_status,
@@ -42,13 +44,15 @@ class OrderRepository {
       `SELECT
         o.order_id,
         o.user_id,
-        o.address_id,
+        o.profile_id,
         o.voucher_id,
         o.voucher_code_snapshot,
+        o.campaign_id,
         o.order_date,
         o.status,
         o.subtotal,
         o.discount_total,
+        o.campaign_discount_total,
         o.shipping_fee,
         o.total_amount,
         o.payment_status,
@@ -77,6 +81,7 @@ class OrderRepository {
         o.status,
         o.subtotal,
         o.discount_total,
+        o.campaign_discount_total,
         o.shipping_fee,
         o.total_amount,
         o.payment_status,
@@ -108,16 +113,18 @@ class OrderRepository {
   async create(orderDto, conn) {
     const [result] = await conn.query(
       `INSERT INTO orders
-        (user_id, address_id, voucher_id, voucher_code_snapshot,
-         subtotal, discount_total, shipping_fee, total_amount, status, payment_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')`,
+        (user_id, profile_id, voucher_id, voucher_code_snapshot, campaign_id,
+         subtotal, discount_total, campaign_discount_total, shipping_fee, total_amount, status, payment_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'pending')`,
       [
         orderDto.user_id,
-        orderDto.address_id || null,
+        orderDto.profile_id || null,
         orderDto.voucher_id || null,
         orderDto.voucher_code_snapshot || null,
+        orderDto.campaign_id || null,
         orderDto.subtotal,
         orderDto.discount_total || 0,
+        orderDto.campaign_discount_total || 0,
         orderDto.shipping_fee || 0,
         orderDto.total_amount,
       ],
@@ -126,7 +133,7 @@ class OrderRepository {
   }
 
   /**
-   * Cập nhật trạng thái đơn hàng
+   * Cập nhật trạng thái đơn hàng và trạng thái thanh toán tương ứng
    * @param {number} orderId
    * @param {string} status - ORDER_STATUS value
    * @param {string|null} cancelledBy - 'USER' | 'ADMIN' | null
@@ -134,16 +141,40 @@ class OrderRepository {
    */
   async updateStatus(orderId, status, cancelledBy = null, conn = null) {
     const db = conn || getDB();
+    
+    let paymentStatus = null;
+    if (status === 'pending' || status === 'confirmed') {
+      paymentStatus = 'pending';
+    } else if (status === 'delivered') {
+      paymentStatus = 'paid';
+    } else if (status === 'cancelled') {
+      paymentStatus = 'cancelled';
+    }
+
     if (cancelledBy !== null) {
-      await db.query(
-        `UPDATE orders SET status = ?, cancelled_by = ? WHERE order_id = ?`,
-        [status, cancelledBy, orderId],
-      );
+      if (paymentStatus) {
+        await db.query(
+          `UPDATE orders SET status = ?, cancelled_by = ?, payment_status = ? WHERE order_id = ?`,
+          [status, cancelledBy, paymentStatus, orderId],
+        );
+      } else {
+        await db.query(
+          `UPDATE orders SET status = ?, cancelled_by = ? WHERE order_id = ?`,
+          [status, cancelledBy, orderId],
+        );
+      }
     } else {
-      await db.query(
-        `UPDATE orders SET status = ? WHERE order_id = ?`,
-        [status, orderId],
-      );
+      if (paymentStatus) {
+        await db.query(
+          `UPDATE orders SET status = ?, payment_status = ? WHERE order_id = ?`,
+          [status, paymentStatus, orderId],
+        );
+      } else {
+        await db.query(
+          `UPDATE orders SET status = ? WHERE order_id = ?`,
+          [status, orderId],
+        );
+      }
     }
   }
 }

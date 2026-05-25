@@ -11,7 +11,12 @@ class AdminDashboardRepository {
         (SELECT COUNT(*) FROM users) AS total_users,
         (SELECT COUNT(*) FROM orders) AS total_orders,
         (SELECT SUM(total_amount) FROM orders WHERE status = 'delivered') AS total_revenue,
-        (SELECT COUNT(*) FROM orders WHERE status = 'pending') AS pending_orders`
+        (SELECT COUNT(*) FROM orders WHERE status = 'pending') AS pending_orders,
+        (SELECT COUNT(*) FROM products) AS total_products,
+        (SELECT COUNT(*) FROM brands) AS total_brands,
+        (SELECT COUNT(*) FROM categories) AS total_categories,
+        (SELECT COUNT(*) FROM vouchers) AS total_vouchers,
+        (SELECT COUNT(*) FROM campaigns) AS total_campaigns`
     );
 
     return {
@@ -19,6 +24,11 @@ class AdminDashboardRepository {
       total_orders: result.total_orders || 0,
       total_revenue: result.total_revenue || 0,
       pending_orders: result.pending_orders || 0,
+      total_products: result.total_products || 0,
+      total_brands: result.total_brands || 0,
+      total_categories: result.total_categories || 0,
+      total_vouchers: result.total_vouchers || 0,
+      total_campaigns: result.total_campaigns || 0,
     };
   }
 

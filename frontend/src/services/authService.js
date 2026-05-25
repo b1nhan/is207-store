@@ -1,26 +1,34 @@
 import { api } from './api';
 import { API_ENDPOINTS } from '@/constants/api';
 
-// ─── Auth Service ─────────────────────────────────────────────────────────────
-
 export const authService = {
-  // Đăng ký tài khoản mới
-  register: (data) => api.post(API_ENDPOINTS.AUTH.REGISTER, data),
+    login: async (email, password) => {
+        return api.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
+    },
 
-  // Đăng nhập
-  login: (data) => api.post(API_ENDPOINTS.AUTH.LOGIN, data),
+    register: async ({ email, password, username, full_name, phone }) => {
+        return api.post(API_ENDPOINTS.AUTH.REGISTER, {
+            email,
+            password,
+            username,
+            ...(full_name && { full_name }),
+            ...(phone && { phone }),
+        });
+    },
 
-  // Làm mới access token
-  refresh: (data = {}) => api.post(API_ENDPOINTS.AUTH.REFRESH, data),
+    getMe: async () => {
+        return api.get(API_ENDPOINTS.AUTH.ME);
+    },
 
-  // Đăng xuất
-  logout: (data = {}) => api.post(API_ENDPOINTS.AUTH.LOGOUT, data),
+    updateProfile: async ({ full_name, phone }) => {
+        return api.patch(API_ENDPOINTS.AUTH.UPDATE_PROFILE, { full_name, phone });
+    },
 
-  // Lấy thông tin user hiện tại
-  getMe: (params = {}) => api.get(API_ENDPOINTS.AUTH.ME, params),
+    changePassword: async ({ current_password, new_password }) => {
+        return api.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, { current_password, new_password });
+    },
 
-  // Đổi mật khẩu
-  changePassword: (data) => api.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, data),
+    logout: async () => {
+        return api.post(API_ENDPOINTS.AUTH.LOGOUT);
+    },
 };
-
-export default authService;

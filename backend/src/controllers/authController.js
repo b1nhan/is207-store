@@ -120,3 +120,17 @@ export const changePassword = async (req, res, next) => {
     next(err);
   }
 };
+
+// ─── PATCH /auth/me/profile ───────────────────────────────────────────────────
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const user = await authService.updateProfile(req.user.user_id, req.body);
+    return sendSuccess(res, {
+      message: 'Cập nhật thông tin thành công',
+      data: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

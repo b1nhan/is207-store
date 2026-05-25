@@ -109,6 +109,28 @@ class AdminOrderService {
 
     return this.getOrderById(orderId);
   }
+
+  /**
+   * Cập nhật trạng thái nhiều đơn hàng
+   */
+  async updateBulkOrderStatus(orderIds, newStatus) {
+    const succeeded = [];
+    const failed = [];
+
+    for (const orderId of orderIds) {
+      try {
+        await this.updateOrderStatus(orderId, newStatus);
+        succeeded.push(orderId);
+      } catch (error) {
+        failed.push({
+          id: orderId,
+          message: error.message || 'Lỗi không xác định',
+        });
+      }
+    }
+
+    return { succeeded, failed };
+  }
 }
 
 export default new AdminOrderService();

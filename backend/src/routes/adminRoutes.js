@@ -2,6 +2,7 @@ import { Router } from 'express';
 import verifyToken from '../middlewares/verifyToken.js';
 import requireAdmin from '../middlewares/requireAdmin.js';
 import validate from '../middlewares/validate.js';
+import upload from '../middlewares/uploadMiddleware.js';
 
 import adminProductController from '../controllers/admin/adminProductController.js';
 import categoryController from '../controllers/categoryController.js';
@@ -9,6 +10,7 @@ import brandController from '../controllers/brandController.js';
 import adminVoucherController from '../controllers/admin/adminVoucherController.js';
 import adminOrderController from '../controllers/admin/adminOrderController.js';
 import adminDashboardController from '../controllers/admin/adminDashboardController.js';
+import adminCampaignController from '../controllers/admin/adminCampaignController.js';
 
 import {
   createProductSchema,
@@ -24,7 +26,8 @@ import {
   updateBrandSchema,
 } from '../validations/categoryValidations.js';
 import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
-import { updateOrderStatusSchema } from '../validations/orderValidations.js';
+import { updateOrderStatusSchema, updateBulkOrderStatusSchema } from '../validations/orderValidations.js';
+import { createCampaignSchema, updateCampaignSchema, statusCampaignSchema } from '../validations/campaignValidations.js';
 
 const router = Router();
 
@@ -92,6 +95,23 @@ router.post(
   requireAdmin,
   validate(createVariantSchema),
   adminProductController.addVariant,
+);
+
+// POST   /admin/products/:id/images    — thêm ảnh cho sản phẩm
+// DELETE /admin/products/:id/images/:imageId — xóa ảnh
+router.post(
+  '/products/:id/images',
+  verifyToken,
+  requireAdmin,
+  upload.single('image'),
+  adminProductController.addImage,
+);
+
+router.delete(
+  '/products/:id/images/:imageId',
+  verifyToken,
+  requireAdmin,
+  adminProductController.deleteImage,
 );
 
 // ─── Categories ─────────────────────────────────────────────────────────────────────
@@ -172,6 +192,7 @@ router.delete('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController
 
 router.get('/orders', verifyToken, requireAdmin, adminOrderController.getAllOrders);
 router.get('/orders/:id', verifyToken, requireAdmin, adminOrderController.getOrderById);
+router.patch('/orders/bulk-status', verifyToken, requireAdmin, validate(updateBulkOrderStatusSchema), adminOrderController.updateBulkOrderStatus);
 router.patch('/orders/:id/status', verifyToken, requireAdmin, validate(updateOrderStatusSchema), adminOrderController.updateOrderStatus);
 
 // ─── Dashboard (Admin) ─────────────────────────────────────────────────────────
@@ -183,5 +204,14 @@ router.patch('/orders/:id/status', verifyToken, requireAdmin, validate(updateOrd
 router.get('/dashboard/summary', verifyToken, requireAdmin, adminDashboardController.getSummary);
 router.get('/dashboard/revenue', verifyToken, requireAdmin, adminDashboardController.getRevenue);
 router.get('/dashboard/top-products', verifyToken, requireAdmin, adminDashboardController.getTopProducts);
+
+// ─── Campaigns (Admin CRUD) ───────────────────────────────────────────────────
+
+router.get('/campaigns', verifyToken, requireAdmin, adminCampaignController.getAllCampaigns);
+router.get('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.getCampaignById);
+router.post('/campaigns', verifyToken, requireAdmin, validate(createCampaignSchema), adminCampaignController.createCampaign);
+router.put('/campaigns/:id', verifyToken, requireAdmin, validate(updateCampaignSchema), adminCampaignController.updateCampaign);
+router.patch('/campaigns/:id/status', verifyToken, requireAdmin, validate(statusCampaignSchema), adminCampaignController.updateStatus);
+router.delete('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.deleteCampaign);
 
 export default router;

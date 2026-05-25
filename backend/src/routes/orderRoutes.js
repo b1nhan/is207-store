@@ -10,6 +10,12 @@ const router = Router();
 router.use(verifyToken);
 
 /**
+ * POST /orders/checkout/preview
+ * Tính toán giá, kiểm tra chênh lệch giá trước khi đặt hàng.
+ */
+router.post('/checkout/preview', orderController.previewOrder);
+
+/**
  * POST /orders/checkout
  * Đặt hàng từ giỏ hàng — body được validate qua checkoutSchema
  */

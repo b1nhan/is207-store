@@ -129,6 +129,167 @@ class ProductRepository {
     const [rows] = await db.query(query, [`%${q}%`]);
     return rows;
   }
+
+  /**
+   * Tìm sản phẩm liên quan theo 4 mức ưu tiên.
+   * @param {number} id       - product_id của sản phẩm hiện tại
+   * @param {number} limit    - số lượng tối đa trả về
+   */
+  async findRelated(id, limit = 8) {
+    const db = getDB();
+
+    // Lấy brand_id, category_id, base_price của sản phẩm hiện tại
+    const [[current]] = await db.query(
+      `SELECT brand_id, category_id, base_price FROM products WHERE product_id = ? AND status = 1`,
+      [id],
+    );
+
+    if (!current) return [];
+
+    const { brand_id, category_id, base_price } = current;
+    const priceMin = base_price * 0.75;
+    const priceMax = base_price * 1.25;
+
+    const baseSelect = `
+      SELECT
+        p.product_id,
+        p.product_name,
+        p.base_price,
+        b.brand_name,
+        c.slug  AS category_slug,
+        p.gender,
+        pi.image_url AS thumbnail,
+        p.status,
+        p.created_at
+      FROM products p
+      LEFT JOIN brands b          ON p.brand_id = b.brand_id
+      LEFT JOIN categories c      ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1 AND p.product_id != ?
+    `;
+
+    const collected = [];
+    const seenIds = new Set();
+
+    const runQuery = async (extraWhere, params, priority) => {
+      const remaining = limit - collected.length;
+      if (remaining <= 0) return;
+      const sql = `${baseSelect} AND ${extraWhere} ORDER BY p.created_at DESC LIMIT ?`;
+      const [rows] = await db.query(sql, [...params, remaining]);
+      for (const row of rows) {
+        if (!seenIds.has(row.product_id)) {
+          seenIds.add(row.product_id);
+          collected.push({ ...row, _priority: priority });
+        }
+      }
+    };
+
+    // Priority 1 — same brand AND same category
+    await runQuery(
+      `p.brand_id = ? AND p.category_id = ?`,
+      [id, brand_id, category_id],
+      1,
+    );
+
+    // Priority 2 — same category (any brand)
+    await runQuery(`p.category_id = ?`, [id, category_id], 2);
+
+    // Priority 3 — same brand (any category)
+    await runQuery(`p.brand_id = ?`, [id, brand_id], 3);
+
+    // Priority 4 — price range ±25%
+    await runQuery(
+      `p.base_price BETWEEN ? AND ?`,
+      [id, priceMin, priceMax],
+      4,
+    );
+
+    // Strip internal _priority field before returning
+    return collected.map(({ _priority, ...rest }) => rest);
+  }
+
+  async getNewArrivals(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price
+      FROM products p
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1
+      ORDER BY p.created_at DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
+
+  async getBestSellers(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
+        SUM(oi.quantity) AS total_sold
+      FROM products p
+      LEFT JOIN product_variants pv ON p.product_id = pv.product_id
+      JOIN order_items oi ON pv.variant_id = oi.variant_id
+      JOIN orders o ON oi.order_id = o.order_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1 AND o.status != 'cancelled'
+      GROUP BY 
+        p.product_id, 
+        p.product_name, 
+        p.base_price, 
+        p.gender,
+        pi.image_url, 
+        b.brand_name, 
+        c.category_name, 
+        c.slug
+      ORDER BY total_sold DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
+
+  async getHotProducts(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
+        SUM(oi.quantity) AS total_sold
+      FROM products p
+      LEFT JOIN product_variants pv ON p.product_id = pv.product_id
+      JOIN order_items oi ON pv.variant_id = oi.variant_id
+      JOIN orders o ON oi.order_id = o.order_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1 AND o.status != 'cancelled' AND o.order_date >= NOW() - INTERVAL 14 DAY
+      GROUP BY 
+        p.product_id, 
+        p.product_name, 
+        p.base_price, 
+        p.gender,
+        pi.image_url, 
+        b.brand_name, 
+        c.category_name, 
+        c.slug
+      ORDER BY total_sold DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
 }
 
 export default new ProductRepository();

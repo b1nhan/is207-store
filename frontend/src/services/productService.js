@@ -25,6 +25,18 @@ export const productService = {
   getRelatedProducts: (id, limit = 6) =>
     api.get(API_ENDPOINTS.PRODUCTS.RELATED(id), { limit }),
 
+  // New arrivals
+  getNewArrivals: (limit = 10) =>
+    api.get(API_ENDPOINTS.PRODUCTS.NEW_ARRIVALS, { limit }),
+
+  // Best sellers
+  getBestSellers: (limit = 10) =>
+    api.get(API_ENDPOINTS.PRODUCTS.BEST_SELLERS, { limit }),
+
+  // Hot products
+  getHotProducts: (limit = 10) =>
+    api.get(API_ENDPOINTS.PRODUCTS.HOT, { limit }),
+
   // Reviews
   getReviews: (id, params = {}) =>
     api.get(API_ENDPOINTS.PRODUCTS.REVIEWS(id), params),

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export function HeroSection() {
@@ -17,9 +18,11 @@ export function HeroSection() {
             Đồ đẹp vãi lz
           </p>
 
-          <Button variant="primary" size="xl">
-            Mua ngay
-          </Button>
+          <Link href="/products">
+            <Button variant="primary" size="xl">
+              Khám phá ngay
+            </Button>
+          </Link>
         </div>
 
         <div className="h-[622px] w-[622px] flex-shrink-0 translate-x-[70px] translate-y-[130px]">

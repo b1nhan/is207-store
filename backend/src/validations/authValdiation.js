@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const emailSchema = z
   .string({ required_error: 'Email là bắt buộc' })
-  //   .email('Email không đúng định dạng')
+  .email('Email không đúng định dạng')
   .max(255, 'Email tối đa 255 ký tự');
 
 const passwordSchema = z
@@ -23,19 +23,25 @@ export const registerSchema = z.object({
     .string({ required_error: 'Username là bắt buộc' })
     .min(3, 'Username tối thiểu 3 ký tự')
     .max(50, 'Username tối đa 50 ký tự')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username chỉ gồm chữ cái, số và dấu gạch dưới'),
-  full_name: z.string().max(100, 'Tên tối đa 100 ký tự').optional(),
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới (_)',
+    ),
+  full_name: z.string().max(100, 'Họ tên không được quá 100 ký tự').optional(),
   phone: z
     .string()
-    .regex(/^0\d{9}$/, 'Số điện thoại phải có 10 số, bắt đầu bằng 0')
+    .regex(
+      /^0\d{9}$/,
+      'Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng số 0)',
+    )
     .optional(),
 });
 
 export const loginSchema = z.object({
   email: emailSchema,
   password: z
-    .string({ required_error: 'Mật khẩu là bắt buộc' })
-    .min(1, 'Mật khẩu là bắt buộc'),
+    .string({ required_error: 'Vui lòng nhập mật khẩu' })
+    .min(1, 'Mật khẩu không được để trống'),
 });
 
 export const changePasswordSchema = z.object({
@@ -43,4 +49,17 @@ export const changePasswordSchema = z.object({
     .string({ required_error: 'Mật khẩu hiện tại là bắt buộc' })
     .min(1, 'Mật khẩu hiện tại là bắt buộc'),
   new_password: passwordSchema,
+});
+
+export const updateProfileSchema = z.object({
+  full_name: z
+    .string()
+    .max(100, 'Tên tối đa 100 ký tự')
+    .optional()
+    .or(z.literal('')),
+  phone: z
+    .string()
+    .regex(/^0\d{9}$/, 'Số điện thoại phải có 10 số, bắt đầu bằng 0')
+    .optional()
+    .or(z.literal('')),
 });

@@ -20,12 +20,10 @@ class ProductService {
       product_id: item.product_id,
       product_name: item.product_name,
       base_price: item.base_price,
-      sale_price: null, // Mặc định theo yêu cầu
       category_slug: item.category_slug,
       brand_name: item.brand_name,
       gender: item.gender,
       thumbnail: item.thumbnail,
-      has_variants: true, // Có thể query thêm COUNT variants nếu cần chính xác
       status: 'ACTIVE',
     }));
 
@@ -52,7 +50,6 @@ class ProductService {
       material: product.material,
       gender: product.gender,
       base_price: product.base_price,
-      sale_price: null,
       brand: { brand_id: product.brand_id, brand_name: product.brand_name },
       category: {
         category_id: product.category_id,
@@ -69,6 +66,44 @@ class ProductService {
   async searchProducts(q) {
     if (!q || q.length < 2) return [];
     return await productRepository.searchAutocomplete(q);
+  }
+
+  async getRelatedProducts(id, limit = 8) {
+    const rows = await productRepository.findRelated(Number(id), Number(limit));
+    return rows.map((item) => ({
+      product_id: item.product_id,
+      product_name: item.product_name,
+      base_price: item.base_price,
+      brand_name: item.brand_name,
+      category_slug: item.category_slug,
+      gender: item.gender,
+      thumbnail: item.thumbnail,
+      status: 'ACTIVE',
+    }));
+  }
+
+  async getNewArrivals(limit = 10) {
+    const rows = await productRepository.getNewArrivals(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
+  }
+
+  async getBestSellers(limit = 10) {
+    const rows = await productRepository.getBestSellers(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
+  }
+
+  async getHotProducts(limit = 10) {
+    const rows = await productRepository.getHotProducts(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
   }
 }
 

@@ -9,7 +9,6 @@ import UserRole from '../constants/userRole.js';
  * router.post('/products', verifyToken, requireAdmin, productController.create);
  */
 const requireAdmin = (req, _res, next) => {
-  console.log(req.user);
   if ((req.user?.role).toLowerCase() !== UserRole.ADMIN.toLowerCase()) {
     return next(new AppError('Không có quyền truy cập', 403, 'FORBIDDEN'));
   }

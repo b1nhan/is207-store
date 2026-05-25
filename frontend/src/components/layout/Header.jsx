@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -6,19 +9,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOutIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import { LogOutIcon, ShoppingCartIcon, UserIcon, PackageIcon, LayoutDashboardIcon } from 'lucide-react';
 import Link from 'next/link';
 import SearchBar from './SearchBar';
+import useAuthStore from '@/store/authStore';
+import useCartStore from '@/store/cartStore';
+import { useRouter } from 'next/navigation';
+import { authService } from '@/services/authService';
 
 const NAV_ITEMS = [
   { title: 'Trang chủ', href: '/' },
   { title: 'Sản phẩm', href: '/products' },
-  { title: 'Danh mục', href: '/' },
-  { title: 'Đăng ký', href: '/register' },
-  { title: 'Đăng nhập', href: '/login' },
+  { title: 'Danh mục', href: '/category' },
+  { title: 'Khuyến mãi', href: '/campaigns' },
 ];
 
-const DROPDOWN_ITEMS = [{ title: 'Profile', href: '/', icon: UserIcon }];
+const DROPDOWN_ITEMS = [
+  { title: 'Profile', href: '/profile', icon: UserIcon },
+  { title: 'Lịch sử đơn hàng', href: '/orders', icon: PackageIcon }
+];
 
 const Logo = () => (
   <Link href="/">
@@ -42,43 +51,106 @@ const NavLinks = () => (
   </nav>
 );
 
-const AccountDropdown = () => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="lg" className="text-lg font-semibold">
-        Account
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      {DROPDOWN_ITEMS.map(({ title, href, icon: Icon }) => (
-        <DropdownMenuItem key={title} asChild>
-          <Link href={href}>
-            <Icon />
-            {title}
-          </Link>
-        </DropdownMenuItem>
-      ))}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive">
-        <LogOutIcon />
-        Log out
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+const AccountDropdown = ({ user, logout }) => {
+  const router = useRouter();
+  const { clearCartState } = useCartStore();
 
-const Header = () => (
-  <header className="bg-primary-foreground sticky top-0 z-50 flex h-16 w-full items-center justify-around">
-    <Logo />
-    <SearchBar />
-    <NavLinks />
-    <div className="flex gap-4">
-      <Button variant="ghost" size="icon-lg">
-        <ShoppingCartIcon />
-      </Button>
-      <AccountDropdown />
-    </div>
-  </header>
-);
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      logout();
+      clearCartState();
+      router.push('/login');
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="lg" className="text-lg font-semibold">
+          {user?.username || 'Account'}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        {DROPDOWN_ITEMS.map(({ title, href, icon: Icon }) => (
+          <DropdownMenuItem key={title} asChild className="cursor-pointer">
+            <Link href={href}>
+              <Icon className="mr-2 h-4 w-4" />
+              {title}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+        {user?.role === 'ADMIN' && (
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href="/admin">
+              <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+              Trang Quản Trị
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onClick={handleLogout} className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600">
+          <LogOutIcon className="mr-2 h-4 w-4" />
+          Đăng xuất
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const Header = () => {
+  const { isAuthenticated, user, logout, isInitialized } = useAuthStore();
+  const { totalItems, fetchCart, clearCartState } = useCartStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+      
+      const onFocus = () => fetchCart();
+      window.addEventListener('focus', onFocus);
+      
+      const intervalId = setInterval(() => {
+        fetchCart();
+      }, 3 * 60 * 1000); // 3 phút
+      
+      return () => {
+        window.removeEventListener('focus', onFocus);
+        clearInterval(intervalId);
+      };
+    } else if (isInitialized && !isAuthenticated) {
+      clearCartState();
+    }
+  }, [isAuthenticated, isInitialized, fetchCart, clearCartState]);
+
+  return (
+    <header className="bg-primary-foreground sticky top-0 z-50 flex h-16 w-full items-center justify-around shadow-sm">
+      <Logo />
+      <SearchBar />
+      <NavLinks />
+      <div className="flex gap-4 items-center">
+        <Button variant="ghost" size="icon-lg" asChild className="relative">
+          <Link href="/cart">
+            <ShoppingCartIcon />
+            {totalItems > 0 && (
+              <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
+          </Link>
+        </Button>
+        {isAuthenticated ? (
+          <AccountDropdown user={user} logout={logout} />
+        ) : (
+          <Button asChild variant="default" size="default" className="font-semibold">
+            <Link href="/login">Đăng nhập</Link>
+          </Button>
+        )}
+      </div>
+    </header>
+  );
+};
 
 export default Header;

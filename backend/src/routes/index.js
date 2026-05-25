@@ -13,6 +13,7 @@ import adminRoutes from './adminRoutes.js';
 import cartRoutes from './cartRoutes.js';
 import voucherRoutes from './voucherRoutes.js';
 import orderRoutes from './orderRoutes.js';
+import campaignRoutes from './campaignRoutes.js';
 
 // const cartRoutes     = require("./cartRoutes");
 // const orderRoutes    = require("./orderRoutes");
@@ -27,6 +28,7 @@ const routes = Router();
 routes.use('/products', productRoutes);
 routes.use('/categories', categoryRoutes);
 routes.use('/brands', brandRoutes);
+routes.use('/campaigns', campaignRoutes);
 routes.use('/auth', authRoutes);
 
 // Giai đoạn 2 — Auth

@@ -1,53 +1,47 @@
-import { HeroSection, HeroSection2 } from '@/components/homepage/HeroSection';
+import { HeroSection } from '@/components/homepage/HeroSection';
 import { CategorySectionWrapper } from '@/components/homepage/CategorySectionWrapper';
 import ProductSection from '@/components/homepage/ProductSection';
+import CampaignBanner from '@/components/homepage/CampaignBanner';
+import CampaignSection from '@/components/homepage/CampaignSection';
 import { productService } from '@/services/productService';
-import Breadcrumbs from '@/components/layout/Breadcrumbs';
-import { ProductGridSection } from '@/components/productPage/ProductGridSection';
-import Hnk from '@/components/phanHNK/Hnk';
+import { campaignService } from '@/services/campaignService';
 
 export default async function HomePage() {
-  let newArrivals = [],
-    bestSellers = [],
-    featured = [],
-    discount = [];
+  let newArrivals = [];
+  let bestSellers = [];
+  let featured = [];
+  let campaigns = [];
+  let discountedItems = [];
 
   try {
-    // Fetch song song, nếu 1 cái lỗi không ảnh hưởng cái khác
-    const [newRes, hotRes, featuredRes, discountRes] = await Promise.allSettled(
-      [
-        productService.getProducts({ sort: 'newest', limit: 5 }),
-        productService.getProducts({ sort: 'best_selling', limit: 6 }),
-        productService.getProducts({ is_featured: true, limit: 7 }),
-        productService.getProducts({ on_sale: true, limit: 8 }),
-      ],
-    );
-    // Lấy data nếu fulfilled, giữ [] nếu lỗi
-    if (newRes.status === 'fulfilled')
-      newArrivals = newRes.value?.data?.items ?? [];
-    if (hotRes.status === 'fulfilled')
-      bestSellers = hotRes.value?.data?.items ?? [];
-    if (featuredRes.status === 'fulfilled')
-      featured = featuredRes.value?.data?.items ?? [];
-    if (discountRes.status === 'fulfilled')
-      discount = discountRes.value?.data?.items ?? [];
+    const [newRes, campaignRes, discountedRes] = await Promise.allSettled([
+      productService.getNewArrivals(8),
+      campaignService.getActiveCampaigns(),
+      campaignService.getDiscountedProducts(8),
+    ]);
+
+    if (newRes.status === 'fulfilled') newArrivals = newRes.value?.data ?? [];
+    if (campaignRes.status === 'fulfilled') campaigns = campaignRes.value?.data ?? [];
+    if (discountedRes.status === 'fulfilled') discountedItems = discountedRes.value?.data ?? [];
   } catch (err) {
-    console.error('Lỗi fetch homepage products:', err);
+    console.error('Lỗi fetch homepage:', err);
   }
 
   return (
     <div className="flex flex-col gap-16 pb-20">
       <HeroSection />
       <CategorySectionWrapper />
-      <HeroSection2 />
+
+      {/* Thay HeroSection2 bằng banner campaign thực tế */}
+      {campaigns.length > 0 && <CampaignBanner campaigns={campaigns} />}
+
+      {/* Danh sách tất cả campaign (cards nhỏ) */}
+      {campaigns.length > 0 && <CampaignSection campaigns={campaigns} />}
+
       <ProductSection
-        newProduct={newArrivals}
-        hotProduct={bestSellers}
-        noibatProduct={featured}
-        giamgia={discount}
+        initialNewArrivals={newArrivals}
+        discountedItems={discountedItems}
       />
-      <ProductGridSection />
-      <Hnk />
     </div>
   );
 }

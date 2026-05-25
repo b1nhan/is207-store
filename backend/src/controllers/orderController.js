@@ -3,6 +3,22 @@ import { sendSuccess } from '../utils/response.js';
 
 class OrderController {
   /**
+   * POST /orders/checkout/preview
+   * Lấy preview cho đơn hàng (để check giá mới nhất)
+   */
+  previewOrder = async (req, res, next) => {
+    try {
+      const result = await orderService.previewOrder(req.user.user_id, req.body);
+      sendSuccess(res, {
+        data: result,
+        message: 'Lấy thông tin preview đơn hàng thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * POST /orders/checkout
    * Đặt hàng từ giỏ hàng hiện tại của user.
    * Body: { address_id?, voucher_code?, receiver_name, receiver_phone, full_address }
