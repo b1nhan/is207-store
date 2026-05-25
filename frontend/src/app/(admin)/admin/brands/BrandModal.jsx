@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, X, Check, AlertCircle } from 'lucide-react';
 import adminBrandService from '@/services/adminBrandService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function BrandModal({ open, onClose, onSaved, initial }) {
   const isEdit = !!initial;
@@ -29,12 +30,15 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
     try {
       if (isEdit) {
         await adminBrandService.updateBrand(initial.brand_id, form);
+        toast.success('Cập nhật Brand thành công!');
       } else {
         await adminBrandService.createBrand(form);
+        toast.success('Tạo Brand thành công!');
       }
       onSaved();
       onClose();
     } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
       setError(err.response?.data?.message || 'Có lỗi xảy ra');
     } finally {
       setSaving(false);

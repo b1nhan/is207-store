@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import cartService from '@/services/cartService';
+import { toast } from 'sonner';
 
 const useCartStore = create((set, get) => ({
   cart_id: null,
@@ -56,6 +57,7 @@ const useCartStore = create((set, get) => ({
         totalItems: response?.total_items || 0,
         isLoading: false,
       });
+      toast.success('Cart updated');
     } catch (error) {
       set({ error: error.response?.data?.message || 'Lỗi khi cập nhật số lượng', isLoading: false });
     }
@@ -72,6 +74,7 @@ const useCartStore = create((set, get) => ({
         totalItems: response?.total_items || 0,
         isLoading: false,
       });
+      toast.info('Item removed');
     } catch (error) {
       set({ error: error.response?.data?.message || 'Lỗi khi xóa sản phẩm khỏi giỏ', isLoading: false });
     }

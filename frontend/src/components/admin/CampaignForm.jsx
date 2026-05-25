@@ -6,6 +6,7 @@ import { Plus, Trash2, Info } from 'lucide-react';
 import adminCampaignService from '@/services/adminCampaignService';
 import adminProductService from '@/services/adminProductService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -351,13 +352,15 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
       const payload = buildPayload();
       if (isEdit) {
         await adminCampaignService.updateCampaign(initialData.campaign_id, payload);
+        toast.success('Campaign updated');
       } else {
         await adminCampaignService.createCampaign(payload);
+        toast.success('Campaign created');
       }
       router.push('/admin/campaigns');
     } catch (err) {
       const msg = err.response?.data?.message || (isEdit ? 'Cập nhật thất bại' : 'Tạo thất bại');
-      alert(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

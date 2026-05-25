@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, Layers } from 'lucide-react';
 import adminCategoryService from '@/services/adminCategoryService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import CategoryModal from './CategoryModal';
 
 // ─── Delete Confirm ────────────────────────────────────────────────────────────
@@ -97,9 +98,10 @@ export default function AdminCategoriesPage() {
     try {
       await adminCategoryService.deleteCategory(deleteModal.category.category_id);
       setDeleteModal({ open: false, category: null });
+      toast.info('Category deleted');
       fetchCategories();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa danh mục thất bại');
+      toast.error(err.response?.data?.message || 'Xóa danh mục thất bại');
     } finally {
       setDeleting(false);
     }

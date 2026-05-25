@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Pencil, Trash2, Search, ShoppingBag } from 'lucide-react';
 import adminBrandService from '@/services/adminBrandService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import BrandModal from './BrandModal';
 
 // ─── Delete Confirm ────────────────────────────────────────────────────────────
@@ -97,9 +98,10 @@ export default function AdminBrandsPage() {
     try {
       await adminBrandService.deleteBrand(deleteModal.brand.brand_id);
       setDeleteModal({ open: false, brand: null });
+      toast.info('Brand deleted');
       fetchBrands();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa thương hiệu thất bại');
+      toast.error(err.response?.data?.message || 'Xóa thương hiệu thất bại');
     } finally {
       setDeleting(false);
     }

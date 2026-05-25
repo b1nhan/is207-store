@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Layers, X, Check, AlertCircle } from 'lucide-react';
 import adminCategoryService from '@/services/adminCategoryService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function CategoryModal({ open, onClose, onSaved, initial }) {
   const isEdit = !!initial;
@@ -51,12 +52,15 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
     try {
       if (isEdit) {
         await adminCategoryService.updateCategory(initial.category_id, form);
+        toast.success('Category updated');
       } else {
         await adminCategoryService.createCategory(form);
+        toast.success('Category created');
       }
       onSaved();
       onClose();
     } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
       setError(err.response?.data?.message || 'Có lỗi xảy ra');
     } finally {
       setSaving(false);

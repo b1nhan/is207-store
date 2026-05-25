@@ -264,9 +264,11 @@ export default function CheckoutPage() {
       // voucherService đã `.data` một lần nữa → trả về chính voucher object { voucher_id, code, discount_amount, ... }
       const voucherData = await voucherService.applyVoucher({ code: voucherCode.trim(), subtotal });
       setAppliedVoucher(voucherData);
+      toast.success('Voucher applied');
     } catch (err) {
       // axios interceptor normalize error thành { ...error, message }
       setVoucherError(err.message || err.response?.data?.message || 'Mã giảm giá không hợp lệ');
+      toast.error('Invalid or expired voucher');
       setAppliedVoucher(null);
     } finally {
       setIsApplyingVoucher(false);
@@ -297,6 +299,7 @@ export default function CheckoutPage() {
       };
 
       const response = await orderService.checkout(data);
+      toast.success('Order placed successfully');
       // Chỉ xóa các items đã checkout khỏi store, giữ lại phần còn lại
       removeItemsFromStore(selectedItemIds);
       router.push(`/orders/${response.data?.order_id ?? response.order_id}`);

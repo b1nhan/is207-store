@@ -19,3 +19,9 @@ export const checkoutSchema = z.object({
 export const updateOrderStatusSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'returned']),
 });
+
+export const updateBulkOrderStatusSchema = z.object({
+  orderIds: z.array(z.number().int().positive()).min(1, 'Vui lòng chọn ít nhất một đơn hàng'),
+  status: z.enum(['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'returned']),
+});
+

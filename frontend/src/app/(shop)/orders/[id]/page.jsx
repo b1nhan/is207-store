@@ -8,6 +8,7 @@ import orderService from '@/services/orderService';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, MapPinIcon, PackageIcon } from 'lucide-react';
 import { formatDate } from '@/utils/date';
+import { toast } from 'sonner';
 
 const STATUS_MAP = {
   pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
@@ -57,9 +58,10 @@ export default function OrderDetailPage({ params }) {
     setIsCancelling(true);
     try {
       await orderService.cancelOrder(orderId, 'Khách hàng hủy đơn');
+      toast.info('Order cancelled');
       await fetchOrderDetail(); // Reload order detail to show cancelled status
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng');
     } finally {
       setIsCancelling(false);
     }

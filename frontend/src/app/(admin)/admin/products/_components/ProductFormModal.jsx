@@ -8,6 +8,7 @@ import adminCategoryService from '@/services/adminCategoryService';
 import adminBrandService from '@/services/adminBrandService';
 import CategoryModal from '../../categories/CategoryModal';
 import BrandModal from '../../brands/BrandModal';
+import { toast } from 'sonner';
 
 /* ─── Multi-select dropdown ─── */
 function MultiSelect({ label, options, selected, onChange, valueKey, labelKey, required, onAdd }) {
@@ -142,8 +143,9 @@ function ImageUploadPanel({ productId, existingImages, onImagesChange, isEdit })
     try {
       await adminProductService.deleteImage(productId, imageId);
       onImagesChange(existingImages.filter((img) => img.image_id !== imageId));
+      toast.info('Image deleted');
     } catch (err) {
-      alert(err.message || 'Không thể xóa ảnh');
+      toast.error(err.message || 'Không thể xóa ảnh');
     } finally {
       setDeletingId(null);
     }
@@ -285,7 +287,7 @@ function VariantSection({ productId, variants, setVariants }) {
 
   const handleSave = async () => {
     if (!editForm.size && !editForm.color) {
-      alert('Vui lòng nhập ít nhất Size hoặc Màu sắc');
+      toast.error('Vui lòng nhập ít nhất Size hoặc Màu sắc');
       return;
     }
     setSaving(true);
@@ -306,10 +308,11 @@ function VariantSection({ productId, variants, setVariants }) {
         setVariants((prev) =>
           prev.map((v) => (v.variant_id === editingId ? res.data : v))
         );
+        toast.success('Variant updated');
       }
       cancelEdit();
     } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Lưu variant thất bại');
+      toast.error(err.response?.data?.message || err.message || 'Lưu variant thất bại');
     } finally {
       setSaving(false);
     }
@@ -321,8 +324,9 @@ function VariantSection({ productId, variants, setVariants }) {
     try {
       await adminProductService.deleteVariant(variantId);
       setVariants((prev) => prev.filter((v) => v.variant_id !== variantId));
+      toast.info('Variant deleted');
     } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Xóa variant thất bại');
+      toast.error(err.response?.data?.message || err.message || 'Xóa variant thất bại');
     } finally {
       setDeletingId(null);
     }
@@ -542,7 +546,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
       })
       .catch((err) => {
         console.error(err);
-        alert('Không thể tải thông tin sản phẩm');
+        toast.error('Không thể tải thông tin sản phẩm');
       })
       .finally(() => setLoading(false));
   }, [isEdit, productId]);
@@ -599,10 +603,11 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
         }
       }
 
+      toast.success(isEdit ? 'Product updated' : 'Product created');
       onSuccess?.();
     } catch (error) {
       console.error('Failed to save product', error);
-      alert(error.response?.data?.message || error.message || 'Lưu sản phẩm thất bại!');
+      toast.error(error.response?.data?.message || error.message || 'Lưu sản phẩm thất bại!');
     } finally {
       setSaving(false);
     }

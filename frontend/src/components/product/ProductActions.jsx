@@ -8,6 +8,7 @@ import { ShoppingCart } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function ProductActions({ product }) {
   const { variants = [] } = product;
@@ -29,28 +30,28 @@ export default function ProductActions({ product }) {
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
-      alert('Vui lòng đăng nhập để mua hàng!');
+      toast.error('Vui lòng đăng nhập để mua hàng!');
       router.push('/login');
       return;
     }
 
     if (isOutOfStock) return;
     if (variants.length > 0 && !selectedVariant) {
-      alert('Vui lòng chọn phân loại hàng!');
+      toast.error('Vui lòng chọn phân loại hàng!');
       return;
     }
 
     if (selectedVariant) {
       const success = await addToCart(selectedVariant.variant_id, quantity);
       if (success) {
-        alert('Đã thêm vào giỏ hàng!');
+        toast.success('Added to cart');
       } else {
-        alert('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+        toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
       }
     } else {
       // In case product has no variants but is added, though backend requires variant_id.
       // Assuming all products have variants based on schema.
-      alert('Sản phẩm không hợp lệ!');
+      toast.error('Sản phẩm không hợp lệ!');
     }
   };
 

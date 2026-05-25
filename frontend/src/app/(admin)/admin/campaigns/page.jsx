@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import adminCampaignService from '@/services/adminCampaignService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const CAMPAIGN_TYPE_META = {
   PERCENTAGE: {
@@ -98,9 +99,10 @@ export default function AdminCampaignsPage() {
     setTogglingId(campaign.campaign_id);
     try {
       await adminCampaignService.updateStatus(campaign.campaign_id, campaign.status === 1 ? 0 : 1);
+      toast.success('Campaign status updated');
       fetchCampaigns();
     } catch (err) {
-      alert(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
+      toast.error(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
     } finally {
       setTogglingId(null);
     }
@@ -110,9 +112,10 @@ export default function AdminCampaignsPage() {
     if (!confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`)) return;
     try {
       await adminCampaignService.deleteCampaign(campaign.campaign_id);
+      toast.info('Campaign deleted');
       fetchCampaigns();
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa campaign thất bại');
+      toast.error(err.response?.data?.message || 'Xóa campaign thất bại');
     }
   };
 

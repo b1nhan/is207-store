@@ -48,6 +48,19 @@ class AdminOrderController {
       next(error);
     }
   }
+
+  /**
+   * PATCH /admin/orders/bulk-status
+   */
+  async updateBulkOrderStatus(req, res, next) {
+    try {
+      const { orderIds, status } = req.body;
+      const result = await adminOrderService.updateBulkOrderStatus(orderIds, status);
+      sendSuccess(res, { data: result, message: 'Cập nhật trạng thái hàng loạt hoàn tất' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new AdminOrderController();

@@ -18,6 +18,7 @@ import {
 import adminCampaignService from '@/services/adminCampaignService';
 import CampaignForm from '@/components/admin/CampaignForm';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const CAMPAIGN_TYPE_META = {
   PERCENTAGE: { label: 'Giảm %', color: 'bg-violet-100 text-violet-700', Icon: Tag },
@@ -79,9 +80,10 @@ export default function CampaignDetailPage() {
     setToggling(true);
     try {
       await adminCampaignService.updateStatus(id, campaign.status === 1 ? 0 : 1);
+      toast.success('Campaign status updated');
       fetchCampaign();
     } catch (err) {
-      alert(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
+      toast.error(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
     } finally {
       setToggling(false);
     }
@@ -91,9 +93,10 @@ export default function CampaignDetailPage() {
     if (!confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`)) return;
     try {
       await adminCampaignService.deleteCampaign(id);
+      toast.info('Campaign deleted');
       router.push('/admin/campaigns');
     } catch (err) {
-      alert(err.response?.data?.message || 'Xóa campaign thất bại');
+      toast.error(err.response?.data?.message || 'Xóa campaign thất bại');
     }
   };
 

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { authService } from '@/services/authService';
 import useAuthStore from '@/store/authStore';
 import { STORAGE_KEYS } from '@/constants';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function LoginForm() {
       }
 
       setUser(payload.user);
+      toast.success('Welcome back!');
       router.push('/');
     } catch (err) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');

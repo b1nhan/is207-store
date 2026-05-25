@@ -1,7 +1,15 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatCurrency } from '@/utils/currency';
 import { DiscountBadge, getDiscountedPrice } from './DiscountBadge';
+import { ShoppingCart } from 'lucide-react';
+import useAuthStore from '@/store/authStore';
+import useCartStore from '@/store/cartStore';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { productService } from '@/services/productService';
 
 /**
  * ProductCard – hiển thị sản phẩm trong grid/listing.
@@ -10,6 +18,11 @@ import { DiscountBadge, getDiscountedPrice } from './DiscountBadge';
  *   discount – { type, value } từ getBestDiscount() (optional, từ campaign)
  */
 export const ProductCard = ({ product, discount }) => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+  const { addToCart } = useCartStore();
+  const [isAdding, setIsAdding] = useState(false);
+
   const productlink = `/products/${product.product_id || product.slug}`;
 
   // Ưu tiên sale_price từ API, nếu không thì tính từ campaign discount
@@ -28,6 +41,52 @@ export const ProductCard = ({ product, discount }) => {
       value: Math.round((1 - apiSalePrice / basePrice) * 100),
     }
     : null);
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để mua hàng!');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      const res = await productService.getProduct(product.product_id);
+      const productDetail = res.data;
+      console.log(productDetail)
+
+      if (!productDetail || !productDetail.variants || productDetail.variants.length === 0) {
+        toast.error('Sản phẩm không hợp lệ!');
+        return;
+      }
+
+      if (productDetail.variants.length === 1) {
+        const variant = productDetail.variants[0];
+        if (variant.stock_quantity < 1) {
+          toast.error('Sản phẩm đã hết hàng!');
+          return;
+        }
+
+        const success = await addToCart(variant.variant_id, 1);
+        if (success) {
+          toast.success('Đã thêm vào giỏ hàng');
+        } else {
+          toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+        }
+      } else {
+        toast.info('Vui lòng chọn phân loại sản phẩm!');
+        router.push(productlink);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra!');
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <div className="group relative flex w-full flex-col items-center justify-center space-y-1 rounded-xl border border-gray-50 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
@@ -63,6 +122,16 @@ export const ProductCard = ({ product, discount }) => {
           Mua ngay
         </div>
       </Link>
+
+      {/* Nút Add to Cart */}
+      <button
+        onClick={handleAddToCart}
+        disabled={isAdding}
+        className="absolute top-6 right-6 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md hover:text-primary text-gray-600 disabled:opacity-50"
+        title="Thêm vào giỏ hàng"
+      >
+        <ShoppingCart size={16} />
+      </button>
     </div>
   );
 };

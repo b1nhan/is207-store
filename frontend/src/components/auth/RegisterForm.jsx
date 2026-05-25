@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { authService } from '@/services/authService';
 import useAuthStore from '@/store/authStore';
 import { STORAGE_KEYS } from '@/constants';
+import { toast } from 'sonner';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -51,6 +52,7 @@ export default function RegisterForm() {
       }
 
       setUser(payload.user);
+      toast.success('Account created');
       router.push('/');
     } catch (err) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');

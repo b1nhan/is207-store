@@ -10,6 +10,9 @@ const adminOrderService = {
   updateOrderStatus: (id, status) => {
     return axios.patch(`/admin/orders/${id}/status`, { status });
   },
+  updateBulkOrderStatus: (orderIds, status) => {
+    return axios.patch('/admin/orders/bulk-status', { orderIds, status });
+  },
 };
 
 export default adminOrderService;

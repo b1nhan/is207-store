@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, Edit, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import adminProductService from '@/services/adminProductService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import ProductFormModal from './_components/ProductFormModal';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -78,9 +79,10 @@ export default function AdminProductsPage() {
       setProducts((prev) =>
         prev.map((p) => (p.product_id === id ? { ...p, status: newStatus } : p))
       );
+      toast.success('Product status updated');
     } catch (error) {
       console.error('Failed to update status', error);
-      alert(error.response?.data?.message || error.message || 'Cập nhật trạng thái thất bại');
+      toast.error(error.response?.data?.message || error.message || 'Cập nhật trạng thái thất bại');
     } finally {
       setTogglingId(null);
     }

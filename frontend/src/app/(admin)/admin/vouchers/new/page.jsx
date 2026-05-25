@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import adminVoucherService from '@/services/adminVoucherService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function NewVoucherPage() {
   const router = useRouter();
@@ -51,10 +52,11 @@ export default function NewVoucherPage() {
       };
 
       await adminVoucherService.createVoucher(payload);
+      toast.success('Voucher created');
       router.push('/admin/vouchers');
     } catch (error) {
       console.error('Failed to create voucher', error);
-      alert(error.response?.data?.message || error.message || 'Tạo voucher thất bại!');
+      toast.error(error.response?.data?.message || error.message || 'Tạo voucher thất bại!');
     } finally {
       setLoading(false);
     }

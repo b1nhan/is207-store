@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import adminOrderService from '@/services/adminOrderService';
+import { toast } from 'sonner';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -170,35 +174,187 @@ function PriceRow({ label, value, color = 'text-gray-700', bold = false }) {
 }
 
 /* ──────────────────────────── Main Page ──────────────────────────── */
+const STATUS_WEIGHT = {
+  pending: 1,
+  confirmed: 2,
+  shipping: 3,
+  delivered: 4,
+  cancelled: 5,
+  returned: 6,
+};
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingOrderId, setViewingOrderId] = useState(null);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchOrders = async () => {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  // Multi-select state
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState('');
+
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState(null);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await adminOrderService.getAllOrders();
-      setOrders(response.data?.orders || []);
+      const response = await adminOrderService.getAllOrders({ page: currentPage, limit: pageSize });
+      const { orders = [], pagination = {} } = response.data || {};
+      setOrders(orders);
+      setTotalItems(pagination.totalItems ?? orders.length);
     } catch (error) {
       console.error('Failed to fetch orders', error);
+      toast.error('Không thể tải danh sách đơn hàng');
     } finally {
       setLoading(false);
     }
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  /* ── Pagination ── */
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const delta = 2;
+    const left = Math.max(1, currentPage - delta);
+    const right = Math.min(totalPages, currentPage + delta);
+
+    if (left > 1) {
+      pages.push(1);
+      if (left > 2) pages.push('...');
+    }
+    for (let i = left; i <= right; i++) pages.push(i);
+    if (right < totalPages) {
+      if (right < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
   };
 
   const handleStatusChange = async (id, newStatus) => {
     if (!confirm(`Xác nhận chuyển trạng thái đơn hàng thành "${newStatus}"?`)) return;
     try {
       await adminOrderService.updateOrderStatus(id, newStatus);
-      fetchOrders();
+      toast.success('Order status updated');
+      setOrders((prev) => prev.map((o) => (o.order_id === id ? { ...o, status: newStatus } : o)));
     } catch (error) {
       console.error('Failed to update status', error);
-      alert(error.response?.data?.message || error.message || 'Cập nhật thất bại');
+      toast.error(error.response?.data?.message || error.message || 'Cập nhật thất bại');
     }
+  };
+
+  // -- MULTI-SELECT --
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedOrderIds(orders.map((o) => o.order_id));
+    } else {
+      setSelectedOrderIds([]);
+    }
+  };
+
+  const handleSelectRow = (e, orderId) => {
+    if (e.target.checked) {
+      setSelectedOrderIds((prev) => [...prev, orderId]);
+    } else {
+      setSelectedOrderIds((prev) => prev.filter((id) => id !== orderId));
+    }
+  };
+
+  // -- BULK UPDATE --
+  const handleBulkApply = async () => {
+    if (!bulkStatus) {
+      toast.error('Vui lòng chọn trạng thái muốn áp dụng');
+      return;
+    }
+    if (selectedOrderIds.length === 0) return;
+
+    if (!confirm(`Xác nhận chuyển ${selectedOrderIds.length} đơn hàng đã chọn sang "${bulkStatus}"?`)) return;
+
+    try {
+      const response = await adminOrderService.updateBulkOrderStatus(selectedOrderIds, bulkStatus);
+      const { succeeded, failed } = response.data;
+
+      // Update successful ones in UI without refetching
+      if (succeeded && succeeded.length > 0) {
+        setOrders((prev) =>
+          prev.map((o) => (succeeded.includes(o.order_id) ? { ...o, status: bulkStatus } : o))
+        );
+        toast.success(`Đã cập nhật thành công ${succeeded.length} đơn hàng`);
+      }
+
+      // Show toast errors for failed ones
+      if (failed && failed.length > 0) {
+        failed.forEach((f) => {
+          toast.error(`Lỗi đơn #${f.id}: ${f.message}`);
+        });
+      }
+
+      // Clear selection after process
+      setSelectedOrderIds([]);
+      setBulkStatus('');
+    } catch (error) {
+      console.error('Bulk update failed', error);
+      toast.error(error.response?.data?.message || error.message || 'Cập nhật hàng loạt thất bại');
+    }
+  };
+
+  // -- SORTING LOGIC --
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev && prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const handleResetSort = () => {
+    setSortConfig(null);
+  };
+
+  const sortedOrders = [...orders].sort((a, b) => {
+    if (!sortConfig) return 0;
+    const { key, direction } = sortConfig;
+    const isAsc = direction === 'asc';
+
+    if (key === 'status') {
+      const weightA = STATUS_WEIGHT[a.status] || 99;
+      const weightB = STATUS_WEIGHT[b.status] || 99;
+      return isAsc ? weightA - weightB : weightB - weightA;
+    } else if (key === 'created_at') {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return isAsc ? dateA - dateB : dateB - dateA;
+    } else if (key === 'total_amount') {
+      const amountA = Number(a.total_amount);
+      const amountB = Number(b.total_amount);
+      return isAsc ? amountA - amountB : amountB - amountA;
+    }
+    return 0;
+  });
+
+  const renderSortIcon = (key) => {
+    if (!sortConfig || sortConfig.key !== key) return ' ↕';
+    return sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
   };
 
   if (loading) {
@@ -241,31 +397,105 @@ export default function AdminOrdersPage() {
         </div>
       )}
 
+      {/* Toolbar: Sorting & Bulk Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Bulk Action Toolbar */}
+        {selectedOrderIds.length > 0 ? (
+          <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-lg w-full sm:w-auto">
+            <span className="text-sm font-medium text-blue-700 whitespace-nowrap">
+              Đã chọn {selectedOrderIds.length} đơn
+            </span>
+            <select
+              className="border border-blue-200 rounded px-2 py-1 text-sm bg-white focus:outline-none"
+              value={bulkStatus}
+              onChange={(e) => setBulkStatus(e.target.value)}
+            >
+              <option value="">-- Chọn trạng thái --</option>
+              <option value="confirmed">confirmed</option>
+              <option value="shipping">shipping</option>
+              <option value="delivered">delivered</option>
+              <option value="cancelled">cancelled</option>
+            </select>
+            <button
+              onClick={handleBulkApply}
+              className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500">
+            * Chọn các đơn hàng để thao tác hàng loạt
+          </div>
+        )}
+
+        {/* Reset Sort Button */}
+        {sortConfig && (
+          <button
+            onClick={handleResetSort}
+            className="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm"
+          >
+            ↺ Reset Sort
+          </button>
+        )}
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="p-4 w-10">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300"
+                    checked={orders.length > 0 && selectedOrderIds.length === orders.length}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">ID</th>
                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Khách hàng</th>
                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Người nhận</th>
-                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Tổng tiền</th>
-                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Trạng thái</th>
-                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Ngày tạo</th>
+                <th
+                  className="p-4 font-semibold text-gray-600 whitespace-nowrap cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSort('total_amount')}
+                >
+                  Tổng tiền {renderSortIcon('total_amount')}
+                </th>
+                <th
+                  className="p-4 font-semibold text-gray-600 whitespace-nowrap cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSort('status')}
+                >
+                  Trạng thái {renderSortIcon('status')}
+                </th>
+                <th
+                  className="p-4 font-semibold text-gray-600 whitespace-nowrap cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSort('created_at')}
+                >
+                  Ngày tạo {renderSortIcon('created_at')}
+                </th>
                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Cập nhật TT</th>
                 <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Xem</th>
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 ? (
+              {sortedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="p-8 text-center text-gray-500">
+                  <td colSpan="9" className="p-8 text-center text-gray-500">
                     Không có đơn hàng nào.
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                sortedOrders.map((order) => (
                   <tr key={order.order_id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300"
+                        checked={selectedOrderIds.includes(order.order_id)}
+                        onChange={(e) => handleSelectRow(e, order.order_id)}
+                      />
+                    </td>
                     <td className="p-4 text-gray-700 font-medium">#{order.order_id}</td>
 
                     {/* Khách hàng */}
@@ -328,6 +558,63 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+
+      {/* ── Pagination ── */}
+      {!loading && totalItems > 0 && (
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Hiển thị</span>
+            <select
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              {PAGE_SIZE_OPTIONS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <span>/ {totalItems} đơn hàng</span>
+          </div>
+
+          {/* Page buttons */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {getPageNumbers().map((page, idx) =>
+              page === '...' ? (
+                <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 select-none">…</span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${
+                    page === currentPage
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Order Detail Modal */}
       {viewingOrderId && (

@@ -26,7 +26,7 @@ import {
   updateBrandSchema,
 } from '../validations/categoryValidations.js';
 import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
-import { updateOrderStatusSchema } from '../validations/orderValidations.js';
+import { updateOrderStatusSchema, updateBulkOrderStatusSchema } from '../validations/orderValidations.js';
 import { createCampaignSchema, updateCampaignSchema, statusCampaignSchema } from '../validations/campaignValidations.js';
 
 const router = Router();
@@ -192,6 +192,7 @@ router.delete('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController
 
 router.get('/orders', verifyToken, requireAdmin, adminOrderController.getAllOrders);
 router.get('/orders/:id', verifyToken, requireAdmin, adminOrderController.getOrderById);
+router.patch('/orders/bulk-status', verifyToken, requireAdmin, validate(updateBulkOrderStatusSchema), adminOrderController.updateBulkOrderStatus);
 router.patch('/orders/:id/status', verifyToken, requireAdmin, validate(updateOrderStatusSchema), adminOrderController.updateOrderStatus);
 
 // ─── Dashboard (Admin) ─────────────────────────────────────────────────────────

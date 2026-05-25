@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Trash2 } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function AdminVouchersPage() {
   const [vouchers, setVouchers] = useState([]);
@@ -34,10 +35,11 @@ export default function AdminVouchersPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) return;
     try {
       await adminVoucherService.deleteVoucher(id);
+      toast.info('Voucher deleted');
       fetchVouchers();
     } catch (error) {
       console.error('Failed to delete voucher', error);
-      alert(error.response?.data?.message || error.message || 'Xóa thất bại');
+      toast.error(error.response?.data?.message || error.message || 'Xóa thất bại');
     }
   };
 

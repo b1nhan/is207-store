@@ -55,7 +55,7 @@ export function VariantSelector({
                 selectedSize === size ? 'font-semibold' : 'font-medium',
               )}
             >
-              Size {size}
+              {size.toLowerCase().includes('size') ? size : `Size ${size}`}
             </Button>
           ))}
         </div>

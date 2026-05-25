@@ -101,6 +101,7 @@ function EditProfileModal({ user, onClose, onSaved }) {
         full_name: form.full_name || undefined,
         phone: form.phone || undefined,
       });
+      toast.success('Profile saved');
       onSaved(response.data);
       onClose();
     } catch (err) {
