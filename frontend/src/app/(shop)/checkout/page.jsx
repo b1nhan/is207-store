@@ -9,6 +9,7 @@ import orderService from '@/services/orderService';
 import voucherService from '@/services/voucherService';
 import shippingProfileService from '@/services/shippingProfileService';
 import { campaignService } from '@/services/campaignService';
+import { productService } from '@/services/productService';
 import AddShippingProfileModal from '@/components/AddShippingProfileModal';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,18 +52,65 @@ export default function CheckoutPage() {
   const { items, isLoading: cartLoading, removeItemsFromStore } = useCartStore();
   const { isAuthenticated, isInitialized } = useAuthStore();
 
+  // ─── Direct Checkout State ──────────────────────────────────────────────────
+  const checkoutType = searchParams.get('type');
+  const isDirectCheckout = checkoutType === 'direct';
+  const directProductId = Number(searchParams.get('productId'));
+  const directVariantId = Number(searchParams.get('variantId'));
+  const directQuantity = Number(searchParams.get('quantity'));
+
+  const [directItemDetails, setDirectItemDetails] = useState(null);
+  const [isFetchingDirect, setIsFetchingDirect] = useState(isDirectCheckout);
+
+  useEffect(() => {
+    if (isDirectCheckout && directProductId && directVariantId && directQuantity) {
+      setIsFetchingDirect(true);
+      productService.getProduct(directProductId)
+        .then((res) => {
+          const productDetail = res.data || res;
+          const variant = productDetail?.variants?.find((v) => v.variant_id === directVariantId);
+          if (variant) {
+            setDirectItemDetails({
+              product_id: directProductId,
+              variant_id: directVariantId,
+              quantity: directQuantity,
+              unit_price: Number(variant.variant_price ?? productDetail.base_price),
+              product_name: productDetail.product_name,
+              size: variant.size,
+              color: variant.color,
+            });
+          } else {
+            toast.error('Phân loại sản phẩm không hợp lệ');
+          }
+        })
+        .catch(() => {
+          toast.error('Không thể tải thông tin sản phẩm');
+        })
+        .finally(() => {
+          setIsFetchingDirect(false);
+        });
+    } else {
+      setIsFetchingDirect(false);
+    }
+  }, [isDirectCheckout, directProductId, directVariantId, directQuantity]);
+
   // ─── Parse selectedItemIds from URL ────────────────────────────────────────
   const selectedItemIds = useMemo(() => {
+    if (isDirectCheckout) return [];
     const raw = searchParams.get('selectedItems');
     if (!raw) return [];
     return raw.split(',').map(Number).filter(Boolean);
-  }, [searchParams]);
+  }, [searchParams, isDirectCheckout]);
 
   // Chỉ tính toán trên các items được chọn
-  const selectedItems = useMemo(
-    () => items.filter((i) => selectedItemIds.includes(i.cart_item_id)),
-    [items, selectedItemIds],
-  );
+  const selectedItems = useMemo(() => {
+    if (isDirectCheckout) {
+      return directItemDetails ? [directItemDetails] : [];
+    }
+    return items.filter((i) => selectedItemIds.includes(i.cart_item_id));
+  }, [items, selectedItemIds, isDirectCheckout, directItemDetails]);
+
+  console.log(selectedItems);
 
   // subtotal của các items được chọn
   const subtotal = useMemo(
@@ -283,8 +331,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (selectedItemIds.length === 0) {
+    if (!isDirectCheckout && selectedItemIds.length === 0) {
       setError('Không có sản phẩm nào được chọn để thanh toán.');
+      return;
+    }
+
+    if (isDirectCheckout && (!directItemDetails)) {
+      setError('Thông tin sản phẩm không hợp lệ.');
       return;
     }
 
@@ -294,14 +347,25 @@ export default function CheckoutPage() {
     try {
       const data = {
         profile_id: selectedProfileId,
-        selectedItemIds,
         ...(appliedVoucher && { voucher_code: appliedVoucher.code }),
       };
 
+      if (isDirectCheckout) {
+        data.directItem = {
+          product_id: directProductId,
+          variant_id: directVariantId,
+          quantity: directQuantity
+        };
+      } else {
+        data.selectedItemIds = selectedItemIds;
+      }
+
       const response = await orderService.checkout(data);
       toast.success('Order placed successfully');
-      // Chỉ xóa các items đã checkout khỏi store, giữ lại phần còn lại
-      removeItemsFromStore(selectedItemIds);
+      // Chỉ xóa các items đã checkout khỏi store nếu không phải mua ngay
+      if (!isDirectCheckout) {
+        removeItemsFromStore(selectedItemIds);
+      }
       router.push(`/orders/${response.data?.order_id ?? response.order_id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.');
@@ -329,13 +393,18 @@ export default function CheckoutPage() {
     );
   }
 
-  // Guard: nếu không có selectedItemIds hợp lệ → redirect về cart
-  if (mounted && isInitialized && isAuthenticated && !cartLoading && selectedItemIds.length === 0) {
+  // Guard: nếu không có selectedItemIds hợp lệ → redirect về cart (nếu không phải direct checkout)
+  if (mounted && isInitialized && isAuthenticated && !cartLoading && !isDirectCheckout && selectedItemIds.length === 0) {
     router.replace('/cart');
     return null;
   }
 
-  if (items.length === 0 && !cartLoading) {
+  // Guard: Loading direct checkout
+  if (isFetchingDirect) {
+    return <div className="flex justify-center items-center h-64"><Loader2Icon size={24} className="animate-spin text-primary" /></div>;
+  }
+
+  if (!isDirectCheckout && items.length === 0 && !cartLoading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold text-text-primary mb-6">Thanh toán</h1>
@@ -648,7 +717,7 @@ export default function CheckoutPage() {
                 form="checkout-form"
                 className="w-full font-semibold"
                 size="lg"
-                disabled={isSubmitting || cartLoading || profilesLoading || !selectedProfileId}
+                disabled={isSubmitting || (!isDirectCheckout && cartLoading) || profilesLoading || !selectedProfileId || isFetchingDirect}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

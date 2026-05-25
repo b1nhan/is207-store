@@ -88,6 +88,52 @@ export const ProductCard = ({ product, discount }) => {
     }
   };
 
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để mua hàng!');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      const res = await productService.getProduct(product.product_id);
+      const productDetail = res.data || res;
+
+      if (!productDetail || !productDetail.variants || productDetail.variants.length === 0) {
+        toast.error('Sản phẩm không hợp lệ!');
+        return;
+      }
+
+      if (productDetail.variants.length === 1) {
+        const variant = productDetail.variants[0];
+        if (variant.stock_quantity < 1) {
+          toast.error('Sản phẩm đã hết hàng!');
+          return;
+        }
+
+        const params = new URLSearchParams({
+          type: 'direct',
+          productId: productDetail.product_id,
+          variantId: variant.variant_id,
+          quantity: 1
+        });
+        router.push(`/checkout?${params.toString()}`);
+      } else {
+        toast.info('Vui lòng chọn phân loại sản phẩm!');
+        router.push(productlink);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra!');
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div className="group relative flex w-full flex-col items-center justify-center space-y-1 rounded-xl border border-gray-50 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       <Link href={productlink} className="flex w-full flex-col items-center">
@@ -118,7 +164,10 @@ export const ProductCard = ({ product, discount }) => {
         </div>
 
         {/* Đổi Button thành div để tránh lỗi lồng thẻ button trong thẻ a */}
-        <div className="bg-primary hover:bg-hover relative mx-auto mt-4 flex h-[40px] w-full max-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-lg text-center text-sm font-semibold text-white transition-all active:scale-95">
+        <div
+          onClick={handleBuyNow}
+          className="bg-primary hover:bg-hover relative mx-auto mt-4 flex h-[40px] w-full max-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-lg text-center text-sm font-semibold text-white transition-all active:scale-95"
+        >
           Mua ngay
         </div>
       </Link>

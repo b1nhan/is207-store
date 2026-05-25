@@ -24,33 +24,76 @@ class OrderService {
   async placeOrder(userId, dto) {
     const db = getDB();
 
-    // ── 1. Lấy cart items của user ───────────────────────────────────────────
-    const cart = await cartRepository.findCartWithItems(userId);
-    if (!cart || !cart.items || cart.items.length === 0) {
-      throw new AppError('Giỏ hàng đang trống', 400, ERROR_CODES.ORDER.EMPTY_CART);
-    }
-
-    // ── 1.5. Filter theo selectedItemIds ─────────────────────────────────────
-    const { selectedItemIds } = dto;
-    // Validate: tất cả selectedItemIds phải tồn tại trong cart của user
-    const cartItemIdSet = new Set(cart.items.map((i) => i.cart_item_id));
-    const invalidIds = selectedItemIds.filter((id) => !cartItemIdSet.has(id));
-    if (invalidIds.length > 0) {
-      throw new AppError(
-        `Sản phẩm không tồn tại trong giỏ hàng: ${invalidIds.join(', ')}`,
-        400,
-        ERROR_CODES.ORDER.BAD_REQUEST,
+    // ── 1. Lấy items (từ giỏ hàng hoặc directItem) ───────────────────────────
+    let items = [];
+    let cart = null;
+    console.log(dto);
+    if (dto.directItem) {
+      console.log('bypass cart');
+      // ── Mua ngay (Bypass cart) ──────────────────────────────────────────────
+      const [variantRows] = await db.query(
+        `SELECT 
+          v.variant_id, v.product_id, v.size, v.color, v.stock_quantity,
+          p.product_name, p.status as product_status,
+          v.status as variant_status,
+          v.variant_price, p.base_price
+          FROM product_variants v
+          JOIN products p ON v.product_id = p.product_id
+          WHERE v.variant_id = ? AND v.product_id = ? AND v.status = 1`,
+        [dto.directItem.variant_id, dto.directItem.product_id]
       );
-    }
+      if (variantRows.length === 0) {
+        throw new AppError('Sản phẩm không tồn tại hoặc đã ngừng bán', 404, ERROR_CODES.ORDER.BAD_REQUEST);
+      }
+      const variant = variantRows[0];
+      items = [{
+        product_id: variant.product_id,
+        variant_id: variant.variant_id,
+        quantity: dto.directItem.quantity,
+        // ── FIX BUG 1: Thêm unit_price, ưu tiên variant_price, fallback base_price
+        unit_price: Number(variant.variant_price ?? variant.base_price),
+        variant_price: variant.variant_price,
+        base_price: variant.base_price,
+        product_name: variant.product_name,
+        size: variant.size,
+        color: variant.color,
+        stock_quantity: variant.stock_quantity,
+        product_status: variant.product_status,
+        variant_status: variant.variant_status,
+      }];
+    } else {
+      // ── Mua từ giỏ hàng ─────────────────────────────────────────────────────
+      cart = await cartRepository.findCartWithItems(userId);
+      if (!cart || !cart.items || cart.items.length === 0) {
+        throw new AppError('Giỏ hàng đang trống', 400, ERROR_CODES.ORDER.EMPTY_CART);
+      }
 
-    // Chỉ xử lý các items được chọn
-    const items = cart.items.filter((i) => selectedItemIds.includes(i.cart_item_id));
+      const { selectedItemIds } = dto;
+      const cartItemIdSet = new Set(cart.items.map((i) => i.cart_item_id));
+      const invalidIds = selectedItemIds.filter((id) => !cartItemIdSet.has(id));
+      if (invalidIds.length > 0) {
+        throw new AppError(
+          `Sản phẩm không tồn tại trong giỏ hàng: ${invalidIds.join(', ')}`,
+          400,
+          ERROR_CODES.ORDER.BAD_REQUEST,
+        );
+      }
+
+      items = cart.items.filter((i) => selectedItemIds.includes(i.cart_item_id));
+    }
 
     // ── 2. Validate từng item ────────────────────────────────────────────────
     for (const item of items) {
       if (item.product_status !== 1) {
         throw new AppError(
           `Sản phẩm "${item.product_name}" hiện không còn bán`,
+          400,
+          ERROR_CODES.ORDER.INSUFFICIENT_STOCK,
+        );
+      }
+      if (item.variant_status !== undefined && item.variant_status !== 1) {
+        throw new AppError(
+          `Phiên bản sản phẩm "${item.product_name}" (${item.size}/${item.color}) hiện không còn bán`,
           400,
           ERROR_CODES.ORDER.INSUFFICIENT_STOCK,
         );
@@ -87,7 +130,7 @@ class OrderService {
     let isFreeship = false;
 
     const activeCampaigns = await campaignRepository.findActiveCampaigns();
-    
+
     if (activeCampaigns.length > 0) {
       let bestCampaign = null;
       let maxEffectiveDiscount = -1;
@@ -100,7 +143,7 @@ class OrderService {
         const campaignProductIds = campaign.products.map(p => p.product_id);
         const appliesToAll = campaignProductIds.length === 0;
 
-        const applicableItems = items.filter(item => 
+        const applicableItems = items.filter(item =>
           appliesToAll || campaignProductIds.includes(item.product_id)
         );
 
@@ -125,7 +168,7 @@ class OrderService {
             const applicableTiers = campaign.tiers
               .filter(t => totalApplicableValue >= t.min_order_value)
               .sort((a, b) => b.min_order_value - a.min_order_value);
-              
+
             if (applicableTiers.length > 0) {
               discount = totalApplicableValue * (applicableTiers[0].discount_value / 100);
             }
@@ -135,7 +178,7 @@ class OrderService {
         }
 
         const effectiveDiscount = discount + (freeship ? SHIPPING_FEE : 0);
-        
+
         if (dto.campaign_id && campaign.campaign_id === dto.campaign_id) {
           bestCampaign = campaign;
           bestDiscountTotal = discount;
@@ -163,7 +206,7 @@ class OrderService {
     // ── 5. Apply voucher nếu có ──────────────────────────────────────────────
     let voucherResult = null;
     const subtotalAfterCampaign = Math.max(0, subtotal - campaignDiscountTotal);
-    
+
     if (dto.voucher_code) {
       voucherResult = await voucherService.applyVoucher(userId, {
         code: dto.voucher_code,
@@ -220,12 +263,19 @@ class OrderService {
 
       // 6d. UPDATE stock: trừ tồn kho từng variant
       for (const item of items) {
-        await conn.query(
+        const [stockResult] = await conn.query(
           `UPDATE product_variants
            SET stock_quantity = stock_quantity - ?
            WHERE variant_id = ? AND stock_quantity >= ?`,
           [item.quantity, item.variant_id, item.quantity],
         );
+        if (stockResult.affectedRows === 0) {
+          throw new AppError(
+            `Sản phẩm "${item.product_name}" (${item.size}/${item.color}) vừa hết hàng, vui lòng thử lại`,
+            409,
+            ERROR_CODES.ORDER.INSUFFICIENT_STOCK,
+          );
+        }
         // Double-check: nếu không có row nào bị update → stock race condition
         // (trường hợp này hiếm vì đã validate ở bước 2, nhưng phòng ngừa)
       }
@@ -243,8 +293,10 @@ class OrderService {
         );
       }
 
-      // 6f. XÓA chỉ các cart_items được chọn (giữ lại các item không checkout)
-      await cartRepository.removeItemsByIds(cart.cart_id, selectedItemIds, conn);
+      // 6f. XÓA chỉ các cart_items được chọn (nếu mua từ giỏ hàng)
+      if (cart && dto.selectedItemIds) {
+        await cartRepository.removeItemsByIds(cart.cart_id, dto.selectedItemIds, conn);
+      }
 
       await conn.commit();
 

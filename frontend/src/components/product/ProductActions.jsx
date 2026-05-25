@@ -56,10 +56,28 @@ export default function ProductActions({ product }) {
   };
 
   const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để mua hàng!');
+      router.push('/login');
+      return;
+    }
+
     if (isOutOfStock) return;
-    await handleAddToCart();
-    if (isAuthenticated) {
-      router.push('/cart'); // Or /checkout in Phase 4
+    if (variants.length > 0 && !selectedVariant) {
+      toast.error('Vui lòng chọn phân loại hàng!');
+      return;
+    }
+
+    if (selectedVariant) {
+      const params = new URLSearchParams({
+        type: 'direct',
+        productId: product.product_id,
+        variantId: selectedVariant.variant_id,
+        quantity: quantity
+      });
+      router.push(`/checkout?${params.toString()}`);
+    } else {
+      toast.error('Sản phẩm không hợp lệ!');
     }
   };
 

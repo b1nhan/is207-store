@@ -11,9 +11,16 @@ export const checkoutSchema = z.object({
   profile_id: z.number({ required_error: 'profile_id là bắt buộc' }).int().positive('profile_id phải là số nguyên dương'),
   selectedItemIds: z
     .array(z.number().int().positive())
-    .min(1, 'Vui lòng chọn ít nhất một sản phẩm để thanh toán'),
+    .optional(),
+  directItem: z.object({
+    product_id: z.number().int().positive(),
+    variant_id: z.number().int().positive(),
+    quantity: z.number().int().positive()
+  }).optional(),
   voucher_code: z.string().min(1).max(20).optional(),
   campaign_id: z.number().int().positive().optional(),
+}).refine(data => (data.selectedItemIds && data.selectedItemIds.length > 0) || data.directItem, {
+  message: 'Vui lòng chọn ít nhất một sản phẩm để thanh toán hoặc sử dụng mua ngay',
 });
 
 export const updateOrderStatusSchema = z.object({
