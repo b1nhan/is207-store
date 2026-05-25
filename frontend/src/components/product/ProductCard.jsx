@@ -10,6 +10,7 @@ import useCartStore from '@/store/cartStore';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { productService } from '@/services/productService';
+import { Button } from '@/components/ui/button';
 
 /**
  * ProductCard – hiển thị sản phẩm trong grid/listing.
@@ -169,10 +170,7 @@ export const ProductCard = ({ product, discount }) => {
           className="bg-primary hover:bg-hover relative mx-auto mt-4 flex h-[40px] w-full max-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-lg text-center text-sm font-semibold text-white transition-all active:scale-95"
         >
           Mua ngay
-        </div> */}
-        <Button variant="primary" size="xl">
-          Mua ngay
-        </Button>
+        </div>
       </Link>
 
       {/* Nút Add to Cart */}

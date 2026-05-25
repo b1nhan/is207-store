@@ -94,7 +94,6 @@ export default function ProductFilter({ categories, has_categories = true, has_p
               <option value="newest">Mới nhất</option>
               <option value="price_asc">Giá: Thấp đến Cao</option>
               <option value="price_desc">Giá: Cao đến Thấp</option>
-              <option value="best_selling">Bán chạy nhất</option>
             </select>
           </div>)}
 
