@@ -41,13 +41,70 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
     };
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.code || !formData.code.trim()) {
+      newErrors.code = 'Mã voucher không được để trống.';
+    }
+
+    const discVal = Number(formData.discount_value);
+    if (!formData.discount_value) {
+      newErrors.discount_value = 'Giá trị giảm không được để trống.';
+    } else if (isNaN(discVal) || discVal <= 0) {
+      newErrors.discount_value = 'Giá trị giảm phải lớn hơn 0.';
+    } else if (formData.discount_type === 'PERCENTAGE' && discVal > 100) {
+      newErrors.discount_value = 'Phần trăm giảm tối đa là 100%.';
+    }
+
+    if (formData.min_order_value !== '' && Number(formData.min_order_value) < 0) {
+      newErrors.min_order_value = 'Đơn tối thiểu không được âm.';
+    }
+
+    if (formData.max_discount_amount !== '' && Number(formData.max_discount_amount) < 0) {
+      newErrors.max_discount_amount = 'Giảm tối đa không được âm.';
+    }
+
+    if (!formData.expiry_date) {
+      newErrors.expiry_date = 'Ngày hết hạn không được để trống.';
+    } else {
+      const selectedDate = new Date(formData.expiry_date);
+      const today = new Date();
+      if (selectedDate < today) {
+        newErrors.expiry_date = 'Ngày hết hạn không được ở quá khứ.';
+      }
+    }
+
+    const usageLim = Number(formData.usage_limit);
+    if (!formData.usage_limit) {
+      newErrors.usage_limit = 'Giới hạn sử dụng không được để trống.';
+    } else if (isNaN(usageLim) || usageLim < 1) {
+      newErrors.usage_limit = 'Giới hạn sử dụng phải từ 1 trở lên.';
+    }
+
+    const userUsageLim = Number(formData.user_usage_limit);
+    if (formData.user_usage_limit !== '' && (isNaN(userUsageLim) || userUsageLim < 1)) {
+      newErrors.user_usage_limit = 'Giới hạn/người dùng phải từ 1 trở lên.';
+    }
+
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     setLoading(true);
 
     try {
@@ -82,7 +139,7 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Mã Voucher (Code) *</label>
@@ -90,10 +147,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             type="text"
             name="code"
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 uppercase"
+            className={`w-full border rounded-lg px-4 py-2 uppercase transition ${errors.code ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.code}
             onChange={handleInputChange}
           />
+          {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
@@ -133,10 +191,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             required
             min="0.01"
             step="any"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.discount_value ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.discount_value}
             onChange={handleInputChange}
           />
+          {errors.discount_value && <p className="text-red-500 text-xs mt-1">{errors.discount_value}</p>}
         </div>
       </div>
 
@@ -147,10 +206,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             type="number"
             name="min_order_value"
             min="0"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.min_order_value ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.min_order_value}
             onChange={handleInputChange}
           />
+          {errors.min_order_value && <p className="text-red-500 text-xs mt-1">{errors.min_order_value}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Giảm tối đa (VND - Tùy chọn)</label>
@@ -158,10 +218,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             type="number"
             name="max_discount_amount"
             min="0"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.max_discount_amount ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.max_discount_amount}
             onChange={handleInputChange}
           />
+          {errors.max_discount_amount && <p className="text-red-500 text-xs mt-1">{errors.max_discount_amount}</p>}
         </div>
       </div>
 
@@ -182,10 +243,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             type="datetime-local"
             name="expiry_date"
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.expiry_date ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.expiry_date}
             onChange={handleInputChange}
           />
+          {errors.expiry_date && <p className="text-red-500 text-xs mt-1">{errors.expiry_date}</p>}
         </div>
       </div>
 
@@ -197,10 +259,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             name="usage_limit"
             required
             min="1"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.usage_limit ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.usage_limit}
             onChange={handleInputChange}
           />
+          {errors.usage_limit && <p className="text-red-500 text-xs mt-1">{errors.usage_limit}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Giới hạn / Người dùng</label>
@@ -208,10 +271,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
             type="number"
             name="user_usage_limit"
             min="1"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.user_usage_limit ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.user_usage_limit}
             onChange={handleInputChange}
           />
+          {errors.user_usage_limit && <p className="text-red-500 text-xs mt-1">{errors.user_usage_limit}</p>}
         </div>
       </div>
 
