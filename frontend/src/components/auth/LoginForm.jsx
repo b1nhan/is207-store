@@ -16,21 +16,22 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [errorDetail, setErrorDetail] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
     const newErrors = {};
-    if (!email) {
-      newErrors.email = 'Vui lòng nhập email.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Email không đúng định dạng.';
-    }
-    if (!password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu.';
-    } else if (password.length < 6) {
-      newErrors.password = 'Mật khẩu phải từ 6 ký tự trở lên.';
-    }
+    // if (!email) {
+    //   newErrors.email = 'Vui lòng nhập email.';
+    // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    //   newErrors.email = 'Email không đúng định dạng.';
+    // }
+    // if (!password) {
+    //   newErrors.password = 'Vui lòng nhập mật khẩu.';
+    // } else if (password.length < 8) {
+    //   newErrors.password = 'Mật khẩu phải từ 8 ký tự trở lên.';
+    // }
     return newErrors;
   };
 
@@ -58,11 +59,8 @@ export default function LoginForm() {
       toast.success('Welcome back!');
       router.push('/');
     } catch (err) {
-      const detailedMessage =
-        err.response?.data?.message ||
-        err.message ||
-        'Đăng nhập thất bại. Vui lòng thử lại.';
-      setError(detailedMessage);
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      setErrorDetail(err.response?.data.errors);
     } finally {
       setLoading(false);
     }
@@ -77,6 +75,16 @@ export default function LoginForm() {
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
+
+          {errorDetail &&
+            <ul className="list-inside list-disc space-y-1 mt-1">
+              {errorDetail.map((errItem, index) => (
+                <li key={index}>
+                  {errItem.message}
+                </li>
+              ))}
+            </ul>
+          }
         </div>
       )}
 

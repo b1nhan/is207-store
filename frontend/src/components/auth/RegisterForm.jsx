@@ -20,6 +20,7 @@ export default function RegisterForm() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
+  const [errorDetail, setErrorDetail] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -95,15 +96,8 @@ export default function RegisterForm() {
       toast.success('Account created');
       router.push('/');
     } catch (err) {
-      const responseData = err.response?.data;
-
-      const errorContent =
-        responseData?.errors ||
-        responseData?.message ||
-        err.message ||
-        'Đăng ký thất bại';
-
-      setError(errorContent);
+      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      setErrorDetail(err.response?.data.errors);
     } finally {
       setLoading(false);
     }
@@ -117,20 +111,17 @@ export default function RegisterForm() {
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {Array.isArray(error) ? (
-            // Nếu là mảng lỗi, hiển thị từng cái một
-            <ul className="list-inside list-disc space-y-1">
-              {error.map((errItem, index) => (
+          {error}
+
+          {errorDetail &&
+            <ul className="list-inside list-disc space-y-1 mt-1">
+              {errorDetail.map((errItem, index) => (
                 <li key={index}>
-                  {/* Backend trả về object {field, message}, ta hiển thị message */}
-                  {errItem.message || errItem}
+                  {errItem.message}
                 </li>
               ))}
             </ul>
-          ) : (
-            // Nếu chỉ là một chuỗi thông báo, hiển thị bình thường
-            <p>{error}</p>
-          )}
+          }
         </div>
       )}
 
