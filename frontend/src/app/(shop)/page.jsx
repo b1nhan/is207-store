@@ -6,6 +6,11 @@ import CampaignSection from '@/components/homepage/CampaignSection';
 import { productService } from '@/services/productService';
 import { campaignService } from '@/services/campaignService';
 
+export const metadata = {
+  title: 'Trang chủ',
+};
+
+
 export default async function HomePage() {
   let newArrivals = [];
   let bestSellers = [];
