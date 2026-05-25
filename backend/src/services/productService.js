@@ -81,6 +81,30 @@ class ProductService {
       status: 'ACTIVE',
     }));
   }
+
+  async getNewArrivals(limit = 10) {
+    const rows = await productRepository.getNewArrivals(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
+  }
+
+  async getBestSellers(limit = 10) {
+    const rows = await productRepository.getBestSellers(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
+  }
+
+  async getHotProducts(limit = 10) {
+    const rows = await productRepository.getHotProducts(limit);
+    return rows.map((item) => ({
+      ...item,
+      status: 'ACTIVE',
+    }));
+  }
 }
 
 export default new ProductService();

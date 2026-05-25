@@ -207,6 +207,89 @@ class ProductRepository {
     // Strip internal _priority field before returning
     return collected.map(({ _priority, ...rest }) => rest);
   }
+
+  async getNewArrivals(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price
+      FROM products p
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1
+      ORDER BY p.created_at DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
+
+  async getBestSellers(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
+        SUM(oi.quantity) AS total_sold
+      FROM products p
+      LEFT JOIN product_variants pv ON p.product_id = pv.product_id
+      JOIN order_items oi ON pv.variant_id = oi.variant_id
+      JOIN orders o ON oi.order_id = o.order_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1 AND o.status != 'cancelled'
+      GROUP BY 
+        p.product_id, 
+        p.product_name, 
+        p.base_price, 
+        p.gender,
+        pi.image_url, 
+        b.brand_name, 
+        c.category_name, 
+        c.slug
+      ORDER BY total_sold DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
+
+  async getHotProducts(limit = 10) {
+    const db = getDB();
+    const query = `
+      SELECT
+        p.product_id, p.product_name, p.base_price, p.gender,
+        pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
+        (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
+        SUM(oi.quantity) AS total_sold
+      FROM products p
+      LEFT JOIN product_variants pv ON p.product_id = pv.product_id
+      JOIN order_items oi ON pv.variant_id = oi.variant_id
+      JOIN orders o ON oi.order_id = o.order_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+      WHERE p.status = 1 AND o.status != 'cancelled' AND o.order_date >= NOW() - INTERVAL 14 DAY
+      GROUP BY 
+        p.product_id, 
+        p.product_name, 
+        p.base_price, 
+        p.gender,
+        pi.image_url, 
+        b.brand_name, 
+        c.category_name, 
+        c.slug
+      ORDER BY total_sold DESC
+      LIMIT ?
+    `;
+    const [rows] = await db.query(query, [Number(limit)]);
+    return rows;
+  }
 }
 
 export default new ProductRepository();

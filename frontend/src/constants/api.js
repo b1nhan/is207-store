@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh',
     ME: '/auth/me',
     UPDATE_PROFILE: '/auth/me/profile',
+    CHANGE_PASSWORD: '/auth/change-password',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
   },
@@ -18,6 +19,9 @@ export const API_ENDPOINTS = {
   // ── Products ───────────────────────────────────────────────────────────────
   PRODUCTS: {
     LIST: '/products',
+    NEW_ARRIVALS: '/products/new-arrivals',
+    BEST_SELLERS: '/products/best-sellers',
+    HOT: '/products/hot',
     DETAIL: (id) => `/products/${id}`,
     BY_SLUG: (slug) => `/products/slug/${slug}`,
     SEARCH: '/products/search',

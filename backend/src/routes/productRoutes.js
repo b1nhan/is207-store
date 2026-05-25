@@ -15,6 +15,24 @@ router.get('/search', (req, res, next) =>
   productController.searchProducts(req, res, next),
 );
 
+// @route   GET /products/new-arrivals
+// @desc    Danh sách hàng mới về
+router.get('/new-arrivals', (req, res, next) =>
+  productController.getNewArrivals(req, res, next),
+);
+
+// @route   GET /products/best-sellers
+// @desc    Danh sách bán chạy nhất
+router.get('/best-sellers', (req, res, next) =>
+  productController.getBestSellers(req, res, next),
+);
+
+// @route   GET /products/hot
+// @desc    Danh sách sản phẩm hot (14 ngày qua)
+router.get('/hot', (req, res, next) =>
+  productController.getHotProducts(req, res, next),
+);
+
 // @route   GET /products/:id/related
 // @desc    Sản phẩm liên quan
 router.get('/:id/related', (req, res, next) =>

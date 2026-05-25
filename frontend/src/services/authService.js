@@ -24,6 +24,10 @@ export const authService = {
         return api.patch(API_ENDPOINTS.AUTH.UPDATE_PROFILE, { full_name, phone });
     },
 
+    changePassword: async ({ current_password, new_password }) => {
+        return api.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, { current_password, new_password });
+    },
+
     logout: async () => {
         return api.post(API_ENDPOINTS.AUTH.LOGOUT);
     },

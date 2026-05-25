@@ -1,63 +1,129 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { ProductGrid } from '../product/ProductGrid';
 import { ProductCard } from '../product/ProductCard';
-import { ChevronRight, Tag } from 'lucide-react';
+import { ChevronRight, Tag, Loader2, RefreshCw } from 'lucide-react';
+import { productService } from '@/services/productService';
 
 /**
  * ProductSection
  * Props:
- *   newProduct      – array of product objects
- *   hotProduct      – array of product objects
- *   noibatProduct   – array of product objects
- *   discountedItems – array of { product_id, product_name, base_price, thumbnail,
- *                                campaign_id, discount: { type, value }, end_date }
- *                     từ API /campaigns/discounted-products
+ *   initialNewArrivals – array of product objects
+ *   discountedItems    – array of { ... } từ API
  */
-const ProductSection = ({ newProduct, hotProduct, noibatProduct, discountedItems = [] }) => {
+const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
   const [activeTab, setActiveTab] = useState('new');
 
+  const [tabData, setTabData] = useState({
+    new: { data: initialNewArrivals, loading: false, error: null, loaded: true },
+    hot: { data: [], loading: false, error: null, loaded: false },
+    bestSellers: { data: [], loading: false, error: null, loaded: false },
+  });
+
   const tabs = [
-    { id: 'new',    label: 'Sản phẩm mới' },
-    { id: 'hot',    label: 'Bán chạy' },
-    { id: 'noibat', label: 'Sản phẩm nổi bật' },
+    { id: 'new', label: 'Hàng mới về' },
+    { id: 'bestSellers', label: 'Bán chạy nhất' },
+    { id: 'hot', label: 'Đang hot' },
   ];
 
-  const getActiveData = () => {
-    if (activeTab === 'new')    return newProduct    || [];
-    if (activeTab === 'hot')    return hotProduct    || [];
-    if (activeTab === 'noibat') return noibatProduct || [];
-    return [];
+  const fetchTabData = useCallback(async (tabId) => {
+    if (tabData[tabId].loaded && !tabData[tabId].error) return;
+
+    setTabData((prev) => ({
+      ...prev,
+      [tabId]: { ...prev[tabId], loading: true, error: null },
+    }));
+
+    try {
+      let res;
+      if (tabId === 'new') res = await productService.getNewArrivals(8);
+      else if (tabId === 'bestSellers') res = await productService.getBestSellers(8);
+      else if (tabId === 'hot') res = await productService.getHotProducts(8);
+
+      setTabData((prev) => ({
+        ...prev,
+        [tabId]: { data: res.data || [], loading: false, error: null, loaded: true },
+      }));
+    } catch (error) {
+      console.error(`Error fetching ${tabId} products:`, error);
+      setTabData((prev) => ({
+        ...prev,
+        [tabId]: { ...prev[tabId], loading: false, error: 'Không thể tải dữ liệu.' },
+      }));
+    }
+  }, [tabData]);
+
+  useEffect(() => {
+    fetchTabData(activeTab);
+  }, [activeTab]);
+
+  const handleRetry = () => {
+    fetchTabData(activeTab);
   };
 
-  const currentProduct = getActiveData();
+  const renderContent = () => {
+    const current = tabData[activeTab];
+
+    if (current.loading) {
+      return (
+        <div className="flex h-64 flex-col items-center justify-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-gray-500">Đang tải sản phẩm...</p>
+        </div>
+      );
+    }
+
+    if (current.error) {
+      return (
+        <div className="flex h-64 flex-col items-center justify-center gap-4">
+          <p className="text-red-500">{current.error}</p>
+          <Button variant="outline" onClick={handleRetry} className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" /> Thử lại
+          </Button>
+        </div>
+      );
+    }
+
+    if (!current.data || current.data.length === 0) {
+      return (
+        <div className="flex h-64 items-center justify-center">
+          <p className="text-gray-500">Không có sản phẩm nào</p>
+        </div>
+      );
+    }
+
+    return <ProductGrid products={current.data} />;
+  };
 
   return (
     <div className="bg-gray-50/30 px-4 py-10">
       {/* Tab list */}
-      <div className="mx-auto flex justify-center gap-4">
+      <div className="mx-auto flex justify-center gap-4 mb-8">
         {tabs.map((tab) => (
           <Button
             key={tab.id}
+            variant="ghost"
             onClick={() => setActiveTab(tab.id)}
-            className={`text-1xl ${activeTab === tab.id ? 'text-black underline decoration-2 underline-offset-4' : 'text-gray-600'}`}
+            className={`text-lg font-semibold hover:bg-transparent hover:text-black ${activeTab === tab.id
+              ? 'text-black underline decoration-2 underline-offset-8'
+              : 'text-gray-500'
+              }`}
           >
             {tab.label}
           </Button>
         ))}
       </div>
 
-      {/* (1) Phần Grid Sản phẩm theo Tab */}
-      <ProductGrid products={currentProduct} />
+      {/* Grid Sản phẩm theo Tab */}
+      {renderContent()}
 
       <br />
 
-      {/* (2) Phần Giảm Giá – từ campaign thực tế */}
+      {/* Phần Giảm Giá */}
       {discountedItems.length > 0 && (
-        <div className="mt-4">
-          {/* Header */}
+        <div className="mt-8">
           <div className="mb-6 flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
               <Tag className="h-5 w-5 text-rose-500" />
@@ -74,7 +140,6 @@ const ProductSection = ({ newProduct, hotProduct, noibatProduct, discountedItems
             </Link>
           </div>
 
-          {/* Grid – dùng ProductCard trực tiếp để truyền discount */}
           <div className="mx-auto grid max-w-5xl grid-cols-2 justify-center justify-items-center gap-8 md:grid-cols-4">
             {discountedItems.map((item) => (
               <ProductCard

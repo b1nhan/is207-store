@@ -51,6 +51,45 @@ class ProductController {
       next(error);
     }
   };
+
+  getNewArrivals = async (req, res, next) => {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const data = await productService.getNewArrivals(limit);
+      sendSuccess(res, {
+        data,
+        message: 'Lấy danh sách hàng mới về thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getBestSellers = async (req, res, next) => {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const data = await productService.getBestSellers(limit);
+      sendSuccess(res, {
+        data,
+        message: 'Lấy danh sách bán chạy nhất thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getHotProducts = async (req, res, next) => {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const data = await productService.getHotProducts(limit);
+      sendSuccess(res, {
+        data,
+        message: 'Lấy danh sách sản phẩm hot thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default new ProductController();

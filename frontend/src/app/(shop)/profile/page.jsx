@@ -247,6 +247,161 @@ function EditProfileModal({ user, onClose, onSaved }) {
     </div>
   );
 }
+// ─── Change Password Modal ───────────────────────────────────────────────────
+
+function ChangePasswordModal({ onClose }) {
+  const [form, setForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.current_password) newErrors.current_password = 'Vui lòng nhập mật khẩu cũ';
+    if (!form.new_password) newErrors.new_password = 'Vui lòng nhập mật khẩu mới';
+    else if (form.new_password.length < 6) newErrors.new_password = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+    if (form.new_password !== form.confirm_password) newErrors.confirm_password = 'Mật khẩu xác nhận không khớp';
+    return newErrors;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+    if (serverError) setServerError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authService.changePassword({
+        current_password: form.current_password,
+        new_password: form.new_password,
+      });
+      toast.success('Đổi mật khẩu thành công!');
+      onClose();
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.[0]?.message ||
+        'Đổi mật khẩu thất bại. Vui lòng thử lại.';
+      setServerError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+      onClick={handleBackdropClick}
+    >
+      <div
+        className="bg-surface w-full max-w-md rounded-2xl shadow-2xl border border-card-border overflow-hidden"
+        style={{ animation: 'modalIn 0.22s cubic-bezier(0.34,1.56,0.64,1)' }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <ShieldCheckIcon className="w-4 h-4 text-primary" />
+            </div>
+            <h2 className="text-lg font-semibold text-text-primary">Đổi mật khẩu</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-text-muted hover:bg-border hover:text-text-primary transition-colors"
+          >
+            <XIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+          {serverError && (
+            <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+              {serverError}
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-primary">
+              Mật khẩu hiện tại
+            </label>
+            <input
+              name="current_password"
+              type="password"
+              value={form.current_password}
+              onChange={handleChange}
+              placeholder="Nhập mật khẩu hiện tại"
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm text-text-primary bg-background placeholder:text-text-muted outline-none transition-colors focus:ring-2 focus:ring-primary/30 ${errors.current_password ? 'border-red-400 focus:border-red-400' : 'border-card-border focus:border-primary'}`}
+            />
+            {errors.current_password && <p className="text-xs text-red-500">{errors.current_password}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-primary">
+              Mật khẩu mới
+            </label>
+            <input
+              name="new_password"
+              type="password"
+              value={form.new_password}
+              onChange={handleChange}
+              placeholder="Nhập mật khẩu mới"
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm text-text-primary bg-background placeholder:text-text-muted outline-none transition-colors focus:ring-2 focus:ring-primary/30 ${errors.new_password ? 'border-red-400 focus:border-red-400' : 'border-card-border focus:border-primary'}`}
+            />
+            {errors.new_password && <p className="text-xs text-red-500">{errors.new_password}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-primary">
+              Xác nhận mật khẩu mới
+            </label>
+            <input
+              name="confirm_password"
+              type="password"
+              value={form.confirm_password}
+              onChange={handleChange}
+              placeholder="Xác nhận mật khẩu mới"
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm text-text-primary bg-background placeholder:text-text-muted outline-none transition-colors focus:ring-2 focus:ring-primary/30 ${errors.confirm_password ? 'border-red-400 focus:border-red-400' : 'border-card-border focus:border-primary'}`}
+            />
+            {errors.confirm_password && <p className="text-xs text-red-500">{errors.confirm_password}</p>}
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={isLoading}>
+              Hủy
+            </Button>
+            <Button type="submit" className="flex-1 gap-2" disabled={isLoading}>
+              {isLoading ? (
+                <><LoaderIcon className="w-4 h-4 animate-spin" /> Đang lưu...</>
+              ) : (
+                <><CheckIcon className="w-4 h-4" /> Xác nhận</>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 // ─── Profile Page ─────────────────────────────────────────────────────────────
 
@@ -259,6 +414,7 @@ export default function ProfilePage() {
   const [totalOrders, setTotalOrders] = useState(0);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
   // ─── Shipping profiles state ─────────────────────────────────────────────────
   const [profiles, setProfiles] = useState([]);
@@ -380,14 +536,24 @@ export default function ProfilePage() {
           <div className="bg-surface p-6 rounded-2xl shadow-sm border border-card-border">
             <div className="flex items-center justify-between mb-4 border-b border-border pb-2">
               <h3 className="text-lg font-semibold text-text-primary">Thông tin liên hệ</h3>
-              <button
-                id="open-edit-profile-btn"
-                onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                <PencilIcon className="w-3.5 h-3.5" />
-                Chỉnh sửa
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  id="open-change-password-btn"
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="flex items-center gap-1.5 text-xs font-medium text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-colors"
+                >
+                  <ShieldCheckIcon className="w-3.5 h-3.5" />
+                  Đổi mật khẩu
+                </button>
+                <button
+                  id="open-edit-profile-btn"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex items-center gap-1.5 text-xs font-medium text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition-colors"
+                >
+                  <PencilIcon className="w-3.5 h-3.5" />
+                  Chỉnh sửa
+                </button>
+              </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-text-secondary">
@@ -608,6 +774,11 @@ export default function ProfilePage() {
           onClose={() => setIsEditModalOpen(false)}
           onSaved={handleProfileSaved}
         />
+      )}
+
+      {/* Change Password Modal */}
+      {isChangePasswordModalOpen && (
+        <ChangePasswordModal onClose={() => setIsChangePasswordModalOpen(false)} />
       )}
 
       {/* Shipping Profile Modal (create / edit) */}

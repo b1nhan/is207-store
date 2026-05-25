@@ -14,17 +14,13 @@ export default async function HomePage() {
   let discountedItems = [];
 
   try {
-    const [newRes, hotRes, featuredRes, campaignRes, discountedRes] = await Promise.allSettled([
-      productService.getProducts({ sort: 'newest', limit: 5 }),
-      productService.getProducts({ sort: 'best_selling', limit: 6 }),
-      productService.getProducts({ is_featured: true, limit: 7 }),
+    const [newRes, campaignRes, discountedRes] = await Promise.allSettled([
+      productService.getNewArrivals(8),
       campaignService.getActiveCampaigns(),
       campaignService.getDiscountedProducts(8),
     ]);
 
-    if (newRes.status === 'fulfilled') newArrivals = newRes.value?.data?.items ?? [];
-    if (hotRes.status === 'fulfilled') bestSellers = hotRes.value?.data?.items ?? [];
-    if (featuredRes.status === 'fulfilled') featured = featuredRes.value?.data?.items ?? [];
+    if (newRes.status === 'fulfilled') newArrivals = newRes.value?.data ?? [];
     if (campaignRes.status === 'fulfilled') campaigns = campaignRes.value?.data ?? [];
     if (discountedRes.status === 'fulfilled') discountedItems = discountedRes.value?.data ?? [];
   } catch (err) {
@@ -43,9 +39,7 @@ export default async function HomePage() {
       {campaigns.length > 0 && <CampaignSection campaigns={campaigns} />}
 
       <ProductSection
-        newProduct={newArrivals}
-        hotProduct={bestSellers}
-        noibatProduct={featured}
+        initialNewArrivals={newArrivals}
         discountedItems={discountedItems}
       />
     </div>

@@ -20,7 +20,7 @@ import { authService } from '@/services/authService';
 const NAV_ITEMS = [
   { title: 'Trang chủ', href: '/' },
   { title: 'Sản phẩm', href: '/products' },
-  { title: 'Danh mục', href: '/' },
+  { title: 'Danh mục', href: '/category' },
   { title: 'Khuyến mãi', href: '/campaigns' },
 ];
 
