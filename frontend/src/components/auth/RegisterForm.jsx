@@ -95,7 +95,15 @@ export default function RegisterForm() {
       toast.success('Account created');
       router.push('/');
     } catch (err) {
-      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      const responseData = err.response?.data;
+
+      const errorContent =
+        responseData?.errors ||
+        responseData?.message ||
+        err.message ||
+        'Đăng ký thất bại';
+
+      setError(errorContent);
     } finally {
       setLoading(false);
     }
@@ -109,7 +117,20 @@ export default function RegisterForm() {
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
+          {Array.isArray(error) ? (
+            // Nếu là mảng lỗi, hiển thị từng cái một
+            <ul className="list-inside list-disc space-y-1">
+              {error.map((errItem, index) => (
+                <li key={index}>
+                  {/* Backend trả về object {field, message}, ta hiển thị message */}
+                  {errItem.message || errItem}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            // Nếu chỉ là một chuỗi thông báo, hiển thị bình thường
+            <p>{error}</p>
+          )}
         </div>
       )}
 
@@ -126,9 +147,8 @@ export default function RegisterForm() {
               setUsername(e.target.value);
               if (errors.username) setErrors((prev) => ({ ...prev, username: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.username ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.username ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Chỉ gồm chữ cái, số và dấu _"
           />
           {errors.username && (
@@ -148,9 +168,8 @@ export default function RegisterForm() {
               setEmail(e.target.value);
               if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Nhập email của bạn"
           />
           {errors.email && (
@@ -170,9 +189,8 @@ export default function RegisterForm() {
               setFullName(e.target.value);
               if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.fullName ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.fullName ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="Nhập họ và tên (tuỳ chọn)"
           />
           {errors.fullName && (
@@ -192,9 +210,8 @@ export default function RegisterForm() {
               setPhone(e.target.value);
               if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.phone ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.phone ? 'border-red-500' : 'border-gray-300'
+              }`}
             placeholder="0xxxxxxxxx (tuỳ chọn)"
           />
           {errors.phone && (
@@ -214,9 +231,8 @@ export default function RegisterForm() {
               setPassword(e.target.value);
               if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Nhập mật khẩu"
           />
           {errors.password && (
@@ -236,9 +252,8 @@ export default function RegisterForm() {
               setConfirmPassword(e.target.value);
               if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: '' }));
             }}
-            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.confirmPassword ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${errors.confirmPassword ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Nhập lại mật khẩu"
           />
           {errors.confirmPassword && (

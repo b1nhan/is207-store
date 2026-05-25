@@ -81,7 +81,10 @@ export const login = async ({ email, password }) => {
     user_id: user.user_id,
     role: user.role,
   });
-  const refreshToken = generateRefreshToken({ user_id: user.user_id, role: user.role });
+  const refreshToken = generateRefreshToken({
+    user_id: user.user_id,
+    role: user.role,
+  });
 
   return {
     accessToken,

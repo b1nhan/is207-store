@@ -18,7 +18,6 @@ const validate = (schema) => (req, res, next) => {
       field: e.path.join('.'),
       message: e.message,
     }));
-
     return sendError(res, {
       status: 400,
       message: 'Dữ liệu đầu vào không hợp lệ',

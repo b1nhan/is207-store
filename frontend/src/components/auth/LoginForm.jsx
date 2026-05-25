@@ -58,25 +58,33 @@ export default function LoginForm() {
       toast.success('Welcome back!');
       router.push('/');
     } catch (err) {
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      const detailedMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'Đăng nhập thất bại. Vui lòng thử lại.';
+      setError(detailedMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Đăng nhập</h2>
+    <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-lg">
+      <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
+        Đăng nhập
+      </h2>
 
       {error && (
-        <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-200">
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Email
+          </label>
           <input
             type="email"
             value={email}
@@ -84,9 +92,8 @@ export default function LoginForm() {
               setEmail(e.target.value);
               if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
             }}
-            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Nhập email của bạn"
           />
           {errors.email && (
@@ -95,7 +102,9 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            Mật khẩu
+          </label>
           <input
             type="password"
             value={password}
@@ -103,9 +112,8 @@ export default function LoginForm() {
               setPassword(e.target.value);
               if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
             }}
-            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${
-              errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
-            }`}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+              }`}
             placeholder="Nhập mật khẩu"
           />
           {errors.password && (
@@ -120,7 +128,10 @@ export default function LoginForm() {
 
       <p className="mt-8 text-center text-gray-600">
         Chưa có tài khoản?{' '}
-        <Link href="/register" className="text-primary font-semibold hover:underline">
+        <Link
+          href="/register"
+          className="text-primary font-semibold hover:underline"
+        >
           Đăng ký ngay
         </Link>
       </p>
