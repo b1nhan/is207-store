@@ -10,20 +10,32 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
   const [form, setForm] = useState({ brand_name: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (open) {
       setForm(initial ? { brand_name: initial.brand_name } : { brand_name: '' });
       setError('');
+      setErrors({});
     }
   }, [open, initial]);
 
+  const validate = () => {
+    const newErrors = {};
+    if (!form.brand_name.trim()) {
+      newErrors.brand_name = 'Tên thương hiệu không được để trống.';
+    }
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.brand_name.trim()) {
-      setError('Tên thương hiệu không được để trống');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+    setErrors({});
     setSaving(true);
     setError('');
     try {
@@ -65,7 +77,7 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
           {error && (
             <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
               <AlertCircle size={15} />
@@ -79,12 +91,20 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
             </label>
             <input
               type="text"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
+                errors.brand_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+              }`}
               placeholder="Ví dụ: Nike, Adidas..."
               value={form.brand_name}
-              onChange={(e) => setForm({ brand_name: e.target.value })}
+              onChange={(e) => {
+                setForm({ brand_name: e.target.value });
+                if (errors.brand_name) setErrors({});
+              }}
               autoFocus
             />
+            {errors.brand_name && (
+              <p className="text-red-500 text-xs mt-1">{errors.brand_name}</p>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
 import useCartStore from '@/store/cartStore';
 import orderService from '@/services/orderService';
@@ -147,7 +148,7 @@ function EditProfileModal({ user, onClose, onSaved }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5" noValidate>
           {/* Server error */}
           {serverError && (
             <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
@@ -333,7 +334,7 @@ function ChangePasswordModal({ onClose }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5" noValidate>
           {serverError && (
             <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
               {serverError}
@@ -513,6 +514,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Breadcrumbs items={[{ label: 'Tài khoản' }]} className="mb-6" />
       <h1 className="text-3xl font-bold text-text-primary mb-8">Hồ sơ cá nhân</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -10,6 +10,7 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
   const [form, setForm] = useState({ category_name: '', slug: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (open) {
@@ -19,33 +20,59 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
           : { category_name: '', slug: '' },
       );
       setError('');
+      setErrors({});
     }
   }, [open, initial]);
 
   // Auto-generate slug from name when creating
   const handleNameChange = (value) => {
+    const slugValue = isEdit
+      ? form.slug
+      : value
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+
     setForm((prev) => ({
       ...prev,
       category_name: value,
-      slug: isEdit
-        ? prev.slug
-        : value
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/đ/g, 'd')
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/\s+/g, '-'),
+      slug: slugValue,
     }));
+
+    if (errors.category_name) setErrors((prev) => ({ ...prev, category_name: '' }));
+    if (!isEdit && errors.slug) setErrors((prev) => ({ ...prev, slug: '' }));
+  };
+
+  const handleSlugChange = (value) => {
+    setForm((prev) => ({ ...prev, slug: value }));
+    if (errors.slug) setErrors((prev) => ({ ...prev, slug: '' }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.category_name.trim()) {
+      newErrors.category_name = 'Tên danh mục không được để trống.';
+    }
+    if (!form.slug.trim()) {
+      newErrors.slug = 'Slug không được để trống.';
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug.trim())) {
+      newErrors.slug = 'Slug chỉ chứa chữ thường, số và dấu gạch ngang (ví dụ: ao-thun).';
+    }
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.category_name.trim() || !form.slug.trim()) {
-      setError('Tên và slug không được để trống');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
+    setErrors({});
     setSaving(true);
     setError('');
     try {
@@ -87,7 +114,7 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
           {error && (
             <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
               <AlertCircle size={15} />
@@ -101,12 +128,17 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
             </label>
             <input
               type="text"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
+                errors.category_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+              }`}
               placeholder="Ví dụ: Áo thun"
               value={form.category_name}
               onChange={(e) => handleNameChange(e.target.value)}
               autoFocus
             />
+            {errors.category_name && (
+              <p className="text-red-500 text-xs mt-1">{errors.category_name}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -115,11 +147,16 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
             </label>
             <input
               type="text"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
+                errors.slug ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+              }`}
               placeholder="Ví dụ: ao-thun"
               value={form.slug}
-              onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
+              onChange={(e) => handleSlugChange(e.target.value)}
             />
+            {errors.slug && (
+              <p className="text-red-500 text-xs mt-1">{errors.slug}</p>
+            )}
             <p className="text-xs text-gray-400">Slug dùng trong URL, chỉ chứa chữ thường, số, dấu gạch ngang</p>
           </div>
 

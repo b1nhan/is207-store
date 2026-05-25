@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { campaignService } from '@/services/campaignService';
 import { Tag, Clock, ChevronRight, Zap, Layers, Gift } from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata = {
   title: 'Khuyến mãi đang diễn ra | Cerulean Blue',
@@ -70,6 +71,9 @@ export default async function CampaignsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-6xl px-4 pt-4">
+        <Breadcrumbs items={[{ label: 'Khuyến mãi' }]} />
+      </div>
       {/* Page header */}
       <section className="bg-gradient-to-r from-cb-950 via-cb-900 to-cb-800 py-14">
         <div className="container mx-auto max-w-6xl px-4 text-center">

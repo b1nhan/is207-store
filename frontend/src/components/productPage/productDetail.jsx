@@ -8,6 +8,8 @@ import ProductActions from '../product/ProductActions';
 import { getBestDiscount, getDiscountedPrice } from '@/components/product/DiscountBadge';
 import { ProductCard } from '@/components/product/ProductCard';
 import { productService } from '@/services/productService';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import Link from 'next/link';
 
 // ── Related Products Carousel ─────────────────────────────────────────────────
 function RelatedProductsSection({ productId }) {
@@ -111,6 +113,13 @@ export default function ProductDetailClient({ product, campaigns = [] }) {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
+      <Breadcrumbs
+        items={[
+          { label: 'Sản phẩm', href: '/products' },
+          { label: product.product_name },
+        ]}
+        className="mb-6"
+      />
       {/* Product Section */}
       <div className="mb-20 grid grid-cols-1 gap-12 lg:grid-cols-2">
         {/* Left: Images */}
@@ -153,6 +162,18 @@ export default function ProductDetailClient({ product, campaigns = [] }) {
               </span>
             )}
           </div>
+
+          {/* Category Tag */}
+          {product.category && (
+            <div className="mb-4">
+              <Link
+                href={`/category/${product.category.category_slug || product.category.category_id}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-secondary-foreground hover:bg-primary hover:text-white transition-all duration-150 uppercase tracking-wider"
+              >
+                {product.category.category_name}
+              </Link>
+            </div>
+          )}
 
           {/* Campaign tags */}
           {productCampaigns.length > 0 && (

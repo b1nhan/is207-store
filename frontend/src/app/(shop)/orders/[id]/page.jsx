@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ const STATUS_MAP = {
   returned: { label: 'Trả hàng', color: 'bg-gray-100 text-gray-800 border-gray-200' },
 };
 
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+
 export default function OrderDetailPage({ params }) {
   // Use React.use to unwrap params since Next.js 15+ expects it for async params
   const unwrappedParams = use(params);
@@ -29,6 +32,7 @@ export default function OrderDetailPage({ params }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (isInitialized && isAuthenticated) {
@@ -52,7 +56,12 @@ export default function OrderDetailPage({ params }) {
   };
 
   const handleCancelOrder = async () => {
-    if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) return;
+    const isConfirmed = await confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?', {
+      title: 'Hủy đơn hàng',
+      confirmLabel: 'Hủy đơn',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
 
     setIsCancelling(true);
     try {
@@ -101,6 +110,13 @@ export default function OrderDetailPage({ params }) {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <Breadcrumbs
+        items={[
+          { label: 'Đơn hàng của tôi', href: '/orders' },
+          { label: `Chi tiết đơn hàng #${order.order_id}` },
+        ]}
+        className="mb-6"
+      />
       <Link href="/orders" className="inline-flex items-center text-text-secondary hover:text-primary mb-6 transition-colors">
         <ArrowLeftIcon size={16} className="mr-2" />
         Quay lại danh sách đơn hàng

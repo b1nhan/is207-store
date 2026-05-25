@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import adminOrderService from '@/services/adminOrderService';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -169,11 +170,14 @@ function PriceRow({ label, value, color = 'text-gray-700', bold = false }) {
   );
 }
 
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+
 /* ──────────────────────────── Main Page ──────────────────────────── */
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingOrderId, setViewingOrderId] = useState(null);
+  const confirm = useConfirm();
 
   useEffect(() => {
     fetchOrders();
@@ -191,7 +195,21 @@ export default function AdminOrdersPage() {
   };
 
   const handleStatusChange = async (id, newStatus) => {
-    if (!confirm(`Xác nhận chuyển trạng thái đơn hàng thành "${newStatus}"?`)) return;
+    const isConfirmed = await confirm(
+      <span className="flex items-center gap-1.5 flex-wrap">
+        Xác nhận chuyển trạng thái đơn hàng thành
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${getStatusColor(newStatus)}`}>
+          {newStatus}
+        </span>
+        ?
+      </span>,
+      {
+        title: 'Chuyển trạng thái đơn hàng',
+        confirmLabel: 'Xác nhận',
+        type: 'info'
+      }
+    );
+    if (!isConfirmed) return;
     try {
       await adminOrderService.updateOrderStatus(id, newStatus);
       fetchOrders();
@@ -211,6 +229,10 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[{ label: 'Đơn hàng' }]}
+      />
       <h1 className="text-2xl font-bold">Orders Management</h1>
 
       {/* Stats cards */}

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { campaignService } from '@/services/campaignService';
 import { ProductCard } from '@/components/product/ProductCard';
 import { getBestDiscount } from '@/components/product/DiscountBadge';
@@ -76,6 +77,14 @@ export default async function CampaignDetailPage({ params }) {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-6xl px-4 pt-4">
+        <Breadcrumbs
+          items={[
+            { label: 'Khuyến mãi', href: '/campaigns' },
+            { label: campaign.name },
+          ]}
+        />
+      </div>
       {/* ── Hero banner ──────────────────────────────────────────────────────── */}
       <section className={`relative overflow-hidden bg-gradient-to-br ${headerGradient} py-16`}>
         {/* Decorative circles */}

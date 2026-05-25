@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import {
   Plus,
   Trash2,
@@ -57,12 +58,15 @@ const RUN_STATUS_META = {
   ended: { label: 'Đã kết thúc', color: 'bg-gray-100 text-gray-500' },
 };
 
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+
 export default function AdminCampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0, limit: 20 });
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ search: '', campaign_type: '', status: '', page: 1 });
   const [togglingId, setTogglingId] = useState(null);
+  const confirm = useConfirm();
 
   const fetchCampaigns = useCallback(async () => {
     setLoading(true);
@@ -107,7 +111,12 @@ export default function AdminCampaignsPage() {
   };
 
   const handleDelete = async (campaign) => {
-    if (!confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`)) return;
+    const isConfirmed = await confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`, {
+      title: 'Xóa campaign',
+      confirmLabel: 'Xóa',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
     try {
       await adminCampaignService.deleteCampaign(campaign.campaign_id);
       fetchCampaigns();
@@ -122,6 +131,10 @@ export default function AdminCampaignsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[{ label: 'Chiến dịch' }]}
+      />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

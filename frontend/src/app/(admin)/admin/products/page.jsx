@@ -5,6 +5,7 @@ import { Plus, Edit, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react
 import adminProductService from '@/services/adminProductService';
 import { Button } from '@/components/ui/button';
 import ProductFormModal from './_components/ProductFormModal';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -119,6 +120,10 @@ export default function AdminProductsPage() {
   return (
     <>
       <div className="space-y-6">
+        <Breadcrumbs
+          root={{ label: 'Admin', href: '/admin' }}
+          items={[{ label: 'Sản phẩm' }]}
+        />
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Quản lý Sản phẩm</h1>
@@ -299,7 +304,7 @@ export default function AdminProductsPage() {
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -311,9 +316,9 @@ export default function AdminProductsPage() {
                   <button
                     key={page}
                     onClick={() => goToPage(page)}
-                    className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${page === currentPage
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${page === currentPage
+                      ? 'bg-indigo-600 text-white shadow-sm cursor-default'
+                      : 'border border-gray-200 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'
                       }`}
                   >
                     {page}
@@ -324,7 +329,7 @@ export default function AdminProductsPage() {
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
               >
                 <ChevronRight size={16} />
               </button>

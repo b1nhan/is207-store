@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Plus, Trash2 } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 export default function AdminVouchersPage() {
   const [vouchers, setVouchers] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   useEffect(() => {
     fetchVouchers();
@@ -31,7 +34,12 @@ export default function AdminVouchersPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) return;
+    const isConfirmed = await confirm('Bạn có chắc chắn muốn xóa voucher này?', {
+      title: 'Xóa voucher',
+      confirmLabel: 'Xóa',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
     try {
       await adminVoucherService.deleteVoucher(id);
       fetchVouchers();
@@ -51,6 +59,10 @@ export default function AdminVouchersPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[{ label: 'Voucher' }]}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Vouchers Management</h1>
         <Link href="/admin/vouchers/new">

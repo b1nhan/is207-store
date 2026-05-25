@@ -7,16 +7,20 @@ export const metadata = {
 
 import AuthGuard from '@/components/auth/AuthGuard';
 import { Toaster } from 'sonner';
+import { ConfirmProvider } from '@/components/ui/ConfirmDialog';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="vi">
       <body>
         <AuthGuard>
-          {children}
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
         </AuthGuard>
         <Toaster position="top-right" richColors />
       </body>
     </html>
   );
 }
+

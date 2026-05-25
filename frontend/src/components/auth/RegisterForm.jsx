@@ -19,17 +19,57 @@ export default function RegisterForm() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!username || !username.trim()) {
+      newErrors.username = 'Vui lòng nhập tên đăng nhập.';
+    } else if (username.trim().length < 3 || username.trim().length > 50) {
+      newErrors.username = 'Tên đăng nhập phải từ 3 đến 50 ký tự.';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+      newErrors.username = 'Tên đăng nhập chỉ chứa chữ cái, số và dấu gạch dưới.';
+    }
+
+    if (!email) {
+      newErrors.email = 'Vui lòng nhập email.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Email không đúng định dạng.';
+    }
+
+    if (fullName && fullName.trim().length > 100) {
+      newErrors.fullName = 'Họ và tên tối đa 100 ký tự.';
+    }
+
+    if (phone && !/^0\d{9}$/.test(phone.trim())) {
+      newErrors.phone = 'Số điện thoại không hợp lệ (phải bắt đầu bằng 0, có 10 chữ số).';
+    }
+
+    if (!password) {
+      newErrors.password = 'Vui lòng nhập mật khẩu.';
+    } else if (password.length < 8) {
+      newErrors.password = 'Mật khẩu phải từ 8 ký tự trở lên.';
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Vui lòng nhập lại mật khẩu.';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp.';
+    }
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (password !== confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp.');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
-
+    setErrors({});
+    setError('');
     setLoading(true);
 
     try {
@@ -71,7 +111,7 @@ export default function RegisterForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         {/* Username — bắt buộc */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -80,13 +120,18 @@ export default function RegisterForm() {
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setUsername(e.target.value);
+              if (errors.username) setErrors((prev) => ({ ...prev, username: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.username ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Chỉ gồm chữ cái, số và dấu _"
-            required
-            minLength={3}
-            maxLength={50}
           />
+          {errors.username && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.username}</span>
+          )}
         </div>
 
         {/* Email — bắt buộc */}
@@ -97,11 +142,18 @@ export default function RegisterForm() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Nhập email của bạn"
-            required
           />
+          {errors.email && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.email}</span>
+          )}
         </div>
 
         {/* Họ và tên — optional */}
@@ -112,11 +164,18 @@ export default function RegisterForm() {
           <input
             type="text"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setFullName(e.target.value);
+              if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.fullName ? 'border-red-500' : 'border-gray-300'
+            }`}
             placeholder="Nhập họ và tên (tuỳ chọn)"
-            maxLength={100}
           />
+          {errors.fullName && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.fullName}</span>
+          )}
         </div>
 
         {/* Số điện thoại — optional */}
@@ -127,10 +186,18 @@ export default function RegisterForm() {
           <input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setPhone(e.target.value);
+              if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.phone ? 'border-red-500' : 'border-gray-300'
+            }`}
             placeholder="0xxxxxxxxx (tuỳ chọn)"
           />
+          {errors.phone && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.phone}</span>
+          )}
         </div>
 
         {/* Mật khẩu — bắt buộc */}
@@ -141,12 +208,18 @@ export default function RegisterForm() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Nhập mật khẩu"
-            required
-            minLength={8}
           />
+          {errors.password && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.password}</span>
+          )}
         </div>
 
         {/* Xác nhận mật khẩu — bắt buộc */}
@@ -157,12 +230,18 @@ export default function RegisterForm() {
           <input
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: '' }));
+            }}
+            className={`w-full rounded-xl border px-4 py-3 transition-all outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.confirmPassword ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Nhập lại mật khẩu"
-            required
-            minLength={8}
           />
+          {errors.confirmPassword && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.confirmPassword}</span>
+          )}
         </div>
 
         <Button

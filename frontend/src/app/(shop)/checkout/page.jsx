@@ -24,6 +24,7 @@ import {
   PencilIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const SHIPPING_FEE = 30000;
 
@@ -360,6 +361,13 @@ export default function CheckoutPage() {
       />
 
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumbs
+          items={[
+            { label: 'Giỏ hàng', href: '/cart' },
+            { label: 'Thanh toán' },
+          ]}
+          className="mb-6"
+        />
         <h1 className="text-3xl font-bold text-text-primary mb-8">Thanh toán</h1>
 
         {error && (
@@ -371,7 +379,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6">
+            <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6" noValidate>
 
               {/* ── Shipping Profile Section ── */}
               <div className="bg-surface p-6 rounded-2xl shadow-sm border border-card-border">

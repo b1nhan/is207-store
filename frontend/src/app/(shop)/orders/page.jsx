@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,7 @@ export default function OrdersPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Breadcrumbs items={[{ label: 'Đơn hàng của tôi' }]} className="mb-6" />
       <h1 className="text-3xl font-bold text-text-primary mb-8">Lịch sử đơn hàng</h1>
 
       {error && (

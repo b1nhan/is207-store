@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Search, Layers } from 'lucide-react';
 import adminCategoryService from '@/services/adminCategoryService';
 import { Button } from '@/components/ui/button';
 import CategoryModal from './CategoryModal';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 // ─── Delete Confirm ────────────────────────────────────────────────────────────
 
@@ -127,6 +128,10 @@ export default function AdminCategoriesPage() {
       />
 
       <div className="space-y-6">
+        <Breadcrumbs
+          root={{ label: 'Admin', href: '/admin' }}
+          items={[{ label: 'Danh mục' }]}
+        />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

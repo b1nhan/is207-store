@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import {
   ArrowLeft,
   Edit,
@@ -50,6 +51,8 @@ function InfoRow({ label, children }) {
   );
 }
 
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+
 export default function CampaignDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -57,6 +60,7 @@ export default function CampaignDetailPage() {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState('view'); // 'view' | 'edit'
   const [toggling, setToggling] = useState(false);
+  const confirm = useConfirm();
 
   const fetchCampaign = async () => {
     setLoading(true);
@@ -88,7 +92,12 @@ export default function CampaignDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`)) return;
+    const isConfirmed = await confirm(`Bạn có chắc muốn xóa campaign "${campaign.name}"?`, {
+      title: 'Xóa campaign',
+      confirmLabel: 'Xóa',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
     try {
       await adminCampaignService.deleteCampaign(id);
       router.push('/admin/campaigns');
@@ -124,6 +133,13 @@ export default function CampaignDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[
+          { label: 'Chiến dịch', href: '/admin/campaigns' },
+          { label: campaign.name },
+        ]}
+      />
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
