@@ -7,18 +7,7 @@ import adminCampaignService from '@/services/adminCampaignService';
 import adminProductService from '@/services/adminProductService';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-
-// ── helpers ──────────────────────────────────────────────────────────────────
-
-function toDatetimeLocal(iso) {
-  if (!iso) return '';
-  return iso.slice(0, 16); // "YYYY-MM-DDTHH:mm"
-}
-
-function toISOString(local) {
-  if (!local) return '';
-  return new Date(local).toISOString();
-}
+import { toDatetimeLocal, toISOString } from '@/utils/date';
 
 // ── sub-components ────────────────────────────────────────────────────────────
 
@@ -326,6 +315,7 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
       end_date: toISOString(form.end_date),
       status: Number(form.status),
     };
+    console.log(payload);
 
     if (needsConfig) {
       payload.config = { discount_value: Number(form.discount_value) };

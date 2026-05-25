@@ -17,3 +17,13 @@ export const formatDate = (dateInput) => {
 
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
+
+export const toDatetimeLocal = (iso) => {
+  if (!iso) return '';
+  return iso.slice(0, 16); // "YYYY-MM-DDTHH:mm"
+}
+
+export const toISOString = (local) => {
+  if (!local) return '';
+  return new Date(local).toISOString();
+}

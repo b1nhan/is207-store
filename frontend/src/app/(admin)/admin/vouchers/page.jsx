@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pencil } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
+import VoucherForm from '@/components/admin/VoucherForm';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -11,6 +12,8 @@ export default function AdminVouchersPage() {
   const [vouchers, setVouchers] = useState([]);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingVoucher, setEditingVoucher] = useState(null);
 
   useEffect(() => {
     fetchVouchers();
@@ -29,6 +32,11 @@ export default function AdminVouchersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (voucher) => {
+    setEditingVoucher(voucher);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = async (id) => {
@@ -121,11 +129,18 @@ export default function AdminVouchersPage() {
                   </td>
                   <td className="p-4">{Number(voucher.min_order_value).toLocaleString('vi-VN')}₫</td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      voucher.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      {voucher.is_active ? 'ACTIVE' : 'INACTIVE'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        voucher.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {voucher.is_active ? 'ACTIVE' : 'INACTIVE'}
+                      </span>
+                      {voucher.expiry_date && new Date(voucher.expiry_date) < new Date() && (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                          EXPIRED
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="p-4 text-sm text-gray-500">
                     {voucher.expiry_date
@@ -133,6 +148,9 @@ export default function AdminVouchersPage() {
                       : '—'}
                   </td>
                   <td className="p-4 text-right space-x-2">
+                    <Button variant="outline" size="icon" onClick={() => handleEdit(voucher)}>
+                      <Pencil size={16} className="text-blue-500" />
+                    </Button>
                     <Button variant="outline" size="icon" onClick={() => handleDelete(voucher.voucher_id)}>
                       <Trash2 size={16} className="text-red-500" />
                     </Button>
@@ -143,6 +161,27 @@ export default function AdminVouchersPage() {
           </tbody>
         </table>
       </div>
+
+      {isEditModalOpen && editingVoucher && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
+            <h2 className="text-xl font-bold mb-4">Sửa Voucher: {editingVoucher.code}</h2>
+            <VoucherForm
+              mode="edit"
+              initialData={editingVoucher}
+              onSuccess={() => {
+                setIsEditModalOpen(false);
+                setEditingVoucher(null);
+                fetchVouchers();
+              }}
+              onCancel={() => {
+                setIsEditModalOpen(false);
+                setEditingVoucher(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
