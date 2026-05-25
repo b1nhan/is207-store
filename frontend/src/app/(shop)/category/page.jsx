@@ -1,5 +1,6 @@
 import { categoryService } from '@/services/categoryService';
 import { CategorySection } from '@/components/category/CategorySection';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata = {
   title: 'Danh mục Sản phẩm | Cerulean Blue',
@@ -17,6 +18,7 @@ export default async function CategoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <Breadcrumbs items={[{ label: 'Danh mục' }]} className="mb-6" />
       <h1 className="mb-12 text-3xl font-bold text-text-primary text-center">
         Danh Mục Sản Phẩm
       </h1>

@@ -3,6 +3,8 @@ import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import ProductFilter from '@/components/product/ProductFilter';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -72,6 +74,13 @@ export default async function CategorySlugPage({ params, searchParams }) {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <Breadcrumbs
+        items={[
+          { label: 'Danh mục', href: '/category' },
+          { label: categoryName },
+        ]}
+        className="mb-6"
+      />
       <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold text-text-primary capitalize">
@@ -120,9 +129,9 @@ export default async function CategorySlugPage({ params, searchParams }) {
                       <a
                         key={pageNum}
                         href={`/category/${slug}?${newParams.toString()}`}
-                        className={`flex h-10 w-10 items-center justify-center rounded-md border font-medium transition-colors ${isActive
+                        className={`flex h-10 w-10 items-center justify-center rounded-md border font-medium transition-all duration-200 ${isActive
                           ? 'bg-primary text-white border-primary'
-                          : 'bg-white text-text-primary hover:bg-gray-50 border-gray-200'
+                          : 'bg-white text-text-primary hover:bg-primary/10 hover:text-primary hover:border-primary/30 border-gray-200'
                           }`}
                       >
                         {pageNum}

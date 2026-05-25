@@ -6,6 +6,7 @@ import adminBrandService from '@/services/adminBrandService';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import BrandModal from './BrandModal';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 // ─── Delete Confirm ────────────────────────────────────────────────────────────
 
@@ -142,6 +143,10 @@ export default function AdminBrandsPage() {
       />
 
       <div className="space-y-6">
+        <Breadcrumbs
+          root={{ label: 'Admin', href: '/admin' }}
+          items={[{ label: 'Thương hiệu' }]}
+        />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

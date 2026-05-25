@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { Plus, Trash2, Pencil } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
 import VoucherForm from '@/components/admin/VoucherForm';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { toast } from 'sonner';
 
 export default function AdminVouchersPage() {
@@ -14,6 +16,7 @@ export default function AdminVouchersPage() {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState(null);
+  const confirm = useConfirm();
 
   useEffect(() => {
     fetchVouchers();
@@ -40,7 +43,12 @@ export default function AdminVouchersPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa voucher này?')) return;
+    const isConfirmed = await confirm('Bạn có chắc chắn muốn xóa voucher này?', {
+      title: 'Xóa voucher',
+      confirmLabel: 'Xóa',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
     try {
       await adminVoucherService.deleteVoucher(id);
       toast.info('Voucher deleted');
@@ -61,6 +69,10 @@ export default function AdminVouchersPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[{ label: 'Voucher' }]}
+      />
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Vouchers Management</h1>
         <Link href="/admin/vouchers/new">
@@ -130,9 +142,8 @@ export default function AdminVouchersPage() {
                   <td className="p-4">{Number(voucher.min_order_value).toLocaleString('vi-VN')}₫</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        voucher.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${voucher.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}>
                         {voucher.is_active ? 'ACTIVE' : 'INACTIVE'}
                       </span>
                       {voucher.expiry_date && new Date(voucher.expiry_date) < new Date() && (

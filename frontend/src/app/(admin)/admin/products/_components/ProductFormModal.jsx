@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, ChevronDown, Check, Upload, Trash2, ImagePlus, Star, Plus, Pencil, Save, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import adminProductService from '@/services/adminProductService';
 import adminCategoryService from '@/services/adminCategoryService';
 import adminBrandService from '@/services/adminBrandService';
@@ -258,6 +259,7 @@ const EMPTY_VARIANT = { color: '', size: '', stock_quantity: '', variant_price: 
 
 /* ─── Variant Section ─── */
 function VariantSection({ productId, variants, setVariants }) {
+  const confirm = useConfirm();
   // editingId: variant_id being edited, or 'new' for a new row
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(EMPTY_VARIANT);
@@ -319,7 +321,12 @@ function VariantSection({ productId, variants, setVariants }) {
   };
 
   const handleDelete = async (variantId) => {
-    if (!confirm('Xác nhận xóa variant này?')) return;
+    const isConfirmed = await confirm('Xác nhận xóa variant này?', {
+      title: 'Xóa biến thể',
+      confirmLabel: 'Xóa',
+      type: 'danger',
+    });
+    if (!isConfirmed) return;
     setDeletingId(variantId);
     try {
       await adminProductService.deleteVariant(variantId);
@@ -491,6 +498,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     category_ids: [],
     brand_ids: [],
   });
+  const [errors, setErrors] = useState({});
 
   const fetchCategories = async () => {
     try {
@@ -552,9 +560,34 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
   }, [isEdit, productId]);
 
   /* Handlers */
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.product_name || !formData.product_name.trim()) {
+      newErrors.product_name = 'Tên sản phẩm không được để trống.';
+    }
+    if (!formData.slug || !formData.slug.trim()) {
+      newErrors.slug = 'Slug không được để trống.';
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug.trim())) {
+      newErrors.slug = 'Slug chỉ chứa chữ thường, số và dấu gạch nối (ví dụ: ao-thun-nam).';
+    }
+    if (formData.base_price === '' || formData.base_price === null || formData.base_price === undefined) {
+      newErrors.base_price = 'Giá cơ bản không được để trống.';
+    } else if (Number(formData.base_price) <= 0) {
+      newErrors.base_price = 'Giá cơ bản phải lớn hơn 0.';
+    }
+    if (!formData.category_ids || formData.category_ids.length === 0) {
+      newErrors.category_ids = 'Vui lòng chọn ít nhất một danh mục.';
+    }
+    if (!formData.brand_ids || formData.brand_ids.length === 0) {
+      newErrors.brand_ids = 'Vui lòng chọn ít nhất một thương hiệu.';
+    }
+    return newErrors;
+  };
+
   const handleInput = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleNameChange = (e) => {
@@ -567,10 +600,18 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
       .trim()
       .replace(/\s+/g, '-');
     setFormData((prev) => ({ ...prev, product_name: name, slug }));
+    if (errors.product_name) setErrors((prev) => ({ ...prev, product_name: '' }));
+    if (errors.slug) setErrors((prev) => ({ ...prev, slug: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     setSaving(true);
     try {
       const payload = {
@@ -661,7 +702,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
             </div>
           ) : (
-            <form id="product-form" onSubmit={handleSubmit} className="space-y-5">
+            <form id="product-form" onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Tên sản phẩm */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -670,11 +711,15 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 <input
                   type="text"
                   name="product_name"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition"
+                  className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
+                    errors.product_name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   value={formData.product_name}
                   onChange={handleNameChange}
                 />
+                {errors.product_name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.product_name}</p>
+                )}
               </div>
 
               {/* Slug */}
@@ -685,13 +730,15 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 <input
                   type="text"
                   name="slug"
-                  required
-                  pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
-                  title="Slug chỉ chứa chữ thường, số và dấu gạch nối"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition"
+                  className={`w-full border rounded-lg px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
+                    errors.slug ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   value={formData.slug}
                   onChange={handleInput}
                 />
+                {errors.slug && (
+                  <p className="text-red-500 text-xs mt-1">{errors.slug}</p>
+                )}
                 <p className="text-xs text-gray-400 mt-1">Tự động tạo từ tên. Chỉ chữ thường, số và dấu -</p>
               </div>
 
@@ -704,12 +751,15 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                   <input
                     type="number"
                     name="base_price"
-                    required
-                    min="1"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition"
+                    className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
+                      errors.base_price ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     value={formData.base_price}
                     onChange={handleInput}
                   />
+                  {errors.base_price && (
+                    <p className="text-red-500 text-xs mt-1">{errors.base_price}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -731,24 +781,40 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
 
               {/* Category & Brand multi-select */}
               <div className="grid grid-cols-2 gap-4">
-                <MultiSelect
-                  label="Danh mục"
-                  options={categories}
-                  selected={formData.category_ids}
-                  onChange={(vals) => setFormData((prev) => ({ ...prev, category_ids: vals }))}
-                  valueKey="category_id"
-                  labelKey="category_name"
-                  onAdd={() => setShowCategoryModal(true)}
-                />
-                <MultiSelect
-                  label="Thương hiệu"
-                  options={brands}
-                  selected={formData.brand_ids}
-                  onChange={(vals) => setFormData((prev) => ({ ...prev, brand_ids: vals }))}
-                  valueKey="brand_id"
-                  labelKey="brand_name"
-                  onAdd={() => setShowBrandModal(true)}
-                />
+                <div>
+                  <MultiSelect
+                    label="Danh mục"
+                    options={categories}
+                    selected={formData.category_ids}
+                    onChange={(vals) => {
+                      setFormData((prev) => ({ ...prev, category_ids: vals }));
+                      if (errors.category_ids) setErrors((prev) => ({ ...prev, category_ids: '' }));
+                    }}
+                    valueKey="category_id"
+                    labelKey="category_name"
+                    onAdd={() => setShowCategoryModal(true)}
+                  />
+                  {errors.category_ids && (
+                    <p className="text-red-500 text-xs mt-1">{errors.category_ids}</p>
+                  )}
+                </div>
+                <div>
+                  <MultiSelect
+                    label="Thương hiệu"
+                    options={brands}
+                    selected={formData.brand_ids}
+                    onChange={(vals) => {
+                      setFormData((prev) => ({ ...prev, brand_ids: vals }));
+                      if (errors.brand_ids) setErrors((prev) => ({ ...prev, brand_ids: '' }));
+                    }}
+                    valueKey="brand_id"
+                    labelKey="brand_name"
+                    onAdd={() => setShowBrandModal(true)}
+                  />
+                  {errors.brand_ids && (
+                    <p className="text-red-500 text-xs mt-1">{errors.brand_ids}</p>
+                  )}
+                </div>
               </div>
 
               {/* Chất liệu */}

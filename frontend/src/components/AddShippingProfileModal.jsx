@@ -147,7 +147,7 @@ export default function AddShippingProfileModal({ isOpen, onClose, onSuccess, in
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
           {serverError && (
             <div className="bg-error-bg text-error border border-error-border p-3 rounded-md text-sm">
               {serverError}

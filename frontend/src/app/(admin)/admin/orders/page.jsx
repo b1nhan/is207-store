@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -174,6 +175,8 @@ function PriceRow({ label, value, color = 'text-gray-700', bold = false }) {
   );
 }
 
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+
 /* ──────────────────────────── Main Page ──────────────────────────── */
 const STATUS_WEIGHT = {
   pending: 1,
@@ -188,6 +191,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingOrderId, setViewingOrderId] = useState(null);
+  const confirm = useConfirm();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -252,7 +256,21 @@ export default function AdminOrdersPage() {
   };
 
   const handleStatusChange = async (id, newStatus) => {
-    if (!confirm(`Xác nhận chuyển trạng thái đơn hàng thành "${newStatus}"?`)) return;
+    const isConfirmed = await confirm(
+      <span className="flex items-center gap-1.5 flex-wrap">
+        Xác nhận chuyển trạng thái đơn hàng thành
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${getStatusColor(newStatus)}`}>
+          {newStatus}
+        </span>
+        ?
+      </span>,
+      {
+        title: 'Chuyển trạng thái đơn hàng',
+        confirmLabel: 'Xác nhận',
+        type: 'info'
+      }
+    );
+    if (!isConfirmed) return;
     try {
       await adminOrderService.updateOrderStatus(id, newStatus);
       toast.success('Order status updated');
@@ -368,6 +386,10 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        root={{ label: 'Admin', href: '/admin' }}
+        items={[{ label: 'Đơn hàng' }]}
+      />
       <h1 className="text-2xl font-bold">Orders Management</h1>
 
       {/* Stats cards */}
@@ -596,8 +618,8 @@ export default function AdminOrdersPage() {
                   key={page}
                   onClick={() => goToPage(page)}
                   className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${page === currentPage
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
                     }`}
                 >
                   {page}

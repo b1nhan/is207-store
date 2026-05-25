@@ -251,6 +251,7 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState(() => {
     if (initialData) {
@@ -300,11 +301,63 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
     fetchProducts();
   }, []);
 
-  const setField = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const setField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: '' }));
+  };
 
   const needsConfig = ['PERCENTAGE', 'FIXED_PRICE'].includes(form.campaign_type);
   const needsTiers = form.campaign_type === 'TIER_DISCOUNT';
   const needsProducts = ['PERCENTAGE', 'FIXED_PRICE', 'FREESHIP'].includes(form.campaign_type);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.name || !form.name.trim()) {
+      newErrors.name = 'Tên campaign không được để trống.';
+    } else if (form.name.length > 255) {
+      newErrors.name = 'Tên campaign tối đa 255 ký tự.';
+    }
+    if (!form.campaign_type) {
+      newErrors.campaign_type = 'Vui lòng chọn loại campaign.';
+    }
+    if (!form.start_date) {
+      newErrors.start_date = 'Vui lòng chọn ngày bắt đầu.';
+    }
+    if (!form.end_date) {
+      newErrors.end_date = 'Vui lòng chọn ngày kết thúc.';
+    } else if (form.start_date && new Date(form.end_date) <= new Date(form.start_date)) {
+      newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu.';
+    }
+    if (needsConfig) {
+      const discountVal = Number(form.discount_value);
+      if (form.discount_value === '' || form.discount_value === null || form.discount_value === undefined) {
+        newErrors.discount_value = 'Giá trị giảm giá không được để trống.';
+      } else if (isNaN(discountVal) || discountVal <= 0) {
+        newErrors.discount_value = 'Giá trị giảm giá phải lớn hơn 0.';
+      } else if (form.campaign_type === 'PERCENTAGE' && discountVal >= 100) {
+        newErrors.discount_value = 'Phần trăm giảm giá phải nhỏ hơn 100%.';
+      }
+    }
+    if (needsTiers) {
+      const invalidTiers = form.tiers.some(t => {
+        const minVal = Number(t.min_order_value);
+        const discVal = Number(t.discount_value);
+        return (
+          t.min_order_value === '' || isNaN(minVal) || minVal <= 0 ||
+          t.discount_value === '' || isNaN(discVal) || discVal <= 0 || discVal >= 100
+        );
+      });
+      if (invalidTiers) {
+        newErrors.tiers = 'Vui lòng nhập ngưỡng > 0 và phần trăm giảm từ 1 đến 99 cho tất cả các bậc.';
+      }
+    }
+    if (needsProducts && form.campaign_type !== 'TIER_DISCOUNT') {
+      if (!form.product_ids || form.product_ids.length === 0) {
+        newErrors.product_ids = 'Vui lòng chọn ít nhất một sản phẩm cho chiến dịch.';
+      }
+    }
+    return newErrors;
+  };
 
   const buildPayload = () => {
     const payload = {
@@ -337,6 +390,12 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     setLoading(true);
     try {
       const payload = buildPayload();
@@ -370,19 +429,21 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
       : 'Sản phẩm áp dụng *';
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       {/* Basic info */}
       <SectionCard title="Thông tin cơ bản">
         <FieldRow label="Tên campaign" required>
           <input
             type="text"
-            required
             maxLength={255}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.name ? 'border-red-500' : 'border-gray-200'
+            }`}
             value={form.name}
             onChange={(e) => setField('name', e.target.value)}
             placeholder="VD: Flash Sale 5.5"
           />
+          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
         </FieldRow>
 
         <FieldRow label="Mô tả">
@@ -398,7 +459,6 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
         <div className="grid grid-cols-2 gap-4">
           <FieldRow label="Loại campaign" required>
             <select
-              required
               disabled={isEdit}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-400"
               value={form.campaign_type}
@@ -427,21 +487,25 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <FieldRow label="Ngày bắt đầu" required>
             <input
               type="datetime-local"
-              required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.start_date ? 'border-red-500' : 'border-gray-200'
+              }`}
               value={form.start_date}
               onChange={(e) => setField('start_date', e.target.value)}
             />
+            {errors.start_date && <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>}
           </FieldRow>
 
           <FieldRow label="Ngày kết thúc" required>
             <input
               type="datetime-local"
-              required
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.end_date ? 'border-red-500' : 'border-gray-200'
+              }`}
               value={form.end_date}
               onChange={(e) => setField('end_date', e.target.value)}
             />
+            {errors.end_date && <p className="text-red-500 text-xs mt-1">{errors.end_date}</p>}
           </FieldRow>
         </div>
       </SectionCard>
@@ -452,14 +516,14 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <FieldRow label={configLabel} hint={configHint}>
             <input
               type="number"
-              required
-              min={1}
-              max={form.campaign_type === 'PERCENTAGE' ? 99 : undefined}
-              className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.discount_value ? 'border-red-500' : 'border-gray-200'
+              }`}
               value={form.discount_value}
               onChange={(e) => setField('discount_value', e.target.value)}
               placeholder={form.campaign_type === 'PERCENTAGE' ? '50' : '99000'}
             />
+            {errors.discount_value && <p className="text-red-500 text-xs mt-1">{errors.discount_value}</p>}
           </FieldRow>
         </SectionCard>
       )}
@@ -474,6 +538,7 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
             </span>
           </div>
           <TiersEditor tiers={form.tiers} onChange={(tiers) => setField('tiers', tiers)} />
+          {errors.tiers && <p className="text-red-500 text-sm mt-2 font-semibold">{errors.tiers}</p>}
         </SectionCard>
       )}
 
@@ -489,10 +554,14 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
         )}
         <ProductPicker
           selectedIds={form.product_ids}
-          onChange={(ids) => setField('product_ids', ids)}
+          onChange={(ids) => {
+            setField('product_ids', ids);
+            if (errors.product_ids) setErrors((prev) => ({ ...prev, product_ids: '' }));
+          }}
           allProducts={allProducts}
           loadingProducts={loadingProducts}
         />
+        {errors.product_ids && <p className="text-red-500 text-sm mt-2 font-semibold">{errors.product_ids}</p>}
       </SectionCard>
 
       {/* Actions */}

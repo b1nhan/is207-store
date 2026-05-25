@@ -16,16 +16,37 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!email) {
+      newErrors.email = 'Vui lòng nhập email.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Email không đúng định dạng.';
+    }
+    if (!password) {
+      newErrors.password = 'Vui lòng nhập mật khẩu.';
+    } else if (password.length < 6) {
+      newErrors.password = 'Mật khẩu phải từ 6 ký tự trở lên.';
+    }
+    return newErrors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     setError('');
     setLoading(true);
 
     try {
       const result = await authService.login(email, password);
-      // Giả sử backend trả về dạng { data: { user, accessToken, refreshToken } } hoặc { user, accessToken, refreshToken }
       const payload = result.data || result;
 
       localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, payload.accessToken);
@@ -53,17 +74,24 @@ export default function LoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+            }}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Nhập email của bạn"
-            required
           />
+          {errors.email && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.email}</span>
+          )}
         </div>
 
         <div>
@@ -71,14 +99,21 @@ export default function LoginForm() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+            }}
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all focus:ring-2 focus:ring-primary focus:border-primary ${
+              errors.password ? 'border-red-500 focus:ring-red-200' : 'border-gray-300'
+            }`}
             placeholder="Nhập mật khẩu"
-            required
           />
+          {errors.password && (
+            <span className="text-red-500 text-xs mt-1 block">{errors.password}</span>
+          )}
         </div>
 
-        <Button variant='primary' type="submit" className="w-full text-lg py-6 rounded-xl" disabled={loading}>
+        <Button variant="primary" type="submit" className="w-full text-lg py-6 rounded-xl" disabled={loading}>
           {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </Button>
       </form>

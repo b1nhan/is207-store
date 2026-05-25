@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon, CheckIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 const SHIPPING_FEE = 30000;
 
@@ -57,6 +58,70 @@ function getItemCampaignDiscount(item, activeCampaigns) {
   if (bestDiscount <= 0) return null;
   return { discountAmount: bestDiscount, discountLabel: bestLabel, campaignName: bestCampaignName };
 }
+
+function QuantityInput({ value, stock, onChange, disabled }) {
+  const [inputValue, setInputValue] = useState(String(value));
+
+  useEffect(() => {
+    setInputValue(String(value));
+  }, [value]);
+
+  const commitValue = (valStr) => {
+    let num = parseInt(valStr, 10);
+    if (isNaN(num) || num < 1) {
+      num = 1;
+    } else if (num > stock) {
+      num = stock;
+    }
+    setInputValue(String(num));
+    if (num !== value) {
+      onChange(num);
+    }
+  };
+
+  const handleChange = (e) => {
+    const rawVal = e.target.value;
+    if (rawVal === '') {
+      setInputValue('');
+      return;
+    }
+    const clean = rawVal.replace(/\D/g, '');
+    if (clean) {
+      const num = parseInt(clean, 10);
+      if (num > stock) {
+        setInputValue(String(stock));
+      } else {
+        setInputValue(clean);
+      }
+    }
+  };
+
+  const handleBlur = () => {
+    commitValue(inputValue);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      commitValue(inputValue);
+      e.target.blur();
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      className="w-12 text-center font-medium text-sm focus:outline-none focus:ring-1 focus:ring-primary border-x border-border py-1 bg-surface h-8"
+      value={inputValue}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      disabled={disabled}
+    />
+  );
+}
+
 
 export default function CartPage() {
   const router = useRouter();
@@ -174,6 +239,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Breadcrumbs items={[{ label: 'Giỏ hàng' }]} className="mb-6" />
       <h1 className="text-3xl font-bold text-text-primary mb-8">Giỏ hàng của bạn</h1>
 
       {error && (
@@ -333,7 +399,12 @@ export default function CartPage() {
                         >
                           <MinusIcon size={16} />
                         </button>
-                        <span className="w-10 text-center font-medium text-sm">{item.quantity}</span>
+                        <QuantityInput
+                          value={item.quantity}
+                          stock={item.stock_quantity}
+                          onChange={(val) => updateQuantity(item.cart_item_id, val)}
+                          disabled={isLoading}
+                        />
                         <button
                           className="p-2 text-text-secondary hover:text-primary hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
