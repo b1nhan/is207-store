@@ -53,7 +53,15 @@ export default function RegisterForm() {
       setUser(payload.user);
       router.push('/');
     } catch (err) {
-      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      const responseData = err.response?.data;
+
+      const errorContent =
+        responseData?.errors ||
+        responseData?.message ||
+        err.message ||
+        'Đăng ký thất bại';
+
+      setError(errorContent);
     } finally {
       setLoading(false);
     }
@@ -67,11 +75,24 @@ export default function RegisterForm() {
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
+          {Array.isArray(error) ? (
+            // Nếu là mảng lỗi, hiển thị từng cái một
+            <ul className="list-inside list-disc space-y-1">
+              {error.map((errItem, index) => (
+                <li key={index}>
+                  {/* Backend trả về object {field, message}, ta hiển thị message */}
+                  {errItem.message || errItem}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            // Nếu chỉ là một chuỗi thông báo, hiển thị bình thường
+            <p>{error}</p>
+          )}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {/* Username — bắt buộc */}
         <div>
           <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -83,9 +104,7 @@ export default function RegisterForm() {
             onChange={(e) => setUsername(e.target.value)}
             className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Chỉ gồm chữ cái, số và dấu _"
-            required
-            minLength={3}
-            maxLength={50}
+            noValidate
           />
         </div>
 
@@ -144,8 +163,7 @@ export default function RegisterForm() {
             onChange={(e) => setPassword(e.target.value)}
             className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập mật khẩu"
-            required
-            minLength={8}
+            noValidate
           />
         </div>
 
@@ -160,8 +178,7 @@ export default function RegisterForm() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="focus:ring-primary focus:border-primary w-full rounded-xl border border-gray-300 px-4 py-3 transition-all outline-none focus:ring-2"
             placeholder="Nhập lại mật khẩu"
-            required
-            minLength={8}
+            noValidate
           />
         </div>
 
