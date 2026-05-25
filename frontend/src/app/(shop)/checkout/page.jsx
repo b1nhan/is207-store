@@ -8,8 +8,6 @@ import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
 import voucherService from '@/services/voucherService';
 import shippingProfileService from '@/services/shippingProfileService';
-import { campaignService } from '@/services/campaignService';
-import { productService } from '@/services/productService';
 import AddShippingProfileModal from '@/components/AddShippingProfileModal';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +44,24 @@ function ProfileSkeleton() {
   );
 }
 
+function CheckoutSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8 animate-pulse">
+      <div className="h-8 w-48 bg-border rounded mb-8"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="h-64 bg-surface rounded-2xl border border-card-border"></div>
+          <div className="h-32 bg-surface rounded-2xl border border-card-border"></div>
+        </div>
+        <div className="space-y-6">
+          <div className="h-32 bg-surface rounded-2xl border border-card-border"></div>
+          <div className="h-96 bg-surface rounded-2xl border border-card-border"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,40 +75,8 @@ export default function CheckoutPage() {
   const directVariantId = Number(searchParams.get('variantId'));
   const directQuantity = Number(searchParams.get('quantity'));
 
-  const [directItemDetails, setDirectItemDetails] = useState(null);
-  const [isFetchingDirect, setIsFetchingDirect] = useState(isDirectCheckout);
-
-  useEffect(() => {
-    if (isDirectCheckout && directProductId && directVariantId && directQuantity) {
-      setIsFetchingDirect(true);
-      productService.getProduct(directProductId)
-        .then((res) => {
-          const productDetail = res.data || res;
-          const variant = productDetail?.variants?.find((v) => v.variant_id === directVariantId);
-          if (variant) {
-            setDirectItemDetails({
-              product_id: directProductId,
-              variant_id: directVariantId,
-              quantity: directQuantity,
-              unit_price: Number(variant.variant_price ?? productDetail.base_price),
-              product_name: productDetail.product_name,
-              size: variant.size,
-              color: variant.color,
-            });
-          } else {
-            toast.error('Phân loại sản phẩm không hợp lệ');
-          }
-        })
-        .catch(() => {
-          toast.error('Không thể tải thông tin sản phẩm');
-        })
-        .finally(() => {
-          setIsFetchingDirect(false);
-        });
-    } else {
-      setIsFetchingDirect(false);
-    }
-  }, [isDirectCheckout, directProductId, directVariantId, directQuantity]);
+  const [checkoutSummary, setCheckoutSummary] = useState(null);
+  const [isFetchingSummary, setIsFetchingSummary] = useState(true);
 
   // ─── Parse selectedItemIds from URL ────────────────────────────────────────
   const selectedItemIds = useMemo(() => {
@@ -102,21 +86,46 @@ export default function CheckoutPage() {
     return raw.split(',').map(Number).filter(Boolean);
   }, [searchParams, isDirectCheckout]);
 
-  // Chỉ tính toán trên các items được chọn
-  const selectedItems = useMemo(() => {
-    if (isDirectCheckout) {
-      return directItemDetails ? [directItemDetails] : [];
+  // ─── Fetch Summary ────────────────────────────────────────────────────────
+  const fetchSummary = useCallback(async (expectedSubtotal = undefined) => {
+    setIsFetchingSummary(true);
+    try {
+      const data = {};
+      if (isDirectCheckout) {
+        data.directItem = {
+          product_id: directProductId,
+          variant_id: directVariantId,
+          quantity: directQuantity
+        };
+      } else {
+        data.selectedItemIds = selectedItemIds;
+      }
+      if (expectedSubtotal !== undefined) {
+        data.expected_subtotal = expectedSubtotal;
+      }
+
+      const response = await orderService.previewCheckout(data);
+      setCheckoutSummary(response.checkoutSummary);
+
+      if (response.priceChangedMessages && response.priceChangedMessages.length > 0) {
+        response.priceChangedMessages.forEach(msg => {
+          if (msg.newPrice > msg.oldPrice) {
+            toast.error(msg.message, { duration: 5000 });
+          } else {
+            toast.success(msg.message, { duration: 5000 });
+          }
+        });
+      }
+      return response;
+    } catch (err) {
+      toast.error('Không thể tải thông tin thanh toán');
+      if (isDirectCheckout) {
+        router.push('/products');
+      }
+    } finally {
+      setIsFetchingSummary(false);
     }
-    return items.filter((i) => selectedItemIds.includes(i.cart_item_id));
-  }, [items, selectedItemIds, isDirectCheckout, directItemDetails]);
-
-  console.log(selectedItems);
-
-  // subtotal của các items được chọn
-  const subtotal = useMemo(
-    () => selectedItems.reduce((sum, i) => sum + Number(i.unit_price) * i.quantity, 0),
-    [selectedItems],
-  );
+  }, [isDirectCheckout, directProductId, directVariantId, directQuantity, selectedItemIds, router]);
 
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,87 +146,15 @@ export default function CheckoutPage() {
   const [voucherError, setVoucherError] = useState('');
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
 
-  // ─── Campaign state ─────────────────────────────────────────────────────────
-  const [activeCampaigns, setActiveCampaigns] = useState([]);
-
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ─── Fetch active campaigns ──────────────────────────────────────────────────
   useEffect(() => {
-    campaignService.getActiveCampaigns()
-      .then((res) => {
-        // campaignService dùng api helper (axiosInstance đã unwrap) → res = { success, message, data }
-        const list = Array.isArray(res) ? res : (res?.data ?? []);
-        setActiveCampaigns(list);
-      })
-      .catch(() => setActiveCampaigns([]));
-  }, []);
-
-  // ─── Tính campaign discount (mirror backend logic) ──────────────────────────
-  const { appliedCampaign, campaignDiscountAmount, isFreeship } = useMemo(() => {
-    if (!activeCampaigns.length || !selectedItems.length) {
-      return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
+    if (isAuthenticated && ((isDirectCheckout && directProductId) || (!isDirectCheckout && selectedItemIds.length > 0))) {
+      fetchSummary();
     }
-
-    const SHIP = SHIPPING_FEE;
-    let bestCampaign = null;
-    let maxEffective = -1;
-    let bestDiscount = 0;
-    let bestFreeship = false;
-
-    for (const campaign of activeCampaigns) {
-      let discount = 0;
-      let freeship = false;
-      const campaignProductIds = (campaign.products ?? []).map((p) => p.product_id);
-      const appliesToAll = campaignProductIds.length === 0;
-
-      const applicable = selectedItems.filter(
-        (item) => appliesToAll || campaignProductIds.includes(item.product_id),
-      );
-
-      if (applicable.length > 0) {
-        if (campaign.campaign_type === 'PERCENTAGE') {
-          const pct = campaign.config?.discount_value ?? 0;
-          applicable.forEach((item) => {
-            discount += (Number(item.unit_price) * (pct / 100)) * item.quantity;
-          });
-        } else if (campaign.campaign_type === 'FIXED_PRICE') {
-          const fixedPrice = campaign.config?.discount_value ?? 0;
-          applicable.forEach((item) => {
-            const orig = Number(item.unit_price);
-            if (orig > fixedPrice) discount += (orig - fixedPrice) * item.quantity;
-          });
-        } else if (campaign.campaign_type === 'TIER_DISCOUNT') {
-          const totalVal = applicable.reduce(
-            (s, item) => s + Number(item.unit_price) * item.quantity, 0,
-          );
-          const tiers = (campaign.tiers ?? [])
-            .filter((t) => totalVal >= t.min_order_value)
-            .sort((a, b) => b.min_order_value - a.min_order_value);
-          if (tiers.length > 0) {
-            discount = totalVal * (tiers[0].discount_value / 100);
-          }
-        } else if (campaign.campaign_type === 'FREESHIP') {
-          freeship = true;
-        }
-      }
-
-      const effective = discount + (freeship ? SHIP : 0);
-      if (effective > maxEffective) {
-        maxEffective = effective;
-        bestCampaign = campaign;
-        bestDiscount = discount;
-        bestFreeship = freeship;
-      }
-    }
-
-    if (!bestCampaign || (bestDiscount === 0 && !bestFreeship)) {
-      return { appliedCampaign: null, campaignDiscountAmount: 0, isFreeship: false };
-    }
-    return { appliedCampaign: bestCampaign, campaignDiscountAmount: bestDiscount, isFreeship: bestFreeship };
-  }, [activeCampaigns, selectedItems]);
+  }, [fetchSummary, isAuthenticated, isDirectCheckout, directProductId, selectedItemIds.length]);
 
   // ─── Fetch profiles ─────────────────────────────────────────────────────────
   const fetchProfiles = useCallback(async () => {
@@ -308,13 +245,23 @@ export default function CheckoutPage() {
     setIsApplyingVoucher(true);
     setVoucherError('');
     try {
-      // axiosInstance interceptor unwraps response → response.data (HTTP body = { success, message, data })
-      // voucherService đã `.data` một lần nữa → trả về chính voucher object { voucher_id, code, discount_amount, ... }
-      const voucherData = await voucherService.applyVoucher({ code: voucherCode.trim(), subtotal });
+      const currentSubtotal = (checkoutSummary?.subtotal || 0) - (checkoutSummary?.campaignDiscountTotal || 0);
+      const voucherData = await voucherService.applyVoucher({ code: voucherCode.trim(), subtotal: currentSubtotal });
       setAppliedVoucher(voucherData);
+
+      const data = {};
+      if (isDirectCheckout) {
+        data.directItem = { product_id: directProductId, variant_id: directVariantId, quantity: directQuantity };
+      } else {
+        data.selectedItemIds = selectedItemIds;
+      }
+      data.voucher_code = voucherData.code;
+
+      const response = await orderService.previewCheckout(data);
+      setCheckoutSummary(response.checkoutSummary);
+
       toast.success('Voucher applied');
     } catch (err) {
-      // axios interceptor normalize error thành { ...error, message }
       setVoucherError(err.message || err.response?.data?.message || 'Mã giảm giá không hợp lệ');
       toast.error('Invalid or expired voucher');
       setAppliedVoucher(null);
@@ -333,11 +280,6 @@ export default function CheckoutPage() {
 
     if (!isDirectCheckout && selectedItemIds.length === 0) {
       setError('Không có sản phẩm nào được chọn để thanh toán.');
-      return;
-    }
-
-    if (isDirectCheckout && (!directItemDetails)) {
-      setError('Thông tin sản phẩm không hợp lệ.');
       return;
     }
 
@@ -360,6 +302,24 @@ export default function CheckoutPage() {
         data.selectedItemIds = selectedItemIds;
       }
 
+      data.expected_subtotal = checkoutSummary?.subtotal;
+
+      const previewRes = await orderService.previewCheckout(data);
+
+      if (previewRes.hasPriceChanged) {
+        setCheckoutSummary(previewRes.checkoutSummary);
+        previewRes.priceChangedMessages?.forEach(msg => {
+          if (msg.newPrice > msg.oldPrice) {
+            toast.error(msg.message, { duration: 5000 });
+          } else {
+            toast.success(msg.message, { duration: 5000 });
+          }
+        });
+        setError('Giá của một số sản phẩm đã thay đổi. Vui lòng kiểm tra lại đơn hàng và thử lại sau.');
+        setIsSubmitting(false);
+        return; // Dừng luồng checkout
+      }
+
       const response = await orderService.checkout(data);
       toast.success('Order placed successfully');
       // Chỉ xóa các items đã checkout khỏi store nếu không phải mua ngay
@@ -369,7 +329,6 @@ export default function CheckoutPage() {
       router.push(`/orders/${response.data?.order_id ?? response.order_id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -400,8 +359,8 @@ export default function CheckoutPage() {
   }
 
   // Guard: Loading direct checkout
-  if (isFetchingDirect) {
-    return <div className="flex justify-center items-center h-64"><Loader2Icon size={24} className="animate-spin text-primary" /></div>;
+  if (isFetchingSummary || !checkoutSummary) {
+    return <CheckoutSkeleton />;
   }
 
   if (!isDirectCheckout && items.length === 0 && !cartLoading) {
@@ -416,10 +375,13 @@ export default function CheckoutPage() {
     );
   }
 
-  const subtotalAfterCampaign = Math.max(0, subtotal - campaignDiscountAmount);
-  const voucherDiscountAmount = appliedVoucher ? appliedVoucher.discount_amount : 0;
-  const finalShippingFee = isFreeship ? 0 : SHIPPING_FEE;
-  const totalAmount = Math.max(0, subtotalAfterCampaign - voucherDiscountAmount) + finalShippingFee;
+  const selectedItemsToDisplay = checkoutSummary?.items || [];
+  const subtotal = checkoutSummary?.subtotal || 0;
+  const campaignDiscountAmount = checkoutSummary?.campaignDiscountTotal || 0;
+  const voucherDiscountAmount = checkoutSummary?.voucherDiscountTotal || 0;
+  const totalAmount = checkoutSummary?.totalAmount || 0;
+  const appliedCampaign = checkoutSummary?.appliedCampaign;
+  const isFreeship = checkoutSummary?.shippingFee === 0;
   const selectedProfile = profiles.find((p) => p.profile_id === selectedProfileId);
 
   return (
@@ -648,7 +610,7 @@ export default function CheckoutPage() {
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-text-secondary">
-                  <span>Tạm tính ({selectedItems.length} sản phẩm đã chọn)</span>
+                  <span>Tạm tính ({selectedItemsToDisplay.length} sản phẩm đã chọn)</span>
                   <span className="font-medium text-text-primary">
                     {subtotal.toLocaleString('vi-VN')} ₫
                   </span>
@@ -717,7 +679,7 @@ export default function CheckoutPage() {
                 form="checkout-form"
                 className="w-full font-semibold"
                 size="lg"
-                disabled={isSubmitting || (!isDirectCheckout && cartLoading) || profilesLoading || !selectedProfileId || isFetchingDirect}
+                disabled={isSubmitting || (!isDirectCheckout && cartLoading) || profilesLoading || !selectedProfileId || isFetchingSummary || !checkoutSummary}
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

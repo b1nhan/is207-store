@@ -108,6 +108,18 @@ const Header = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
+      
+      const onFocus = () => fetchCart();
+      window.addEventListener('focus', onFocus);
+      
+      const intervalId = setInterval(() => {
+        fetchCart();
+      }, 3 * 60 * 1000); // 3 phút
+      
+      return () => {
+        window.removeEventListener('focus', onFocus);
+        clearInterval(intervalId);
+      };
     } else if (isInitialized && !isAuthenticated) {
       clearCartState();
     }

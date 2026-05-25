@@ -1,6 +1,11 @@
 import axiosInstance from '@/config/axios';
 
 const orderService = {
+  previewCheckout: async (data) => {
+    const response = await axiosInstance.post('/orders/checkout/preview', data);
+    return response.data;
+  },
+
   checkout: async (data) => {
     // Expected data: { shipping_address, payment_method, voucher_code, note } etc.
     const response = await axiosInstance.post('/orders/checkout', data);

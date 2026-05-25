@@ -54,7 +54,7 @@ function getCampaignRunStatus(campaign) {
 
 const RUN_STATUS_META = {
   upcoming: { label: 'Sắp diễn ra', color: 'bg-yellow-100 text-yellow-700' },
-  running: { label: 'Đang chạy', color: 'bg-emerald-100 text-emerald-700' },
+  running: { label: 'Đang trong thời gian diễn ra', color: 'bg-emerald-100 text-emerald-700' },
   ended: { label: 'Đã kết thúc', color: 'bg-gray-100 text-gray-500' },
 };
 

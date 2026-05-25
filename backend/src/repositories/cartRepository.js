@@ -48,6 +48,7 @@ class CartRepository {
         ci.cart_id,
         ci.variant_id,
         ci.quantity,
+        ci.price_snapshot,
         pv.size,
         pv.color,
         pv.stock_quantity,
@@ -106,13 +107,15 @@ class CartRepository {
    * Thêm item vào cart — nếu đã có thì cộng dồn quantity (upsert)
    * Sử dụng INSERT ... ON DUPLICATE KEY UPDATE để đảm bảo atomicity
    */
-  async addItem(cartId, variantId, qty) {
+  async addItem(cartId, variantId, qty, priceSnapshot) {
     const db = getDB();
     await db.query(
-      `INSERT INTO cart_items (cart_id, variant_id, quantity)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`,
-      [cartId, variantId, qty],
+      `INSERT INTO cart_items (cart_id, variant_id, quantity, price_snapshot)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE 
+          quantity = quantity + VALUES(quantity),
+          price_snapshot = VALUES(price_snapshot)`,
+      [cartId, variantId, qty, priceSnapshot],
     );
     // Trả về item vừa thêm/cập nhật
     const [rows] = await db.query(
@@ -131,6 +134,17 @@ class CartRepository {
     await db.query(
       `UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?`,
       [qty, cartItemId],
+    );
+  }
+
+  /**
+   * Cập nhật price_snapshot của một item cụ thể
+   */
+  async updatePriceSnapshot(cartItemId, price) {
+    const db = getDB();
+    await db.query(
+      `UPDATE cart_items SET price_snapshot = ? WHERE cart_item_id = ?`,
+      [price, cartItemId],
     );
   }
 

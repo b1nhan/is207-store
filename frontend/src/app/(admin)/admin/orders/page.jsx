@@ -9,22 +9,22 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'pending':   return 'bg-yellow-100 text-yellow-800';
+    case 'pending': return 'bg-yellow-100 text-yellow-800';
     case 'confirmed': return 'bg-blue-100 text-blue-800';
-    case 'shipping':  return 'bg-purple-100 text-purple-800';
+    case 'shipping': return 'bg-purple-100 text-purple-800';
     case 'delivered': return 'bg-green-100 text-green-800';
     case 'cancelled': return 'bg-red-100 text-red-800';
-    case 'returned':  return 'bg-orange-100 text-orange-800';
-    default:          return 'bg-gray-100 text-gray-800';
+    case 'returned': return 'bg-orange-100 text-orange-800';
+    default: return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getPaymentStatusColor = (status) => {
   switch (status) {
-    case 'paid':    return 'bg-green-100 text-green-700';
+    case 'paid': return 'bg-green-100 text-green-700';
     case 'pending': return 'bg-yellow-100 text-yellow-700';
-    case 'failed':  return 'bg-red-100 text-red-700';
-    default:        return 'bg-gray-100 text-gray-700';
+    case 'failed': return 'bg-red-100 text-red-700';
+    default: return 'bg-gray-100 text-gray-700';
   }
 };
 
@@ -42,6 +42,7 @@ function OrderDetailModal({ orderId, onClose }) {
     const fetchDetail = async () => {
       try {
         const res = await adminOrderService.getOrderById(orderId);
+        console.log(res.data);
         setDetail(res.data);
       } catch (err) {
         console.error('Failed to fetch order detail', err);
@@ -594,11 +595,10 @@ export default function AdminOrdersPage() {
                 <button
                   key={page}
                   onClick={() => goToPage(page)}
-                  className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${
-                    page === currentPage
+                  className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition ${page === currentPage
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

@@ -202,7 +202,7 @@ export default function CampaignDetailPage() {
           <Clock size={15} />
           {isEnded
             ? 'Campaign đã kết thúc. Bạn chỉ có thể xem thông tin.'
-            : 'Campaign đang chạy. Chỉ có thể bật/tắt — không thể chỉnh sửa nội dung.'}
+            : 'Campaign đang trong thời gian diễn ra. Chỉ có thể bật/tắt — không thể chỉnh sửa nội dung.'}
         </div>
       )}
 

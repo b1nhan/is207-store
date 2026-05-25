@@ -133,7 +133,7 @@ class OrderRepository {
   }
 
   /**
-   * Cập nhật trạng thái đơn hàng
+   * Cập nhật trạng thái đơn hàng và trạng thái thanh toán tương ứng
    * @param {number} orderId
    * @param {string} status - ORDER_STATUS value
    * @param {string|null} cancelledBy - 'USER' | 'ADMIN' | null
@@ -141,16 +141,40 @@ class OrderRepository {
    */
   async updateStatus(orderId, status, cancelledBy = null, conn = null) {
     const db = conn || getDB();
+    
+    let paymentStatus = null;
+    if (status === 'pending' || status === 'confirmed') {
+      paymentStatus = 'pending';
+    } else if (status === 'delivered') {
+      paymentStatus = 'paid';
+    } else if (status === 'cancelled') {
+      paymentStatus = 'cancelled';
+    }
+
     if (cancelledBy !== null) {
-      await db.query(
-        `UPDATE orders SET status = ?, cancelled_by = ? WHERE order_id = ?`,
-        [status, cancelledBy, orderId],
-      );
+      if (paymentStatus) {
+        await db.query(
+          `UPDATE orders SET status = ?, cancelled_by = ?, payment_status = ? WHERE order_id = ?`,
+          [status, cancelledBy, paymentStatus, orderId],
+        );
+      } else {
+        await db.query(
+          `UPDATE orders SET status = ?, cancelled_by = ? WHERE order_id = ?`,
+          [status, cancelledBy, orderId],
+        );
+      }
     } else {
-      await db.query(
-        `UPDATE orders SET status = ? WHERE order_id = ?`,
-        [status, orderId],
-      );
+      if (paymentStatus) {
+        await db.query(
+          `UPDATE orders SET status = ?, payment_status = ? WHERE order_id = ?`,
+          [status, paymentStatus, orderId],
+        );
+      } else {
+        await db.query(
+          `UPDATE orders SET status = ? WHERE order_id = ?`,
+          [status, orderId],
+        );
+      }
     }
   }
 }

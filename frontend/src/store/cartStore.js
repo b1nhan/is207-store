@@ -16,6 +16,18 @@ const useCartStore = create((set, get) => ({
 
       const response = await cartService.getCart();
       console.log(response)
+      
+      // Hiển thị toast cho thay đổi giá
+      if (response?.priceChangedMessages && response.priceChangedMessages.length > 0) {
+        response.priceChangedMessages.forEach(msg => {
+          if (msg.newPrice > msg.oldPrice) {
+            toast.error(msg.message, { duration: 5000 });
+          } else {
+            toast.success(msg.message, { duration: 5000 });
+          }
+        });
+      }
+
       set({
         cart_id: response?.cart_id || null,
         items: response?.items || [],

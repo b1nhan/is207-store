@@ -46,10 +46,41 @@ class CartService {
 
     // Nếu user chưa có cart, tạo mới (cart rỗng)
     if (!cart) {
-      return this._formatCart(null);
+      return { ...this._formatCart(null), priceChangedMessages: [] };
     }
 
-    return this._formatCart(cart);
+    const priceChangedMessages = [];
+    const updatePromises = [];
+
+    if (cart.items && cart.items.length > 0) {
+      for (const item of cart.items) {
+        // Kiểm tra chênh lệch giá
+        if (item.price_snapshot !== null && item.price_snapshot !== undefined) {
+          const oldPrice = Number(item.price_snapshot);
+          const newPrice = Number(item.unit_price);
+          
+          if (oldPrice !== newPrice) {
+            priceChangedMessages.push({
+              productId: item.product_id,
+              productName: item.product_name,
+              oldPrice,
+              newPrice,
+              message: `Giá sản phẩm "${item.product_name}" đã được cập nhật từ ${oldPrice.toLocaleString('vi-VN')}₫ → ${newPrice.toLocaleString('vi-VN')}₫`
+            });
+            updatePromises.push(cartRepository.updatePriceSnapshot(item.cart_item_id, newPrice));
+          }
+        } else {
+          // Nếu price_snapshot null (ví dụ data cũ), cập nhật mà không thông báo
+          updatePromises.push(cartRepository.updatePriceSnapshot(item.cart_item_id, Number(item.unit_price)));
+        }
+      }
+
+      if (updatePromises.length > 0) {
+        await Promise.all(updatePromises);
+      }
+    }
+
+    return { ...this._formatCart(cart), priceChangedMessages };
   }
 
   /**
@@ -68,6 +99,8 @@ class CartService {
         pv.variant_id,
         pv.stock_quantity,
         pv.status AS variant_status,
+        pv.variant_price,
+        p.base_price,
         p.product_id,
         p.status AS product_status
       FROM product_variants pv
@@ -81,6 +114,7 @@ class CartService {
     }
 
     const variant = variantRows[0];
+    const unitPrice = Number(variant.variant_price ?? variant.base_price);
 
     // Kiểm tra product active
     if (variant.product_status !== 1) {
@@ -122,7 +156,7 @@ class CartService {
       );
     }
 
-    await cartRepository.addItem(cartId, variant_id, quantity);
+    await cartRepository.addItem(cartId, variant_id, quantity, unitPrice);
 
     // Trả về cart mới nhất
     return this.getCart(userId);
