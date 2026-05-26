@@ -21,6 +21,7 @@ import {
   CheckCircle2Icon,
   ZapIcon,
   PencilIcon,
+  PackageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -438,6 +439,41 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
+
+            {/* ── Ordered Products Section ── */}
+            <div className="bg-surface p-6 rounded-2xl shadow-sm border border-card-border">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <PackageIcon className="text-primary" />
+                Sản phẩm
+              </h2>
+              <div className="divide-y divide-border">
+                {selectedItemsToDisplay.map((item, index) => (
+                  <div key={`${item.product_id}-${item.variant_id}-${index}`} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <img src={item.thumbnail} alt={item.product_name} className="w-16 h-16 object-cover rounded-lg border border-border flex-shrink-0" />
+                    {/* Product Info */}
+                    <div className="flex-grow">
+                      <Link href={`/products/${item.product_id || '#'}`} className="text-base font-medium text-text-primary hover:text-primary transition-colors line-clamp-2">
+                        {item.product_name}
+                      </Link>
+                      <div className="text-sm text-text-secondary mt-1">
+                        Phân loại: {item.color} - {item.size}
+                      </div>
+                    </div>
+
+                    {/* Price & Quantity */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 w-full sm:w-auto mt-2 sm:mt-0">
+                      <div className="text-text-secondary">
+                        {Number(item.unit_price).toLocaleString('vi-VN')} ₫ <span className="mx-1">x</span> {item.quantity}
+                      </div>
+                      <div className="font-semibold text-primary sm:w-28 text-right">
+                        {(item.unit_price * item.quantity).toLocaleString('vi-VN')} ₫
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6" noValidate>
 
               {/* ── Shipping Profile Section ── */}

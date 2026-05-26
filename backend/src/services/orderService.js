@@ -31,9 +31,11 @@ class OrderService {
           v.variant_id, v.product_id, v.size, v.color, v.stock_quantity,
           p.product_name, p.status as product_status,
           v.status as variant_status,
-          v.variant_price, p.base_price
+          v.variant_price, p.base_price,
+          pi.image_url as product_thumbnail
           FROM product_variants v
           JOIN products p ON v.product_id = p.product_id
+          LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
           WHERE v.variant_id = ? AND v.product_id = ? AND v.status = 1`,
         [dto.directItem.variant_id, dto.directItem.product_id]
       );
@@ -42,13 +44,14 @@ class OrderService {
       }
       const variant = variantRows[0];
       const unitPrice = Number(variant.variant_price ?? variant.base_price);
-      
+
       items = [{
         product_id: variant.product_id,
         variant_id: variant.variant_id,
         quantity: dto.directItem.quantity,
         unit_price: unitPrice,
         product_name: variant.product_name,
+        thumbnail: variant.product_thumbnail,
         size: variant.size,
         color: variant.color,
         stock_quantity: variant.stock_quantity,
@@ -62,7 +65,7 @@ class OrderService {
       }
       const { selectedItemIds } = dto;
       items = cart.items.filter((i) => selectedItemIds.includes(i.cart_item_id));
-      
+
       if (items.length !== selectedItemIds.length) {
         throw new AppError('Một số sản phẩm không tồn tại trong giỏ hàng', 400, ERROR_CODES.ORDER.BAD_REQUEST);
       }
@@ -77,7 +80,7 @@ class OrderService {
     // Kiểm tra chênh lệch giá nếu client gửi expected_subtotal
     if (dto.expected_subtotal !== undefined && Number(dto.expected_subtotal) !== subtotal) {
       hasPriceChanged = true;
-      
+
       // Tìm các items bị thay đổi giá
       if (cart) {
         for (const item of items) {
@@ -99,13 +102,13 @@ class OrderService {
         const oldPrice = Number(dto.directItem.expected_price);
         const newPrice = items[0].unit_price;
         if (oldPrice !== newPrice) {
-           priceChangedMessages.push({
-              productId: items[0].product_id,
-              productName: items[0].product_name,
-              oldPrice,
-              newPrice,
-              message: `Giá sản phẩm "${items[0].product_name}" đã được cập nhật từ ${oldPrice.toLocaleString('vi-VN')}₫ → ${newPrice.toLocaleString('vi-VN')}₫`
-           });
+          priceChangedMessages.push({
+            productId: items[0].product_id,
+            productName: items[0].product_name,
+            oldPrice,
+            newPrice,
+            message: `Giá sản phẩm "${items[0].product_name}" đã được cập nhật từ ${oldPrice.toLocaleString('vi-VN')}₫ → ${newPrice.toLocaleString('vi-VN')}₫`
+          });
         }
       }
     }
