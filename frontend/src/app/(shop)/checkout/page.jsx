@@ -271,6 +271,31 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleRemoveVoucher = async () => {
+    console.log('xóa')
+    setIsApplyingVoucher(true);
+    try {
+      const data = {};
+      if (isDirectCheckout) {
+        data.directItem = { product_id: directProductId, variant_id: directVariantId, quantity: directQuantity };
+      } else {
+        data.selectedItemIds = selectedItemIds;
+      }
+
+      const response = await orderService.previewCheckout(data);
+      setCheckoutSummary(response.checkoutSummary);
+
+      setAppliedVoucher(null);
+      setVoucherCode('');
+      toast.success('Đã gỡ mã giảm giá');
+    } catch (err) {
+      toast.error('Có lỗi xảy ra khi gỡ mã giảm giá');
+    } finally {
+      setIsApplyingVoucher(false);
+    }
+  };
+
+
   const handleCheckout = async (e) => {
     e.preventDefault();
 
@@ -600,13 +625,12 @@ export default function CheckoutPage() {
                 <p className="text-green-500 text-sm mt-1 flex items-center gap-1">
                   Đã áp dụng mã: <span className="font-bold">{appliedVoucher.code}</span>
                   <button
-                    onClick={() => {
-                      setAppliedVoucher(null);
-                      setVoucherCode('');
-                    }}
-                    className="text-error hover:underline ml-2 text-xs"
+                    type="button"
+                    onClick={handleRemoveVoucher}
+                    disabled={isApplyingVoucher}
+                    className="text-error hover:underline ml-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Xóa
+                    {isApplyingVoucher ? 'Đang xóa...' : 'Xóa'}
                   </button>
                 </p>
               )}
