@@ -64,6 +64,13 @@ router.delete(
 router.get('/products', verifyToken, requireAdmin, adminProductController.getAllProducts);
 
 router.post(
+  '/products/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminProductController.generateDescription,
+);
+
+router.post(
   '/products',
   verifyToken,
   requireAdmin,

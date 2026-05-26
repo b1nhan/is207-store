@@ -37,6 +37,9 @@ const adminProductService = {
   deleteVariant: (variantId) => {
     return axios.delete(`/admin/products/variants/${variantId}`);
   },
+  generateDescription: (data) => {
+    return axios.post('/admin/products/generate-description', data);
+  },
 };
 
 export default adminProductService;

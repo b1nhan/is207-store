@@ -72,6 +72,10 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
       newErrors.max_discount_amount = 'Giảm tối đa không được âm.';
     }
 
+    if (!formData.start_date) {
+      newErrors.start_date = 'Ngày bắt đầu không được để trống.';
+    }
+
     if (!formData.expiry_date) {
       newErrors.expiry_date = 'Ngày hết hạn không được để trống.';
     } else {
@@ -79,6 +83,11 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
       const today = new Date();
       if (selectedDate < today) {
         newErrors.expiry_date = 'Ngày hết hạn không được ở quá khứ.';
+      } else if (formData.start_date) {
+        const startDate = new Date(formData.start_date);
+        if (selectedDate <= startDate) {
+          newErrors.expiry_date = 'Ngày hết hạn phải sau ngày bắt đầu.';
+        }
       }
     }
 
@@ -228,14 +237,16 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu (Tùy chọn)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu *</label>
           <input
             type="datetime-local"
             name="start_date"
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            required
+            className={`w-full border rounded-lg px-4 py-2 transition ${errors.start_date ? 'border-red-500 focus:ring-red-300' : 'border-gray-300 focus:ring-indigo-300'}`}
             value={formData.start_date}
             onChange={handleInputChange}
           />
+          {errors.start_date && <p className="text-red-500 text-xs mt-1">{errors.start_date}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Ngày hết hạn *</label>
