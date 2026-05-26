@@ -130,14 +130,15 @@ class AdminCampaignRepository {
   }
 
   async update(campaignId, data, conn) {
-    const { name, description, end_date, config, tiers, product_ids } = data;
+    const { name, description, start_date, end_date, config, tiers, product_ids } = data;
 
     const updateFields = [];
     const params = [];
 
     if (name !== undefined) { updateFields.push('name = ?'); params.push(name); }
     if (description !== undefined) { updateFields.push('description = ?'); params.push(description); }
-    if (end_date !== undefined) { updateFields.push('end_date = ?'); params.push(end_date); }
+    if (start_date !== undefined) { updateFields.push('start_date = ?'); params.push(toMySQLDatetime(start_date)); }
+    if (end_date !== undefined) { updateFields.push('end_date = ?'); params.push(toMySQLDatetime(end_date)); }
 
     if (updateFields.length > 0) {
       params.push(campaignId);

@@ -75,9 +75,16 @@ class AdminCampaignService {
     }
 
     const now = new Date();
-    const startDate = new Date(campaign.start_date);
-    if (campaign.status === 1 && startDate <= now) {
+    const currentStartDate = new Date(campaign.start_date);
+    if (campaign.status === 1 && currentStartDate <= now) {
       throw new AppError('Không thể chỉnh sửa campaign đang active', 422, ERROR_CODES.CAMPAIGN.ALREADY_ACTIVE);
+    }
+
+    const finalStartDate = data.start_date ? new Date(data.start_date) : currentStartDate;
+    const finalEndDate = data.end_date ? new Date(data.end_date) : new Date(campaign.end_date);
+
+    if (finalEndDate <= finalStartDate) {
+      throw new AppError('end_date phải lớn hơn start_date', 400, ERROR_CODES.CAMPAIGN.DATE_INVALID);
     }
 
     const { config, tiers, product_ids } = data;
