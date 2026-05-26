@@ -58,6 +58,27 @@ class CartController {
   };
 
   /**
+   * PATCH /cart/:itemId/variant
+   * Cập nhật variant của item trong giỏ
+   * Body: { variant_id, quantity (optional) }
+   */
+  updateCartItemVariant = async (req, res, next) => {
+    try {
+      const result = await cartService.updateCartItemVariant(
+        req.user.user_id,
+        Number(req.params.itemId),
+        req.body,
+      );
+      sendSuccess(res, {
+        data: result,
+        message: 'Cập nhật phân loại sản phẩm thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * DELETE /cart/:itemId
    * Xóa một item khỏi giỏ hàng
    */

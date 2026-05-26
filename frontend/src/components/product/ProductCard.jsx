@@ -64,22 +64,31 @@ export const ProductCard = ({ product, discount }) => {
         return;
       }
 
-      if (productDetail.variants.length === 1) {
-        const variant = productDetail.variants[0];
-        if (variant.stock_quantity < 1) {
-          toast.error('Sản phẩm đã hết hàng!');
-          return;
-        }
+      const defaultVariant = productDetail.variants.find(v => v.stock_quantity > 0) || productDetail.variants[0];
 
-        const success = await addToCart(variant.variant_id, 1);
-        if (success) {
-          toast.success('Đã thêm vào giỏ hàng');
-        } else {
-          toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+      if (defaultVariant.stock_quantity < 1) {
+        toast.error('Sản phẩm đã hết hàng!');
+        return;
+      }
+
+      const success = await addToCart(defaultVariant.variant_id, 1);
+      if (success) {
+        let variantLabel = '';
+        if (defaultVariant.size || defaultVariant.color) {
+          const parts = [];
+          if (defaultVariant.size) parts.push(`Size ${defaultVariant.size}`);
+          if (defaultVariant.color) parts.push(defaultVariant.color);
+          variantLabel = ` (${parts.join(' / ')})`;
         }
+        
+        toast.success(`Đã thêm vào giỏ hàng${variantLabel}`, {
+          action: {
+            label: 'Đổi',
+            onClick: () => router.push(productlink)
+          }
+        });
       } else {
-        toast.info('Vui lòng chọn phân loại sản phẩm!');
-        router.push(productlink);
+        toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
       }
     } catch (error) {
       console.error(error);
@@ -109,24 +118,20 @@ export const ProductCard = ({ product, discount }) => {
         return;
       }
 
-      if (productDetail.variants.length === 1) {
-        const variant = productDetail.variants[0];
-        if (variant.stock_quantity < 1) {
-          toast.error('Sản phẩm đã hết hàng!');
-          return;
-        }
+      const defaultVariant = productDetail.variants.find(v => v.stock_quantity > 0) || productDetail.variants[0];
 
-        const params = new URLSearchParams({
-          type: 'direct',
-          productId: productDetail.product_id,
-          variantId: variant.variant_id,
-          quantity: 1
-        });
-        router.push(`/checkout?${params.toString()}`);
-      } else {
-        toast.info('Vui lòng chọn phân loại sản phẩm!');
-        router.push(productlink);
+      if (defaultVariant.stock_quantity < 1) {
+        toast.error('Sản phẩm đã hết hàng!');
+        return;
       }
+
+      const params = new URLSearchParams({
+        type: 'direct',
+        productId: productDetail.product_id,
+        variantId: defaultVariant.variant_id,
+        quantity: 1
+      });
+      router.push(`/checkout?${params.toString()}`);
     } catch (error) {
       console.error(error);
       toast.error('Có lỗi xảy ra!');

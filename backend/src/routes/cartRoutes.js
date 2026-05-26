@@ -2,7 +2,8 @@ import { Router } from 'express';
 import cartController from '../controllers/cartController.js';
 import verifyToken from '../middlewares/verifyToken.js';
 import validate from '../middlewares/validate.js';
-import { addCartItemSchema, updateCartItemSchema } from '../validations/cartValidations.js';
+import { addCartItemSchema, updateCartItemSchema, updateCartItemVariantSchema } from '../validations/cartValidations.js';
+
 
 const router = Router();
 
@@ -17,6 +18,9 @@ router.post('/', validate(addCartItemSchema), cartController.addToCart);
 
 // PUT /cart/:itemId — Cập nhật số lượng
 router.put('/:itemId', validate(updateCartItemSchema), cartController.updateCartItem);
+
+// PATCH /cart/:itemId/variant — Cập nhật variant
+router.patch('/:itemId/variant', validate(updateCartItemVariantSchema), cartController.updateCartItemVariant);
 
 // DELETE /cart/:itemId — Xóa một item
 router.delete('/:itemId', cartController.removeCartItem);

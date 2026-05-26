@@ -16,6 +16,11 @@ const cartService = {
     return response.data;
   },
 
+  updateCartItemVariant: async (itemId, { variant_id, quantity }) => {
+    const response = await axiosInstance.patch(`/cart/${itemId}/variant`, { variant_id, quantity });
+    return response.data;
+  },
+
   removeCartItem: async (itemId) => {
     const response = await axiosInstance.delete(`/cart/${itemId}`);
     return response.data;

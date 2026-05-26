@@ -9,6 +9,7 @@ import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon, CheckIcon } 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { CartItemVariantSelector } from './CartItemVariantSelector';
 
 const SHIPPING_FEE = 30000;
 
@@ -355,9 +356,7 @@ export default function CartPage() {
                         >
                           {item.product_name}
                         </Link>
-                        <p className="text-sm text-text-secondary mt-1">
-                          Phân loại: <span className="font-medium text-text-primary">{item.color}</span> - <span className="font-medium text-text-primary">{item.size}</span>
-                        </p>
+                        <CartItemVariantSelector item={item} />
                         {/* Campaign name tag */}
                         {discount && (
                           <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-orange-500 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-medium">
