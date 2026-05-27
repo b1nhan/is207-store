@@ -3,6 +3,13 @@ import { categoryService } from '@/services/categoryService';
 import { CategorySection } from '@/components/category/CategorySection';
 
 export async function CategorySectionWrapper() {
-  const { data } = await categoryService.getCategories();
-  return <CategorySection categories={data.items} />;
+  let categories = [];
+  try {
+    const { data } = await categoryService.getCategories();
+    categories = data?.items || [];
+  } catch (error) {
+    console.error('Failed to fetch categories:', error.message);
+  }
+
+  return <CategorySection categories={categories} />;
 }

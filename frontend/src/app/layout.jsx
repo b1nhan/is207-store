@@ -12,7 +12,7 @@ import { ConfirmProvider } from '@/components/ui/ConfirmDialog';
 export default function RootLayout({ children }) {
   return (
     <html lang="vi">
-      <body>
+      <body suppressHydrationWarning>
         <AuthGuard>
           <ConfirmProvider>
             {children}
