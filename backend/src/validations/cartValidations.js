@@ -24,3 +24,17 @@ export const updateCartItemSchema = z.object({
     .positive()
     .max(99, 'Số lượng tối đa là 99'),
 });
+
+/**
+ * Schema validate body khi cập nhật variant của item
+ * PATCH /cart/:itemId/variant
+ */
+export const updateCartItemVariantSchema = z.object({
+  variant_id: z.number({ required_error: 'variant_id là bắt buộc' }).int().positive(),
+  quantity: z
+    .number()
+    .int()
+    .positive()
+    .max(99, 'Số lượng tối đa là 99')
+    .optional(),
+});

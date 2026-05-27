@@ -75,6 +75,24 @@ const useCartStore = create((set, get) => ({
     }
   },
 
+  updateVariant: async (itemId, variant_id, quantity) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await cartService.updateCartItemVariant(itemId, { variant_id, quantity });
+      set({
+        cart_id: response?.cart_id || null,
+        items: response?.items || [],
+        subtotal: response?.subtotal || 0,
+        totalItems: response?.total_items || 0,
+        isLoading: false,
+      });
+      toast.success('Cart updated');
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Lỗi khi cập nhật phân loại sản phẩm', isLoading: false });
+      throw error;
+    }
+  },
+
   removeItem: async (itemId) => {
     set({ isLoading: true, error: null });
     try {

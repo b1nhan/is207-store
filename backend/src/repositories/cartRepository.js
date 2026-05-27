@@ -82,7 +82,8 @@ class CartRepository {
         ci.cart_id,
         ci.variant_id,
         ci.quantity,
-        pv.stock_quantity
+        pv.stock_quantity,
+        pv.product_id
       FROM cart_items ci
       JOIN product_variants pv ON ci.variant_id = pv.variant_id
       WHERE ci.cart_id = ? AND ci.cart_item_id = ?`,
@@ -134,6 +135,17 @@ class CartRepository {
     await db.query(
       `UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?`,
       [qty, cartItemId],
+    );
+  }
+
+  /**
+   * Cập nhật variant, số lượng và giá của một item
+   */
+  async updateItemVariant(cartItemId, variantId, qty, priceSnapshot) {
+    const db = getDB();
+    await db.query(
+      `UPDATE cart_items SET variant_id = ?, quantity = ?, price_snapshot = ? WHERE cart_item_id = ?`,
+      [variantId, qty, priceSnapshot, cartItemId],
     );
   }
 

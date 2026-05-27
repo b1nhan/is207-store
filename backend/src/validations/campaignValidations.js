@@ -27,6 +27,7 @@ export const createCampaignSchema = z.object({
 export const updateCampaignSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().optional().nullable(),
+  start_date: z.string().datetime({ offset: true }).optional(),
   end_date: z.string().datetime({ offset: true }).optional(),
   
   config: z.object({
@@ -39,7 +40,12 @@ export const updateCampaignSchema = z.object({
   })).nullable().optional(),
 
   product_ids: z.array(z.number().int().positive()).nullable().optional()
-});
+}).refine(data => {
+  if (data.start_date && data.end_date) {
+    return new Date(data.end_date) > new Date(data.start_date);
+  }
+  return true;
+}, { message: 'end_date phải lớn hơn start_date', path: ['end_date'] });
 
 export const statusCampaignSchema = z.object({
   status: z.number({ required_error: 'Trạng thái là bắt buộc' }).int().min(0).max(1)

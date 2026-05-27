@@ -195,6 +195,73 @@ class CartService {
   }
 
   /**
+   * Cập nhật variant của item trong giỏ
+   */
+  async updateCartItemVariant(userId, itemId, { variant_id, quantity }) {
+    const cartRow = await cartRepository.findCartByUserId(userId);
+    if (!cartRow) {
+      throw new AppError('Giỏ hàng không tồn tại', 404, ERROR_CODES.CART.NOT_FOUND);
+    }
+    const cartId = cartRow.cart_id;
+
+    const item = await cartRepository.findCartItem(cartId, itemId);
+    if (!item) {
+      throw new AppError('Sản phẩm không có trong giỏ hàng', 404, ERROR_CODES.CART.ITEM_NOT_FOUND);
+    }
+
+    const db = getDB();
+    const [variantRows] = await db.query(
+      `SELECT
+        pv.variant_id,
+        pv.product_id,
+        pv.stock_quantity,
+        pv.status AS variant_status,
+        pv.variant_price,
+        p.base_price,
+        p.status AS product_status
+      FROM product_variants pv
+      JOIN products p ON pv.product_id = p.product_id
+      WHERE pv.variant_id = ?`,
+      [variant_id]
+    );
+
+    if (variantRows.length === 0) {
+      throw new AppError('Biến thể sản phẩm không tồn tại', 422, ERROR_CODES.PRODUCT.VARIANT_NOT_FOUND);
+    }
+    const variant = variantRows[0];
+
+    if (variant.product_id !== item.product_id) {
+      throw new AppError('Biến thể không thuộc cùng một sản phẩm', 422, 'VARIANT_MISMATCH');
+    }
+
+    if (variant.product_status !== 1 || (variant.is_active !== undefined && !variant.is_active)) {
+      throw new AppError('Sản phẩm này hiện không còn bán', 409, ERROR_CODES.PRODUCT.INACTIVE);
+    }
+
+    const newQty = quantity !== undefined ? quantity : item.quantity;
+    const unitPrice = Number(variant.variant_price ?? variant.base_price);
+
+    const existingVariantItem = await cartRepository.findCartItemByVariant(cartId, variant_id);
+
+    if (existingVariantItem && existingVariantItem.cart_item_id !== itemId) {
+      const mergedQty = existingVariantItem.quantity + newQty;
+      if (mergedQty > variant.stock_quantity) {
+        throw new AppError(`Chỉ còn ${variant.stock_quantity} sản phẩm trong kho`, 409, ERROR_CODES.CART.EXCEED_STOCK);
+      }
+      await cartRepository.updateItemQuantity(existingVariantItem.cart_item_id, mergedQty);
+      await cartRepository.updatePriceSnapshot(existingVariantItem.cart_item_id, unitPrice);
+      await cartRepository.removeItem(itemId);
+    } else {
+      if (newQty > variant.stock_quantity) {
+        throw new AppError(`Chỉ còn ${variant.stock_quantity} sản phẩm trong kho`, 409, ERROR_CODES.CART.EXCEED_STOCK);
+      }
+      await cartRepository.updateItemVariant(itemId, variant_id, newQty, unitPrice);
+    }
+
+    return this.getCart(userId);
+  }
+
+  /**
    * Xóa một item khỏi giỏ hàng
    * - Kiểm tra ownership (item phải thuộc cart của user này)
    */
