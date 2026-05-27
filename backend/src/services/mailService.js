@@ -18,18 +18,15 @@ class MailService {
     return this.transporter;
   }
 
-  async getAdminEmails() {
-    const emails = new Set();
+  async getAdmins() {
+    const admins = [];
+    const seenEmails = new Set();
 
-    // Luôn thêm email cấu hình từ env/code
-    if (MAIL_CONFIG.ADMIN_EMAIL) {
-      emails.add(MAIL_CONFIG.ADMIN_EMAIL.trim().toLowerCase());
-    }
-
+    // 1. Lấy từ database trước
     try {
       const db = getDB();
       const [rows] = await db.query(
-        `SELECT u.email 
+        `SELECT u.username, u.email 
          FROM users u
          JOIN roles r ON u.role_id = r.role_id
          WHERE r.role_name = 'admin'`
@@ -37,15 +34,34 @@ class MailService {
       if (rows && rows.length > 0) {
         rows.forEach((row) => {
           if (row.email) {
-            emails.add(row.email.trim().toLowerCase());
+            const emailKey = row.email.trim().toLowerCase();
+            if (!seenEmails.has(emailKey)) {
+              seenEmails.add(emailKey);
+              admins.push({
+                username: row.username || 'Admin',
+                email: emailKey
+              });
+            }
           }
         });
       }
     } catch (error) {
-      logger.error(`Error querying admin emails: ${error.message}`);
+      logger.error(`Error querying admin users: ${error.message}`);
     }
 
-    return Array.from(emails);
+    // 2. Thêm email từ cấu hình env/code nếu chưa có trong danh sách
+    if (MAIL_CONFIG.ADMIN_EMAIL) {
+      const envEmail = MAIL_CONFIG.ADMIN_EMAIL.trim().toLowerCase();
+      if (!seenEmails.has(envEmail)) {
+        seenEmails.add(envEmail);
+        admins.push({
+          username: 'Admin',
+          email: envEmail
+        });
+      }
+    }
+
+    return admins;
   }
 
   /**
@@ -94,8 +110,7 @@ class MailService {
    * @param {object} user - Chi tiết người đặt hàng (optional)
    */
   async sendOrderPlacementNotification(order, user) {
-    const adminEmails = await this.getAdminEmails();
-    const to = adminEmails.join(', ');
+    const admins = await this.getAdmins();
     const subject = `[ĐƠN HÀNG MỚI] Đơn hàng #${order.order_id} đã được đặt thành công`;
 
     const customerName = user ? `${user.full_name || user.username} (${user.email})` : order.receiver_name;
@@ -120,7 +135,8 @@ class MailService {
       )
       .join('');
 
-    const html = `
+    for (const admin of admins) {
+      const html = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -138,7 +154,7 @@ class MailService {
 
           <!-- Body -->
           <div style="padding: 30px;">
-            <p style="font-size: 16px; color: #2d3748; margin-top: 0;">Xin chào Admin,</p>
+            <p style="font-size: 16px; color: #2d3748; margin-top: 0;">Xin chào <strong>${admin.username}</strong>,</p>
             <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">
               Hệ thống vừa ghi nhận khách hàng <strong>${customerName}</strong> đã đặt một đơn hàng mới thành công. Dưới đây là thông tin chi tiết:
             </p>
@@ -231,8 +247,9 @@ class MailService {
       </html>
     `;
 
-    // Gửi bất đồng bộ ở background, không đợi await để không block API chính
-    this.sendMail({ to, subject, html });
+      // Gửi bất đồng bộ ở background, không đợi await để không block API chính
+      this.sendMail({ to: admin.email, subject, html });
+    }
   }
 
   /**
@@ -241,8 +258,7 @@ class MailService {
    * @param {object} user - Chi tiết người hủy đơn
    */
   async sendOrderCancellationNotification(order, user) {
-    const adminEmails = await this.getAdminEmails();
-    const to = adminEmails.join(', ');
+    const admins = await this.getAdmins();
     const subject = `[HỦY ĐƠN HÀNG] Đơn hàng #${order.order_id} đã bị hủy bởi khách hàng`;
 
     const customerName = user ? `${user.full_name || user.username} (${user.email})` : order.receiver_name;
@@ -267,7 +283,8 @@ class MailService {
       )
       .join('');
 
-    const html = `
+    for (const admin of admins) {
+      const html = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -285,7 +302,7 @@ class MailService {
 
           <!-- Body -->
           <div style="padding: 30px;">
-            <p style="font-size: 16px; color: #2d3748; margin-top: 0;">Xin chào Admin,</p>
+            <p style="font-size: 16px; color: #2d3748; margin-top: 0;">Xin chào <strong>${admin.username}</strong>,</p>
             <p style="font-size: 15px; color: #4a5568; line-height: 1.6;">
               Hệ thống ghi nhận đơn hàng <strong>#${order.order_id}</strong> của khách hàng <strong>${customerName}</strong> đã được <strong>hủy thành công bởi người dùng</strong>.
             </p>
@@ -340,8 +357,9 @@ class MailService {
       </html>
     `;
 
-    // Gửi bất đồng bộ ở background, không đợi await để không block API chính
-    this.sendMail({ to, subject, html });
+      // Gửi bất đồng bộ ở background, không đợi await để không block API chính
+      this.sendMail({ to: admin.email, subject, html });
+    }
   }
 }
 
