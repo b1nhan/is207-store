@@ -9,6 +9,8 @@ import AppError from '../utils/AppError.js';
 import { ERROR_CODES } from '../constants/errorCode.js';
 import ORDER_STATUS from '../constants/orderStatus.js';
 import { getPagination, getPaginationData } from '../utils/pagination.js';
+import mailService from './mailService.js';
+import * as userRepository from '../repositories/userRepository.js';
 
 // Phí ship cố định (có thể tách ra config sau)
 const SHIPPING_FEE = 30000;
@@ -512,7 +514,19 @@ class OrderService {
       await conn.commit();
 
       // ── 7. Trả về order detail ───────────────────────────────────────────
-      return this._getOrderDetail(orderId);
+      const orderDetail = await this._getOrderDetail(orderId);
+
+      // Gửi mail thông báo cho admin bất đồng bộ
+      userRepository.findById(userId)
+        .then((user) => {
+          mailService.sendOrderPlacementNotification(orderDetail, user);
+        })
+        .catch((err) => {
+          console.error('Error fetching user info for email notification:', err);
+          mailService.sendOrderPlacementNotification(orderDetail, null);
+        });
+
+      return orderDetail;
     } catch (err) {
       await conn.rollback();
       throw err;
@@ -580,6 +594,18 @@ class OrderService {
       }
 
       await conn.commit();
+
+      // Gửi mail thông báo hủy đơn cho admin bất đồng bộ
+      this._getOrderDetail(orderId)
+        .then(async (orderDetail) => {
+          if (orderDetail) {
+            const user = await userRepository.findById(userId).catch(() => null);
+            mailService.sendOrderCancellationNotification(orderDetail, user);
+          }
+        })
+        .catch((err) => {
+          console.error('Error sending order cancellation email notification:', err);
+        });
     } catch (err) {
       await conn.rollback();
       throw err;
