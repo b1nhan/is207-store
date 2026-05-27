@@ -74,7 +74,7 @@ const AccountDropdown = ({ user, logout }) => {
           {user?.username || 'Account'}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end" className='w-auto flex flex-col justify-end'>
         {DROPDOWN_ITEMS.map(({ title, href, icon: Icon }) => (
           <DropdownMenuItem key={title} asChild className="cursor-pointer">
             <Link href={href}>
@@ -87,7 +87,7 @@ const AccountDropdown = ({ user, logout }) => {
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link href="/admin">
               <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-              Trang Quản Trị
+              Admin
             </Link>
           </DropdownMenuItem>
         )}
@@ -108,14 +108,14 @@ const Header = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchCart();
-      
+
       const onFocus = () => fetchCart();
       window.addEventListener('focus', onFocus);
-      
+
       const intervalId = setInterval(() => {
         fetchCart();
       }, 3 * 60 * 1000); // 3 phút
-      
+
       return () => {
         window.removeEventListener('focus', onFocus);
         clearInterval(intervalId);
@@ -131,11 +131,11 @@ const Header = () => {
       <SearchBar />
       <NavLinks />
       <div className="flex gap-4 items-center">
-        <Button variant="ghost" size="icon-lg" asChild className="relative">
+        <Button variant="ghost" size="icon-2xl" asChild className="relative">
           <Link href="/cart">
-            <ShoppingCartIcon />
+            <ShoppingCartIcon className='size-6' />
             {totalItems > 0 && (
-              <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              <span className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[12px] font-bold leading-none text-white">
                 {totalItems > 99 ? '99+' : totalItems}
               </span>
             )}

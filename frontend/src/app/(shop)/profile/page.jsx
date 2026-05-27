@@ -102,7 +102,7 @@ function EditProfileModal({ user, onClose, onSaved }) {
         full_name: form.full_name || undefined,
         phone: form.phone || undefined,
       });
-      toast.success('Profile saved');
+      toast.success('Lưu Profile thành công');
       onSaved(response.data);
       onClose();
     } catch (err) {
@@ -442,7 +442,7 @@ export default function ProfilePage() {
   const fetchRecentOrders = async () => {
     setIsLoadingOrders(true);
     try {
-      const response = await orderService.getOrders({ page: 1, limit: 3 });
+      const response = await orderService.getOrders({ page: 1, limit: 5 });
       setRecentOrders(response.orders || []);
       setTotalOrders(response.pagination?.totalItems || 0);
     } catch (error) {
@@ -515,7 +515,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Breadcrumbs items={[{ label: 'Tài khoản' }]} className="mb-6" />
+      <Breadcrumbs items={[{ label: 'Profile' }]} className="mb-6" />
       <h1 className="text-3xl font-bold text-text-primary mb-8">Hồ sơ cá nhân</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -750,16 +750,21 @@ export default function ProfilePage() {
                           Đơn hàng #{order.order_id}
                         </Link>
                         <p className="text-sm text-text-secondary">
-                          {formatDate(order.created_at)}
+                          {formatDate(order.order_date)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                      <div className="flex items-end gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusInfo.color}`}>
                           {statusInfo.label}
                         </span>
-                        <span className="font-semibold text-text-primary">
-                          {Number(order.total_amount).toLocaleString('vi-VN')} ₫
-                        </span>
+                        <div className='text-right'>
+                          <p className="text-sm font-medium text-text-secondary">
+                            {order.receiver_name}
+                          </p>
+                          <span className="font-semibold text-text-primary">
+                            {Number(order.total_amount).toLocaleString('vi-VN')} ₫
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );

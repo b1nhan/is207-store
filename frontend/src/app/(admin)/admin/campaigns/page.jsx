@@ -103,7 +103,7 @@ export default function AdminCampaignsPage() {
     setTogglingId(campaign.campaign_id);
     try {
       await adminCampaignService.updateStatus(campaign.campaign_id, campaign.status === 1 ? 0 : 1);
-      toast.success('Campaign status updated');
+      toast.success('Cập nhật trạng thái campaign thành công');
       fetchCampaigns();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
@@ -121,7 +121,7 @@ export default function AdminCampaignsPage() {
     if (!isConfirmed) return;
     try {
       await adminCampaignService.deleteCampaign(campaign.campaign_id);
-      toast.info('Campaign deleted');
+      toast.info(`Đã xóa Campaign ${campaign.name}`);
       fetchCampaigns();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xóa campaign thất bại');
@@ -136,13 +136,15 @@ export default function AdminCampaignsPage() {
     <div className="space-y-6">
       <Breadcrumbs
         root={{ label: 'Admin', href: '/admin' }}
-        items={[{ label: 'Chiến dịch' }]}
+        items={[{ label: 'Campaign' }]}
       />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Quản lý chương trình khuyến mãi</p>
+          <h1 className="text-2xl font-bold text-gray-900">Quản lý Campaign</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {campaigns.length} Campaign
+          </p>
         </div>
         <Link href="/admin/campaigns/new">
           <Button className="flex items-center gap-2">

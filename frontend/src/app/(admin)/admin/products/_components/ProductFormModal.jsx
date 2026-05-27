@@ -144,7 +144,7 @@ function ImageUploadPanel({ productId, existingImages, onImagesChange, isEdit })
     try {
       await adminProductService.deleteImage(productId, imageId);
       onImagesChange(existingImages.filter((img) => img.image_id !== imageId));
-      toast.info('Image deleted');
+      toast.info('Đã xóa hình ảnh');
     } catch (err) {
       toast.error(err.message || 'Không thể xóa ảnh');
     } finally {
@@ -310,11 +310,11 @@ function VariantSection({ productId, variants, setVariants }) {
         setVariants((prev) =>
           prev.map((v) => (v.variant_id === editingId ? res.data : v))
         );
-        toast.success('Variant updated');
+        toast.success('Cập nhật phân loại thành công');
       }
       cancelEdit();
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'Lưu variant thất bại');
+      toast.error(err.response?.data?.message || err.message || 'Lưu phân loại thất bại');
     } finally {
       setSaving(false);
     }
@@ -331,9 +331,9 @@ function VariantSection({ productId, variants, setVariants }) {
     try {
       await adminProductService.deleteVariant(variantId);
       setVariants((prev) => prev.filter((v) => v.variant_id !== variantId));
-      toast.info('Variant deleted');
+      toast.info('Đã xóa phân loại');
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'Xóa variant thất bại');
+      toast.error(err.response?.data?.message || err.message || 'Xóa phân loại thất bại');
     } finally {
       setDeletingId(null);
     }
@@ -644,7 +644,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
         }
       }
 
-      toast.success(isEdit ? 'Product updated' : 'Product created');
+      toast.success(isEdit ? 'Cập nhật sản phẩm thành công' : 'Tạo sản phẩm thành công');
       onSuccess?.();
     } catch (error) {
       console.error('Failed to save product', error);
@@ -711,9 +711,8 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 <input
                   type="text"
                   name="product_name"
-                  className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
-                    errors.product_name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${errors.product_name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   value={formData.product_name}
                   onChange={handleNameChange}
                 />
@@ -730,9 +729,8 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 <input
                   type="text"
                   name="slug"
-                  className={`w-full border rounded-lg px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
-                    errors.slug ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full border rounded-lg px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${errors.slug ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   value={formData.slug}
                   onChange={handleInput}
                 />
@@ -751,9 +749,8 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                   <input
                     type="number"
                     name="base_price"
-                    className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${
-                      errors.base_price ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition ${errors.base_price ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     value={formData.base_price}
                     onChange={handleInput}
                   />

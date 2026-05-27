@@ -31,11 +31,9 @@ export default async function HomePage() {
     <div className="flex flex-col gap-16 pb-20">
       <HeroSection />
       <CategorySectionWrapper />
-
-      {/* Thay HeroSection2 bằng banner campaign thực tế */}
       {campaigns.length > 0 && <CampaignBanner campaigns={campaigns} />}
 
-      {/* Danh sách tất cả campaign (cards nhỏ) */}
+
       {campaigns.length > 0 && <CampaignSection campaigns={campaigns} />}
 
       <ProductSection

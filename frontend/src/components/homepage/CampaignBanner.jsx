@@ -40,7 +40,7 @@ function CountdownBlock({ endDate, light = false }) {
 
   const valueCls = `text-xl font-bold tabular-nums ${light ? 'text-white' : 'text-text-primary'}`;
   const labelCls = `text-[9px] uppercase tracking-widest ${light ? 'text-white/60' : 'text-text-muted'}`;
-  const sepCls   = `text-lg font-bold ${light ? 'text-white/50' : 'text-text-muted'}`;
+  const sepCls = `text-lg font-bold ${light ? 'text-white/50' : 'text-text-muted'}`;
 
   if (t.expired) {
     return (
@@ -51,8 +51,8 @@ function CountdownBlock({ endDate, light = false }) {
   }
 
   const hours = parseInt(t.h, 10);
-  const days  = Math.floor(hours / 24);
-  const remH  = String(hours % 24).padStart(2, '0');
+  const days = Math.floor(hours / 24);
+  const remH = String(hours % 24).padStart(2, '0');
 
   return (
     <div className="flex items-center gap-1.5">

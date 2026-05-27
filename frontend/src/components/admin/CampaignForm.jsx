@@ -401,10 +401,10 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
       const payload = buildPayload();
       if (isEdit) {
         await adminCampaignService.updateCampaign(initialData.campaign_id, payload);
-        toast.success('Campaign updated');
+        toast.success('Cập nhật Campaign thành công');
       } else {
         await adminCampaignService.createCampaign(payload);
-        toast.success('Campaign created');
+        toast.success('Tạo Campaign thành công');
       }
       router.push('/admin/campaigns');
     } catch (err) {

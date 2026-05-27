@@ -19,10 +19,10 @@ function DeleteConfirmModal({ open, onClose, onConfirm, brand, deleting }) {
           <div className="p-2 bg-red-50 rounded-xl">
             <Trash2 size={20} className="text-red-500" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Xóa thương hiệu</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Xóa Brand</h2>
         </div>
         <p className="text-sm text-gray-600 mb-1">
-          Bạn có chắc muốn xóa thương hiệu{' '}
+          Bạn có chắc muốn xóa Brand{' '}
           <span className="font-semibold text-gray-900">&ldquo;{brand.brand_name}&rdquo;</span>?
         </p>
         <p className="text-xs text-gray-400 mb-5">Hành động này không thể hoàn tác.</p>
@@ -99,10 +99,10 @@ export default function AdminBrandsPage() {
     try {
       await adminBrandService.deleteBrand(deleteModal.brand.brand_id);
       setDeleteModal({ open: false, brand: null });
-      toast.info('Brand deleted');
+      toast.info(`Đã xóa Brand ${deleteModal.brand.brand_name}`);
       fetchBrands();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Xóa thương hiệu thất bại');
+      toast.error(err.response?.data?.message || 'Xóa Brand thất bại');
     } finally {
       setDeleting(false);
     }
@@ -145,34 +145,20 @@ export default function AdminBrandsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           root={{ label: 'Admin', href: '/admin' }}
-          items={[{ label: 'Thương hiệu' }]}
+          items={[{ label: 'Brand' }]}
         />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Thương hiệu</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý Brand</h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              Quản lý tất cả thương hiệu · <span className="font-medium">{brands.length}</span> thương hiệu
+              {brands.length} Brand
             </p>
           </div>
           <Button onClick={handleOpenCreate} className="flex items-center gap-2 self-start sm:self-auto">
             <Plus size={16} />
-            Tạo thương hiệu
+            Tạo Brand
           </Button>
-        </div>
-
-        {/* Search bar */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="relative max-w-sm">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo tên thương hiệu..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
         </div>
 
         {/* Stats cards */}
@@ -203,6 +189,20 @@ export default function AdminBrandsPage() {
           </div>
         )}
 
+        {/* Search bar */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên Brand..."
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           {loading ? (
@@ -214,8 +214,8 @@ export default function AdminBrandsPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="p-4 font-semibold text-gray-600 text-sm w-12">#</th>
-                  <th className="p-4 font-semibold text-gray-600 text-sm">Thương hiệu</th>
-                  <th className="p-4 font-semibold text-gray-600 text-sm text-center">Số sản phẩm</th>
+                  <th className="p-4 font-semibold text-gray-600 text-sm">Brand</th>
+                  <th className="p-4 font-semibold text-gray-600 text-sm text-center">Sản phẩm thuộc Brand</th>
                   <th className="p-4 font-semibold text-gray-600 text-sm text-right">Thao tác</th>
                 </tr>
               </thead>
@@ -225,7 +225,7 @@ export default function AdminBrandsPage() {
                     <td colSpan={4} className="p-12 text-center text-gray-400">
                       <ShoppingBag size={40} className="mx-auto mb-3 opacity-30" />
                       <p className="text-sm">
-                        {search ? 'Không tìm thấy thương hiệu phù hợp' : 'Chưa có thương hiệu nào'}
+                        {search ? 'Không tìm thấy Brand phù hợp' : 'Chưa có Brand nào'}
                       </p>
                     </td>
                   </tr>
@@ -296,7 +296,7 @@ export default function AdminBrandsPage() {
         {/* Info note */}
         {!loading && (
           <p className="text-xs text-gray-400 text-center">
-            * Thương hiệu đang chứa sản phẩm không thể xóa trực tiếp
+            * Brand đang chứa sản phẩm không thể xóa trực tiếp
           </p>
         )}
       </div>

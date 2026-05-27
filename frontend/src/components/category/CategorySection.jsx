@@ -33,8 +33,8 @@ export function CategorySection({ categories, isGrid = false, hideHeader = false
   };
 
   return (
-    <section className={isGrid ? "py-4" : "bg-background py-10"}>
-      <div className={isGrid ? "w-full" : "mx-auto max-w-[1440px] px-12"}>
+    <section className={isGrid ? "py-4" : "py-10"}>
+      <div className={isGrid ? "w-full" : "px-12"}>
         {!hideHeader && (
           <div className="mb-8 flex items-center justify-between">
             <h2 className="text-text-primary text-2xl font-medium">
@@ -44,14 +44,14 @@ export function CategorySection({ categories, isGrid = false, hideHeader = false
               <Button
                 variant="ghost"
                 onClick={() => scroll('left')}
-                className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0 hover:bg-transparent"
+                className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0"
               >
                 <ChevronLeft size={34} strokeWidth={2.4} />
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => scroll('right')}
-                className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0 hover:bg-transparent"
+                className="text-text-primary hover:text-text-primary h-8 w-8 min-w-8 p-0"
               >
                 <ChevronRight size={34} strokeWidth={2.4} />
               </Button>
@@ -77,9 +77,8 @@ export function CategorySection({ categories, isGrid = false, hideHeader = false
               <Link
                 key={item.category_id}
                 href={`/category/${slug}`}
-                className={`bg-secondary hover:bg-cb-200 flex h-[128px] ${
-                  !isGrid ? 'min-w-[160px]' : ''
-                } cursor-pointer flex-col items-center justify-center gap-2 rounded-[15px] px-6 py-6 text-center transition`}
+                className={`bg-secondary hover:bg-cb-200 flex h-[128px] ${!isGrid ? 'min-w-[160px]' : ''
+                  } cursor-pointer flex-col items-center justify-center gap-2 rounded-[15px] px-6 py-6 text-center transition`}
               >
                 <Icon
                   size={32}

@@ -93,7 +93,7 @@ export default function RegisterForm() {
       }
 
       setUser(payload.user);
-      toast.success('Account created');
+      toast.success('Tạo tài khoản thành công');
       router.push('/');
     } catch (err) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');

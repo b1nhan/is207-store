@@ -183,7 +183,7 @@ export default function CampaignSection({ campaigns = [] }) {
   });
 
   return (
-    <section className="px-4 py-10" id="campaigns-section">
+    <section className="px-12 py-10" id="campaigns-section">
       <style>{`
         .countdown-unit {
           display: inline-block;
@@ -216,13 +216,12 @@ export default function CampaignSection({ campaigns = [] }) {
 
       {/* Grid */}
       <div
-        className={`grid gap-4 ${
-          sorted.length === 1
+        className={`grid gap-4 ${sorted.length === 1
             ? 'grid-cols-1 max-w-md'
             : sorted.length === 2
               ? 'grid-cols-1 sm:grid-cols-2'
               : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-        }`}
+          }`}
       >
         {sorted.slice(0, 6).map((c, i) => (
           <CampaignCard key={c.campaign_id} campaign={c} index={i} />

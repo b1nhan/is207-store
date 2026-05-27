@@ -71,9 +71,7 @@ export default async function CampaignsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-6xl px-4 pt-4">
-        <Breadcrumbs items={[{ label: 'Khuyến mãi' }]} />
-      </div>
+
       {/* Page header */}
       <section className="bg-gradient-to-r from-cb-950 via-cb-900 to-cb-800 py-14">
         <div className="container mx-auto max-w-6xl px-4 text-center">
@@ -89,6 +87,9 @@ export default async function CampaignsPage() {
         </div>
       </section>
 
+      <div className="container mx-auto max-w-6xl px-4 pt-4">
+        <Breadcrumbs items={[{ label: 'Khuyến mãi' }]} />
+      </div>
       {/* Campaign grid */}
       <section className="container mx-auto max-w-6xl px-4 py-12">
         {sorted.length === 0 ? (

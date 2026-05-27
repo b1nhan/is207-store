@@ -99,7 +99,7 @@ export default function AdminCategoriesPage() {
     try {
       await adminCategoryService.deleteCategory(deleteModal.category.category_id);
       setDeleteModal({ open: false, category: null });
-      toast.info('Category deleted');
+      toast.info(`Đã xóa danh mục ${deleteModal.category.category_name}`);
       fetchCategories();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xóa danh mục thất bại');
@@ -137,9 +137,9 @@ export default function AdminCategoriesPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Danh mục</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý danh mục</h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              Quản lý tất cả danh mục sản phẩm · <span className="font-medium">{categories.length}</span> danh mục
+              {categories.length} danh mục
             </p>
           </div>
           <Button onClick={handleOpenCreate} className="flex items-center gap-2 self-start sm:self-auto">
@@ -156,7 +156,7 @@ export default function AdminCategoriesPage() {
               <p className="text-2xl font-bold text-gray-900 mt-1">{categories.length}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Danh mục có SP</p>
+              <p className="text-xs text-gray-500 font-medium">Danh mục có sản phẩm</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
                 {categories.filter((c) => Number(c.product_count) > 0).length}
               </p>
@@ -178,7 +178,7 @@ export default function AdminCategoriesPage() {
 
         {/* Search bar */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="relative max-w-sm">
+          <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"

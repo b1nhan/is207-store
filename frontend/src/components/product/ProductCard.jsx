@@ -80,13 +80,8 @@ export const ProductCard = ({ product, discount }) => {
           if (defaultVariant.color) parts.push(defaultVariant.color);
           variantLabel = ` (${parts.join(' / ')})`;
         }
-        
-        toast.success(`Đã thêm vào giỏ hàng${variantLabel}`, {
-          action: {
-            label: 'Đổi',
-            onClick: () => router.push(productlink)
-          }
-        });
+
+        toast.success(`Đã thêm sản phẩm ${product.product_name} vào giỏ hàng`);
       } else {
         toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
       }

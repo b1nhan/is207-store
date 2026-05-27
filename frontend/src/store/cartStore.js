@@ -69,7 +69,7 @@ const useCartStore = create((set, get) => ({
         totalItems: response?.total_items || 0,
         isLoading: false,
       });
-      toast.success('Cart updated');
+      toast.success('Cập nhật giỏ hàng thành công');
     } catch (error) {
       set({ error: error.response?.data?.message || 'Lỗi khi cập nhật số lượng', isLoading: false });
     }
@@ -86,7 +86,7 @@ const useCartStore = create((set, get) => ({
         totalItems: response?.total_items || 0,
         isLoading: false,
       });
-      toast.success('Cart updated');
+      toast.success('Cập nhật giỏ hàng thành công');
     } catch (error) {
       set({ error: error.response?.data?.message || 'Lỗi khi cập nhật phân loại sản phẩm', isLoading: false });
       throw error;
@@ -104,7 +104,7 @@ const useCartStore = create((set, get) => ({
         totalItems: response?.total_items || 0,
         isLoading: false,
       });
-      toast.info('Item removed');
+      toast.info('Đã xóa sản phẩm');
     } catch (error) {
       set({ error: error.response?.data?.message || 'Lỗi khi xóa sản phẩm khỏi giỏ', isLoading: false });
     }

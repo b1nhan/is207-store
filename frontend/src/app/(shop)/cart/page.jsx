@@ -9,7 +9,7 @@ import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon, CheckIcon } 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { CartItemVariantSelector } from './CartItemVariantSelector';
+import { CartItemVariantSelector } from '../../../components/cart/CartItemVariantSelector';
 
 const SHIPPING_FEE = 30000;
 
@@ -45,7 +45,7 @@ function getItemCampaignDiscount(item, activeCampaigns) {
       const fixedPrice = campaign.config?.discount_value ?? 0;
       if (price > fixedPrice) {
         discount = price - fixedPrice;
-        label = `Còn ${fixedPrice.toLocaleString('vi-VN')}₫`;
+        label = `${fixedPrice.toLocaleString('vi-VN')}₫`;
       }
     }
 
@@ -302,15 +302,13 @@ export default function CartPage() {
               const discountedPrice = discount
                 ? Number(item.unit_price) - discount.discountAmount
                 : null;
-
               return (
                 <div
                   key={item.cart_item_id}
-                  className={`flex gap-4 p-4 bg-surface rounded-2xl shadow-sm border transition-all duration-200 ${
-                    isSelected
-                      ? 'border-primary/50 ring-1 ring-primary/20'
-                      : 'border-card-border opacity-70'
-                  }`}
+                  className={`flex gap-4 p-4 bg-surface rounded-2xl shadow-sm border transition-all duration-200 ${isSelected
+                    ? 'border-primary/50 ring-1 ring-primary/20'
+                    : 'border-card-border opacity-70'
+                    }`}
                 >
                   {/* Checkbox */}
                   <div className="flex items-center flex-shrink-0 pt-1">
@@ -349,7 +347,7 @@ export default function CartPage() {
                   {/* Info */}
                   <div className="flex flex-col flex-grow justify-between">
                     <div className="flex justify-between gap-4">
-                      <div>
+                      <div className='flex flex-col gap-1'>
                         <Link
                           href={`/products/${item.product_id}`}
                           className="text-lg font-semibold text-text-primary hover:text-primary transition-colors line-clamp-2"
@@ -357,69 +355,76 @@ export default function CartPage() {
                           {item.product_name}
                         </Link>
                         <CartItemVariantSelector item={item} />
-                        {/* Campaign name tag */}
-                        {discount && (
-                          <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-orange-500 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-medium">
-                            <ZapIcon size={10} />
-                            {discount.campaignName}
-                          </span>
-                        )}
+
+                        <div>
+                          {discount && (
+                            <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-orange-500 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full font-medium">
+                              <ZapIcon size={10} />
+                              {discount.campaignName}
+                            </span>
+
+                          )}
+                        </div >
                       </div>
 
-                      {/* Price */}
-                      <div className="text-right flex-shrink-0">
-                        {discount ? (
-                          <>
+                      <div className='flex flex-col justify-between gap-2'>
+                        {/* Price */}
+                        <div className="text-right flex-shrink-0">
+                          {discount ? (
+                            <>
+                              <p className="font-semibold text-primary">
+                                {discountedPrice.toLocaleString('vi-VN')} ₫
+                              </p>
+                              <p className="text-xs text-text-secondary line-through">
+                                {Number(item.unit_price).toLocaleString('vi-VN')} ₫
+                              </p>
+                            </>
+                          ) : (
                             <p className="font-semibold text-primary">
-                              {discountedPrice.toLocaleString('vi-VN')} ₫
-                            </p>
-                            <p className="text-xs text-text-secondary line-through">
                               {Number(item.unit_price).toLocaleString('vi-VN')} ₫
                             </p>
-                          </>
-                        ) : (
-                          <p className="font-semibold text-primary">
-                            {Number(item.unit_price).toLocaleString('vi-VN')} ₫
-                          </p>
-                        )}
-                        {!item.is_available && (
-                          <p className="text-xs text-error mt-1 font-medium bg-error-bg px-2 py-0.5 rounded-full inline-block">Ngừng bán</p>
-                        )}
+                          )}
+                          {!item.is_available && (
+                            <p className="text-xs text-error mt-1 font-medium bg-error-bg px-2 py-0.5 rounded-full inline-block">Ngừng bán</p>
+                          )}
+                        </div>
+
+                        {/* Quantity + Remove */}
+                        <div className="flex items-center border border-border rounded-md overflow-hidden bg-surface">
+                          <button
+                            className="p-2 text-text-secondary hover:text-primary hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
+                            disabled={item.quantity <= 1 || isLoading}
+                          >
+                            <MinusIcon size={16} />
+                          </button>
+                          <QuantityInput
+                            value={item.quantity}
+                            stock={item.stock_quantity}
+                            onChange={(val) => updateQuantity(item.cart_item_id, val)}
+                            disabled={isLoading}
+                          />
+                          <button
+                            className="p-2 text-text-secondary hover:text-primary hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
+                            disabled={item.quantity >= item.stock_quantity || isLoading}
+                          >
+                            <PlusIcon size={16} />
+                          </button>
+                        </div>
+                        <Button
+                          className="ml-auto p-2 text-text-muted hover:text-error transition-colors rounded-md"
+                          onClick={() => removeItem(item.cart_item_id)}
+                          disabled={isLoading}
+                          size="icon-lg"
+                          variant="ghost"
+                        >
+                          <Trash2Icon size={20} />
+                        </Button>
                       </div>
+
                     </div>
 
-                    {/* Quantity + Remove */}
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="flex items-center border border-border rounded-md overflow-hidden bg-surface">
-                        <button
-                          className="p-2 text-text-secondary hover:text-primary hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
-                          disabled={item.quantity <= 1 || isLoading}
-                        >
-                          <MinusIcon size={16} />
-                        </button>
-                        <QuantityInput
-                          value={item.quantity}
-                          stock={item.stock_quantity}
-                          onChange={(val) => updateQuantity(item.cart_item_id, val)}
-                          disabled={isLoading}
-                        />
-                        <button
-                          className="p-2 text-text-secondary hover:text-primary hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
-                          disabled={item.quantity >= item.stock_quantity || isLoading}
-                        >
-                          <PlusIcon size={16} />
-                        </button>
-                      </div>
-                      <button
-                        className="p-2 text-text-muted hover:text-error transition-colors bg-surface rounded-md border border-transparent hover:border-error-border"
-                        onClick={() => removeItem(item.cart_item_id)}
-                        disabled={isLoading}
-                      >
-                        <Trash2Icon size={20} />
-                      </button>
-                    </div>
                   </div>
                 </div>
               );

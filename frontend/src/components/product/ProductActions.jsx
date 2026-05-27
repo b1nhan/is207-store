@@ -44,7 +44,7 @@ export default function ProductActions({ product }) {
     if (selectedVariant) {
       const success = await addToCart(selectedVariant.variant_id, quantity);
       if (success) {
-        toast.success('Added to cart');
+        toast.success('Đã thêm vào giỏ hàng');
       } else {
         toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!');
       }

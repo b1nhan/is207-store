@@ -30,13 +30,13 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
     const slugValue = isEdit
       ? form.slug
       : value
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/đ/g, 'd')
-          .replace(/[^a-z0-9\s-]/g, '')
-          .trim()
-          .replace(/\s+/g, '-');
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
 
     setForm((prev) => ({
       ...prev,
@@ -79,10 +79,10 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
     try {
       if (isEdit) {
         await adminCategoryService.updateCategory(initial.category_id, form);
-        toast.success('Category updated');
+        toast.success('Cập nhật danh mục thành công');
       } else {
         await adminCategoryService.createCategory(form);
-        toast.success('Category created');
+        toast.success('Tạo danh mục thành công');
       }
       onSaved();
       onClose();
@@ -132,9 +132,8 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
             </label>
             <input
               type="text"
-              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                errors.category_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.category_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+                }`}
               placeholder="Ví dụ: Áo thun"
               value={form.category_name}
               onChange={(e) => handleNameChange(e.target.value)}
@@ -151,9 +150,8 @@ export default function CategoryModal({ open, onClose, onSaved, initial }) {
             </label>
             <input
               type="text"
-              className={`w-full border rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                errors.slug ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.slug ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+                }`}
               placeholder="Ví dụ: ao-thun"
               value={form.slug}
               onChange={(e) => handleSlugChange(e.target.value)}

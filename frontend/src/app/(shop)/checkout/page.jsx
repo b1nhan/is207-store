@@ -22,6 +22,7 @@ import {
   ZapIcon,
   PencilIcon,
   PackageIcon,
+  NotepadText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -262,10 +263,10 @@ export default function CheckoutPage() {
       const response = await orderService.previewCheckout(data);
       setCheckoutSummary(response.checkoutSummary);
 
-      toast.success('Voucher applied');
+      toast.success('Áp dụng mã giảm giá thành công');
     } catch (err) {
       setVoucherError(err.message || err.response?.data?.message || 'Mã giảm giá không hợp lệ');
-      toast.error('Invalid or expired voucher');
+      toast.error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
       setAppliedVoucher(null);
     } finally {
       setIsApplyingVoucher(false);
@@ -348,7 +349,7 @@ export default function CheckoutPage() {
       }
 
       const response = await orderService.checkout(data);
-      toast.success('Order placed successfully');
+      toast.success('Đặt hàng thành công');
       // Chỉ xóa các items đã checkout khỏi store nếu không phải mua ngay
       if (!isDirectCheckout) {
         removeItemsFromStore(selectedItemIds);
@@ -443,10 +444,10 @@ export default function CheckoutPage() {
             {/* ── Ordered Products Section ── */}
             <div className="bg-surface p-6 rounded-2xl shadow-sm border border-card-border">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <PackageIcon className="text-primary" />
-                Sản phẩm
+                <NotepadText className="text-primary" />
+                Thông tin đơn hàng
               </h2>
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border overflow-y-auto max-h-[50vh] pr-2">
                 {selectedItemsToDisplay.map((item, index) => (
                   <div key={`${item.product_id}-${item.variant_id}-${index}`} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                     <img src={item.thumbnail} alt={item.product_name} className="w-16 h-16 object-cover rounded-lg border border-border flex-shrink-0" />
@@ -527,7 +528,7 @@ export default function CheckoutPage() {
 
                 {/* Profile list */}
                 {!profilesLoading && !profilesError && profiles.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="max-h-[40vh] pr-2 overflow-y-auto space-y-3">
                     {profiles.map((profile) => {
                       const isSelected = profile.profile_id === selectedProfileId;
                       return (

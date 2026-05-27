@@ -84,7 +84,7 @@ export default function CampaignDetailPage() {
     setToggling(true);
     try {
       await adminCampaignService.updateStatus(id, campaign.status === 1 ? 0 : 1);
-      toast.success('Campaign status updated');
+      toast.success('Cập nhật trạng thái campaign thành công');
       fetchCampaign();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Cập nhật trạng thái thất bại');
@@ -102,7 +102,7 @@ export default function CampaignDetailPage() {
     if (!isConfirmed) return;
     try {
       await adminCampaignService.deleteCampaign(id);
-      toast.info('Campaign deleted');
+      toast.info('Đã xóa campaign');
       router.push('/admin/campaigns');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Xóa campaign thất bại');
@@ -139,7 +139,7 @@ export default function CampaignDetailPage() {
       <Breadcrumbs
         root={{ label: 'Admin', href: '/admin' }}
         items={[
-          { label: 'Chiến dịch', href: '/admin/campaigns' },
+          { label: 'Campaign', href: '/admin/campaigns' },
           { label: campaign.name },
         ]}
       />

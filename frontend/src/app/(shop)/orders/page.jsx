@@ -65,11 +65,9 @@ export default function OrdersPage() {
     );
   }
 
-  console.log(orders)
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <Breadcrumbs items={[{ label: 'Đơn hàng của tôi' }]} className="mb-6" />
+      <Breadcrumbs items={[{ label: 'Profile', href: '/profile' }, { label: 'Đơn hàng của tôi' }]} className="mb-6" />
       <h1 className="text-3xl font-bold text-text-primary mb-8">Lịch sử đơn hàng</h1>
 
       {error && (

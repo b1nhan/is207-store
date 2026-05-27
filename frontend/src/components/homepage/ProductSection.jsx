@@ -94,11 +94,17 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
       );
     }
 
-    return <ProductGrid products={current.data} />;
+    return <ProductGrid products={current.data} title="Sản phẩm nổi bật" />;
   };
 
   return (
-    <div className="bg-gray-50/30 px-4 py-10">
+    <div className="px-4 py-10">
+      <div className="px-8 mb-8 flex items-end justify-between">
+        <h2 className="text-text-primary text-2xl font-medium">
+          Sản phẩm nổi bật
+        </h2>
+      </div>
+
       {/* Tab list */}
       <div className="mx-auto flex justify-center gap-4 mb-8">
         {tabs.map((tab) => (
@@ -124,31 +130,7 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
       {/* Phần Giảm Giá */}
       {discountedItems.length > 0 && (
         <div className="mt-8">
-          <div className="mb-6 flex items-center justify-between px-2">
-            <div className="flex items-center gap-2">
-              <Tag className="h-5 w-5 text-rose-500" />
-              <p className="text-xl font-bold text-black">Đang Giảm Giá</p>
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-600">
-                {discountedItems.length} sản phẩm
-              </span>
-            </div>
-            <Link
-              href="/campaigns"
-              className="flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
-            >
-              Xem tất cả <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="mx-auto grid max-w-5xl grid-cols-2 justify-center justify-items-center gap-8 md:grid-cols-4">
-            {discountedItems.map((item) => (
-              <ProductCard
-                key={item.product_id}
-                product={item}
-                discount={item.discount}
-              />
-            ))}
-          </div>
+          <ProductGrid products={discountedItems} title="Đang Giảm Giá" icon={Tag} badge={discountedItems.length + " sản phẩm"} highlightColor="red" />
         </div>
       )}
     </div>

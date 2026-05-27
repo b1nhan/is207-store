@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, Edit, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Eye, EyeOff, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import adminProductService from '@/services/adminProductService';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -24,8 +24,13 @@ export default function AdminProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  const filteredProducts = products.filter(p =>
+    p.product_name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -80,7 +85,7 @@ export default function AdminProductsPage() {
       setProducts((prev) =>
         prev.map((p) => (p.product_id === id ? { ...p, status: newStatus } : p))
       );
-      toast.success('Product status updated');
+      toast.success('Cập nhật trạng thái sản phẩm thành công');
     } catch (error) {
       console.error('Failed to update status', error);
       toast.error(error.response?.data?.message || error.message || 'Cập nhật trạng thái thất bại');
@@ -128,7 +133,12 @@ export default function AdminProductsPage() {
         />
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Quản lý Sản phẩm</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Quản lý Sản phẩm</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {products.length} sản phẩm
+            </p>
+          </div>
           <Button className="flex items-center gap-2" onClick={openCreateModal}>
             <Plus size={16} />
             <span>Thêm Sản phẩm</span>
@@ -143,19 +153,33 @@ export default function AdminProductsPage() {
               <p className="text-2xl font-bold text-gray-900 mt-1">{totalItems}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Đang Hiển Thị (Trang hiện tại - {currentPage}/{totalPages})</p>
+              <p className="text-xs text-gray-500 font-medium">Sản Phẩm Đang Hiển Thị (Trang hiện tại - {currentPage}/{totalPages})</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
                 {products.filter((p) => p.status === 1).length}
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <p className="text-xs text-gray-500 font-medium">Đã Ẩn (Trang hiện tại - {currentPage}/{totalPages})</p>
+              <p className="text-xs text-gray-500 font-medium">Sản Phẩm Đã Ẩn (Trang hiện tại - {currentPage}/{totalPages})</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">
                 {products.filter((p) => p.status === 0).length}
               </p>
             </div>
           </div>
         )}
+
+        {/* Search bar */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên sản phẩm..."
+              className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -180,14 +204,14 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                 </tr>
-              ) : products.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="p-8 text-center text-gray-500">
                     Không có sản phẩm nào.
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <tr
                     key={product.product_id}
                     className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${product.status === 0 ? 'opacity-50' : ''

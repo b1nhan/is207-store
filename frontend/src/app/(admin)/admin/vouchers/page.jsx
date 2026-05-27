@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { Plus, Trash2, Pencil } from 'lucide-react';
+import { Plus, Trash2, Pencil, Search } from 'lucide-react';
 import adminVoucherService from '@/services/adminVoucherService';
 import VoucherForm from '@/components/admin/VoucherForm';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,12 @@ export default function AdminVouchersPage() {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState(null);
+  const [search, setSearch] = useState('');
   const confirm = useConfirm();
+
+  const filteredVouchers = vouchers.filter(v =>
+    v.code.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
     fetchVouchers();
@@ -51,7 +56,7 @@ export default function AdminVouchersPage() {
     if (!isConfirmed) return;
     try {
       await adminVoucherService.deleteVoucher(id);
-      toast.info('Voucher deleted');
+      toast.info(`Đã xóa Voucher ${vouchers.find(v => v.voucher_id === id)?.code || ''}`);
       fetchVouchers();
     } catch (error) {
       console.error('Failed to delete voucher', error);
@@ -74,11 +79,16 @@ export default function AdminVouchersPage() {
         items={[{ label: 'Voucher' }]}
       />
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Vouchers Management</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Quản Lý Voucher</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {vouchers.length} voucher
+          </p>
+        </div>
         <Link href="/admin/vouchers/new">
           <Button className="flex items-center space-x-2">
             <Plus size={16} />
-            <span>Add Voucher</span>
+            <span>Thêm Voucher</span>
           </Button>
         </Link>
       </div>
@@ -97,7 +107,7 @@ export default function AdminVouchersPage() {
             </p>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-            <p className="text-xs text-gray-500 font-medium">Đã ngưng</p>
+            <p className="text-xs text-gray-500 font-medium">Đã vô hiệu hóa</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">
               {vouchers.filter((v) => !v.is_active).length}
             </p>
@@ -110,6 +120,20 @@ export default function AdminVouchersPage() {
           </div>
         </div>
       )}
+
+      {/* Search bar */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm theo mã voucher..."
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left border-collapse">
@@ -124,14 +148,14 @@ export default function AdminVouchersPage() {
             </tr>
           </thead>
           <tbody>
-            {vouchers.length === 0 ? (
+            {filteredVouchers.length === 0 ? (
               <tr>
                 <td colSpan="6" className="p-8 text-center text-gray-500">
                   No vouchers found.
                 </td>
               </tr>
             ) : (
-              vouchers.map((voucher) => (
+              filteredVouchers.map((voucher) => (
                 <tr key={voucher.voucher_id} className="border-b border-gray-50 hover:bg-gray-50">
                   <td className="p-4 font-medium text-blue-600">{voucher.code}</td>
                   <td className="p-4">

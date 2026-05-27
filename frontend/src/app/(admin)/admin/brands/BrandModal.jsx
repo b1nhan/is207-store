@@ -24,7 +24,7 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
   const validate = () => {
     const newErrors = {};
     if (!form.brand_name.trim()) {
-      newErrors.brand_name = 'Tên thương hiệu không được để trống.';
+      newErrors.brand_name = 'Tên Brand không được để trống.';
     }
     return newErrors;
   };
@@ -69,7 +69,7 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
               <ShoppingBag size={18} className="text-purple-600" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900">
-              {isEdit ? 'Chỉnh sửa thương hiệu' : 'Tạo thương hiệu mới'}
+              {isEdit ? 'Chỉnh sửa Brand' : 'Tạo Brand mới'}
             </h2>
           </div>
           <button
@@ -91,13 +91,12 @@ export default function BrandModal({ open, onClose, onSaved, initial }) {
 
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-700">
-              Tên thương hiệu <span className="text-red-500">*</span>
+              Tên Brand <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${
-                errors.brand_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${errors.brand_name ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'
+                }`}
               placeholder="Ví dụ: Nike, Adidas..."
               value={form.brand_name}
               onChange={(e) => {

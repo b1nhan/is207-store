@@ -67,7 +67,7 @@ export default function OrderDetailPage({ params }) {
     setIsCancelling(true);
     try {
       await orderService.cancelOrder(orderId, 'Khách hàng hủy đơn');
-      toast.info('Order cancelled');
+      toast.info('Đã hủy đơn hàng');
       await fetchOrderDetail(); // Reload order detail to show cancelled status
     } catch (err) {
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng');
@@ -114,6 +114,7 @@ export default function OrderDetailPage({ params }) {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <Breadcrumbs
         items={[
+          { label: 'Profile', href: '/profile' },
           { label: 'Đơn hàng của tôi', href: '/orders' },
           { label: `Chi tiết đơn hàng #${order.order_id}` },
         ]}
@@ -159,7 +160,7 @@ export default function OrderDetailPage({ params }) {
           <div className="text-text-secondary">
             {order.shipping_address ? (
               <>
-                <p className="font-medium text-text-primary text-lg mb-1">{order.receiver_name}</p>
+                <p className="mb-1">Người nhận: <span className="font-medium text-text-primary">{order.receiver_name}</span></p>
                 <p className="mb-1">Số điện thoại: {order.receiver_phone}</p>
                 <p>Địa chỉ: {order.shipping_address}</p>
               </>

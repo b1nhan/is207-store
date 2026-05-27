@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import adminOrderService from '@/services/adminOrderService';
 import { toast } from 'sonner';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -85,7 +85,7 @@ function OrderDetailModal({ orderId, onClose }) {
             {/* Status badges */}
             <div className="flex flex-wrap gap-2">
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(detail.status)}`}>
-                {detail.status}
+                Trạng thái: {detail.status}
               </span>
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(detail.payment_status)}`}>
                 Thanh toán: {detail.payment_status}
@@ -197,6 +197,7 @@ export default function AdminOrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
@@ -273,7 +274,7 @@ export default function AdminOrdersPage() {
     if (!isConfirmed) return;
     try {
       await adminOrderService.updateOrderStatus(id, newStatus);
-      toast.success('Order status updated');
+      toast.success('Cập nhật trạng thái đơn hàng thành công');
       setOrders((prev) => prev.map((o) => (o.order_id === id ? { ...o, status: newStatus } : o)));
     } catch (error) {
       console.error('Failed to update status', error);
@@ -350,26 +351,32 @@ export default function AdminOrdersPage() {
     setSortConfig(null);
   };
 
-  const sortedOrders = [...orders].sort((a, b) => {
-    if (!sortConfig) return 0;
-    const { key, direction } = sortConfig;
-    const isAsc = direction === 'asc';
+  const sortedOrders = [...orders]
+    .filter(o =>
+      String(o.order_id).includes(search) ||
+      (o.user_email && o.user_email.toLowerCase().includes(search.toLowerCase())) ||
+      (o.receiver_name && o.receiver_name.toLowerCase().includes(search.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (!sortConfig) return 0;
+      const { key, direction } = sortConfig;
+      const isAsc = direction === 'asc';
 
-    if (key === 'status') {
-      const weightA = STATUS_WEIGHT[a.status] || 99;
-      const weightB = STATUS_WEIGHT[b.status] || 99;
-      return isAsc ? weightA - weightB : weightB - weightA;
-    } else if (key === 'created_at') {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return isAsc ? dateA - dateB : dateB - dateA;
-    } else if (key === 'total_amount') {
-      const amountA = Number(a.total_amount);
-      const amountB = Number(b.total_amount);
-      return isAsc ? amountA - amountB : amountB - amountA;
-    }
-    return 0;
-  });
+      if (key === 'status') {
+        const weightA = STATUS_WEIGHT[a.status] || 99;
+        const weightB = STATUS_WEIGHT[b.status] || 99;
+        return isAsc ? weightA - weightB : weightB - weightA;
+      } else if (key === 'created_at') {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return isAsc ? dateA - dateB : dateB - dateA;
+      } else if (key === 'total_amount') {
+        const amountA = Number(a.total_amount);
+        const amountB = Number(b.total_amount);
+        return isAsc ? amountA - amountB : amountB - amountA;
+      }
+      return 0;
+    });
 
   const renderSortIcon = (key) => {
     if (!sortConfig || sortConfig.key !== key) return ' ↕';
@@ -390,8 +397,14 @@ export default function AdminOrdersPage() {
         root={{ label: 'Admin', href: '/admin' }}
         items={[{ label: 'Đơn hàng' }]}
       />
-      <h1 className="text-2xl font-bold">Orders Management</h1>
-
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Quản lý Đơn hàng</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {orders.length} đơn hàng
+          </p>
+        </div>
+      </div>
       {/* Stats cards */}
       {!loading && orders.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -419,6 +432,20 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
+      {/* Search bar */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Tìm theo ID, email, tên người nhận..."
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
 
       {/* Toolbar: Sorting & Bulk Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -497,8 +524,8 @@ export default function AdminOrdersPage() {
                 >
                   Ngày tạo {renderSortIcon('created_at')}
                 </th>
-                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Cập nhật TT</th>
-                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Xem</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Cập nhật</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Chi tiết</th>
               </tr>
             </thead>
             <tbody>
