@@ -161,6 +161,65 @@ class AdminProductController {
       next(error);
     }
   };
+
+  /**
+   * POST /admin/products/generate-description
+   * Body: { name, keywords }
+   */
+  generateDescription = async (req, res, next) => {
+    try {
+      const { name, keywords } = req.body;
+      if (!name) {
+        return res.status(400).json({ success: false, message: 'Tên sản phẩm là bắt buộc.' });
+      }
+
+      const apiKey = process.env.GROQ_API_KEY;
+      if (!apiKey) {
+        const mockDescription = `Sản phẩm ${name} chất lượng cao, thiết kế hiện đại và sang trọng. Được sản xuất từ các chất liệu cao cấp mang lại sự thoải mái tuyệt đối khi sử dụng. Đây là lựa chọn hoàn hảo cho phong cách năng động hàng ngày.`;
+        return sendSuccess(res, {
+          data: {
+            description: `[MÔ PHỎNG - Chưa cài GROQ_API_KEY] ${mockDescription}`
+          },
+          message: 'Tạo mô tả giả lập (chưa cấu hình API Key)'
+        });
+      }
+
+      const response = await fetch(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              {
+                role: 'user',
+                content: `Hãy viết một đoạn mô tả sản phẩm ngắn gọn, thu hút khách hàng cho sản phẩm sau:\nTên sản phẩm: ${name}\nThông tin chi tiết: ${keywords || 'Không có'}\n\nYêu cầu: Viết hoàn toàn bằng tiếng Việt, độ dài khoảng 3-4 câu, mô tả chân thực, tự nhiên và chuyên nghiệp, không chứa các ký tự Markdown hay định dạng đặc biệt.`,
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Groq API returned error status ${response.status}: ${errText}`);
+      }
+
+      const resData = await response.json();
+      const aiText = resData.choices?.[0]?.message?.content?.trim() || '';
+
+      sendSuccess(res, {
+        data: { description: aiText },
+        message: 'Tạo mô tả sản phẩm bằng AI thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default new AdminProductController();

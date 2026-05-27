@@ -64,6 +64,13 @@ router.delete(
 router.get('/products', verifyToken, requireAdmin, adminProductController.getAllProducts);
 
 router.post(
+  '/products/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminProductController.generateDescription,
+);
+
+router.post(
   '/products',
   verifyToken,
   requireAdmin,
@@ -179,6 +186,12 @@ router.delete('/brands/:id', verifyToken, requireAdmin, brandController.deleteBr
 // DELETE /admin/vouchers/:id    — soft delete (set is_active=0)
 
 router.get('/vouchers', verifyToken, requireAdmin, adminVoucherController.getAllVouchers);
+router.post(
+  '/vouchers/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminVoucherController.generateDescription,
+);
 router.get('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController.getVoucherById);
 router.post('/vouchers', verifyToken, requireAdmin, validate(createVoucherSchema), adminVoucherController.createVoucher);
 router.put('/vouchers/:id', verifyToken, requireAdmin, validate(updateVoucherSchema), adminVoucherController.updateVoucher);
@@ -208,6 +221,12 @@ router.get('/dashboard/top-products', verifyToken, requireAdmin, adminDashboardC
 // ─── Campaigns (Admin CRUD) ───────────────────────────────────────────────────
 
 router.get('/campaigns', verifyToken, requireAdmin, adminCampaignController.getAllCampaigns);
+router.post(
+  '/campaigns/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminCampaignController.generateDescription,
+);
 router.get('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.getCampaignById);
 router.post('/campaigns', verifyToken, requireAdmin, validate(createCampaignSchema), adminCampaignController.createCampaign);
 router.put('/campaigns/:id', verifyToken, requireAdmin, validate(updateCampaignSchema), adminCampaignController.updateCampaign);

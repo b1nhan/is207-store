@@ -55,6 +55,8 @@ class AdminProductService {
           }
         : null,
       thumbnail: product.thumbnail ?? null,
+      total_stock: Number(product.total_stock || 0),
+      total_sold: Number(product.total_sold || 0),
       created_at: product.created_at,
       updated_at: product.updated_at,
     };

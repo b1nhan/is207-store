@@ -13,7 +13,19 @@ class AdminProductRepository {
         p.created_at, p.updated_at,
         c.category_id, c.category_name, c.slug AS category_slug,
         b.brand_id, b.brand_name,
-        pi.image_url AS thumbnail
+        pi.image_url AS thumbnail,
+        COALESCE((
+          SELECT SUM(pv.stock_quantity)
+          FROM product_variants pv
+          WHERE pv.product_id = p.product_id AND pv.status = 1
+        ), 0) AS total_stock,
+        COALESCE((
+          SELECT SUM(oi.quantity)
+          FROM order_items oi
+          JOIN product_variants pv ON oi.variant_id = pv.variant_id
+          JOIN orders o ON oi.order_id = o.order_id
+          WHERE pv.product_id = p.product_id AND o.status != 'cancelled'
+        ), 0) AS total_sold
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.category_id
       LEFT JOIN brands b ON p.brand_id = b.brand_id

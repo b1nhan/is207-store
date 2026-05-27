@@ -190,6 +190,8 @@ export default function AdminProductsPage() {
                 <th className="p-4 font-semibold text-gray-600">Tên sản phẩm</th>
                 <th className="p-4 font-semibold text-gray-600">Giá</th>
                 <th className="p-4 font-semibold text-gray-600">Danh mục</th>
+                <th className="p-4 font-semibold text-gray-600 text-center">Tồn kho</th>
+                <th className="p-4 font-semibold text-gray-600 text-center">Đã bán</th>
                 <th className="p-4 font-semibold text-gray-600 text-center">Trạng thái</th>
                 <th className="p-4 font-semibold text-gray-600 text-center">Ẩn/Hiện</th>
                 <th className="p-4 font-semibold text-gray-600 text-right">Thao tác</th>
@@ -198,7 +200,7 @@ export default function AdminProductsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="p-8 text-center">
+                  <td colSpan="9" className="p-8 text-center">
                     <div className="flex justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
                     </div>
@@ -206,7 +208,7 @@ export default function AdminProductsPage() {
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-8 text-center text-gray-500">
+                  <td colSpan="9" className="p-8 text-center text-gray-500">
                     Không có sản phẩm nào.
                   </td>
                 </tr>
@@ -248,6 +250,16 @@ export default function AdminProductsPage() {
                       {product.category?.category_name || (
                         <span className="text-gray-300 italic">N/A</span>
                       )}
+                    </td>
+
+                    {/* Stock */}
+                    <td className="p-4 text-center text-gray-700 font-medium">
+                      {product.total_stock ?? 0}
+                    </td>
+
+                    {/* Sold */}
+                    <td className="p-4 text-center text-gray-700 font-medium">
+                      {product.total_sold ?? 0}
                     </td>
 
                     {/* Status badge */}
