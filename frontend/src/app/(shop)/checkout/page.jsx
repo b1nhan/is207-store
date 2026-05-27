@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
@@ -68,6 +68,7 @@ function CheckoutSkeleton() {
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { items, isLoading: cartLoading, removeItemsFromStore } = useCartStore();
   const { isAuthenticated, isInitialized } = useAuthStore();
 
@@ -374,7 +375,7 @@ export default function CheckoutPage() {
         <h1 className="text-3xl font-bold text-text-primary mb-6">Thanh toán</h1>
         <p className="text-text-secondary mb-8">Bạn cần đăng nhập để tiến hành thanh toán.</p>
         <Button asChild size="lg">
-          <Link href="/login">Đăng nhập ngay</Link>
+          <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>Đăng nhập ngay</Link>
         </Button>
       </div>
     );

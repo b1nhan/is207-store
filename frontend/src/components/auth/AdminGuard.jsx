@@ -1,21 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import useAuthStore from '@/store/authStore';
 import Link from 'next/link';
 
 export default function AdminGuard({ children }) {
   const { user, isInitialized } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isInitialized) {
       if (!user) {
-        router.push('/login');
+        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       }
     }
-  }, [isInitialized, user, router]);
+  }, [isInitialized, user, router, pathname]);
 
   if (!isInitialized || !user) {
     return (

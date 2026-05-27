@@ -7,7 +7,7 @@ import { DiscountBadge, getDiscountedPrice } from './DiscountBadge';
 import { ShoppingCart } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 import useCartStore from '@/store/cartStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { productService } from '@/services/productService';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
  */
 export const ProductCard = ({ product, discount }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
   const { addToCart } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
@@ -49,7 +50,7 @@ export const ProductCard = ({ product, discount }) => {
 
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để mua hàng!');
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -99,7 +100,7 @@ export const ProductCard = ({ product, discount }) => {
 
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để mua hàng!');
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 

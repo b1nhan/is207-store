@@ -1,6 +1,7 @@
 import LoginForm from '@/components/auth/LoginForm';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Đăng nhập',
@@ -17,7 +18,9 @@ export default function LoginPage() {
         Back to homepage
       </Link>
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <LoginForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );
