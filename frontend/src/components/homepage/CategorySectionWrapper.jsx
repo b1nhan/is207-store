@@ -8,7 +8,7 @@ export async function CategorySectionWrapper() {
     const { data } = await categoryService.getCategories();
     categories = data?.items || [];
   } catch (error) {
-    console.error('Failed to fetch categories:', error.message);
+    // Ignore error
   }
 
   return <CategorySection categories={categories} />;

@@ -22,7 +22,7 @@ export default function VouchersSection() {
         setVouchers([]);
       }
     } catch (err) {
-      console.error('Error fetching active vouchers:', err);
+      // console.error('Error fetching active vouchers:', err);
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function VouchersSection() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">Mã giảm giá dành cho bạn</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Đang tải Voucher...</h2>
           <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,7 +97,26 @@ export default function VouchersSection() {
   }
 
   if (vouchers.length === 0) {
-    return null; // Don't show the section if there are no vouchers
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Ticket className="h-6 w-6 text-indigo-600" />
+            <h2 className="text-2xl font-bold text-gray-800">Các Voucher dành cho bạn</h2>
+          </div>
+          <button
+            onClick={fetchVouchers}
+            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 transition-colors"
+            title="Tải lại danh sách"
+          >
+            <RefreshCw className="h-3 w-3" /> Làm mới
+          </button>
+        </div>
+        <div className="flex h-32 items-center justify-center">
+          <p className="text-gray-500">Chưa có mã giảm giá nào được áp dụng</p>
+        </div>
+      </div>
+    );
   }
 
   return (

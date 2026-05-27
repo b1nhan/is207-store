@@ -32,6 +32,25 @@ export function CategorySection({ categories, isGrid = false, hideHeader = false
     });
   };
 
+  if (!categories || categories.length === 0) {
+    return (
+      <section className={isGrid ? "py-4" : "py-10"}>
+        <div className={isGrid ? "w-full" : "px-12"}>
+          {!hideHeader && (
+            <div className="mb-8 flex items-center justify-between">
+              <h2 className="text-text-primary text-2xl font-medium">
+                Danh Mục Sản Phẩm
+              </h2>
+            </div>
+          )}
+          <div className="flex h-32 items-center justify-center">
+            <p className="text-gray-500">Chưa có danh mục nào</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={isGrid ? "py-4" : "py-10"}>
       <div className={isGrid ? "w-full" : "px-12"}>

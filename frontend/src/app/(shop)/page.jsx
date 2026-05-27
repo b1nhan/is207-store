@@ -8,8 +8,6 @@ import { campaignService } from '@/services/campaignService';
 
 export default async function HomePage() {
   let newArrivals = [];
-  let bestSellers = [];
-  let featured = [];
   let campaigns = [];
   let discountedItems = [];
 
