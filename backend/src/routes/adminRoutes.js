@@ -186,6 +186,12 @@ router.delete('/brands/:id', verifyToken, requireAdmin, brandController.deleteBr
 // DELETE /admin/vouchers/:id    — soft delete (set is_active=0)
 
 router.get('/vouchers', verifyToken, requireAdmin, adminVoucherController.getAllVouchers);
+router.post(
+  '/vouchers/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminVoucherController.generateDescription,
+);
 router.get('/vouchers/:id', verifyToken, requireAdmin, adminVoucherController.getVoucherById);
 router.post('/vouchers', verifyToken, requireAdmin, validate(createVoucherSchema), adminVoucherController.createVoucher);
 router.put('/vouchers/:id', verifyToken, requireAdmin, validate(updateVoucherSchema), adminVoucherController.updateVoucher);

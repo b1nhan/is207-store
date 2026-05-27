@@ -16,6 +16,9 @@ const adminVoucherService = {
   deleteVoucher: (id) => {
     return axios.delete(`/admin/vouchers/${id}`);
   },
+  generateDescription: (data) => {
+    return axios.post('/admin/vouchers/generate-description', data);
+  },
 };
 
 export default adminVoucherService;
