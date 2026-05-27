@@ -464,9 +464,8 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <input
             type="text"
             maxLength={255}
-            className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-200'
-            }`}
+            className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-200'
+              }`}
             value={form.name}
             onChange={(e) => setField('name', e.target.value)}
             placeholder="VD: Flash Sale 5.5"
@@ -499,7 +498,7 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
         >
           <textarea
             rows={3}
-            className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={form.description}
             onChange={(e) => setField('description', e.target.value)}
             placeholder="Mô tả ngắn về campaign..."
@@ -537,9 +536,8 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <FieldRow label="Ngày bắt đầu" required>
             <input
               type="datetime-local"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.start_date ? 'border-red-500' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.start_date ? 'border-red-500' : 'border-gray-200'
+                }`}
               value={form.start_date}
               onChange={(e) => setField('start_date', e.target.value)}
             />
@@ -549,9 +547,8 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <FieldRow label="Ngày kết thúc" required>
             <input
               type="datetime-local"
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.end_date ? 'border-red-500' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.end_date ? 'border-red-500' : 'border-gray-200'
+                }`}
               value={form.end_date}
               onChange={(e) => setField('end_date', e.target.value)}
             />
@@ -566,9 +563,8 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
           <FieldRow label={configLabel} hint={configHint}>
             <input
               type="number"
-              className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.discount_value ? 'border-red-500' : 'border-gray-200'
-              }`}
+              className={`w-full border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.discount_value ? 'border-red-500' : 'border-gray-200'
+                }`}
               value={form.discount_value}
               onChange={(e) => setField('discount_value', e.target.value)}
               placeholder={form.campaign_type === 'PERCENTAGE' ? '50' : '99000'}

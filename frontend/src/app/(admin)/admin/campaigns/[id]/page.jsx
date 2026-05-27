@@ -296,7 +296,7 @@ export default function CampaignDetailPage() {
                   : 'Không có sản phẩm'}
               </p>
             ) : (
-              <div className="space-y-2 max-h-72 overflow-y-auto">
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
                 {campaign.products.map((p) => (
                   <div
                     key={p.product_id}

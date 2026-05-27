@@ -507,12 +507,12 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
     try {
       const keywords = [];
       if (formData.material) keywords.push(`chất liệu: ${formData.material}`);
-      
+
       const response = await adminProductService.generateDescription({
         name: formData.product_name,
         keywords: keywords.join(', '),
       });
-      
+
       const aiDescription = response.data?.description;
       if (aiDescription) {
         setFormData((prev) => ({
@@ -884,7 +884,7 @@ export default function ProductFormModal({ isEdit = false, productId = null, onC
                 <textarea
                   name="product_description"
                   rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition resize-none"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition"
                   value={formData.product_description}
                   onChange={handleInput}
                   placeholder="Nhập tên sản phẩm rồi click 'Viết mô tả bằng AI' để tự động tạo mô tả..."

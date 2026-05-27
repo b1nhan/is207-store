@@ -346,7 +346,7 @@ export default function VoucherForm({ mode = 'create', initialData = null, onSuc
           name="description"
           maxLength={255}
           rows={3}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-none"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2"
           value={formData.description}
           onChange={handleInputChange}
         />

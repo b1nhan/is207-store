@@ -105,7 +105,7 @@ export default function VouchersSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Ticket className="h-6 w-6 text-indigo-600" />
-          <h2 className="text-2xl font-bold text-gray-800">Mã giảm giá (Vouchers)</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Các Voucher dành cho bạn</h2>
         </div>
         <button
           onClick={fetchVouchers}
@@ -153,15 +153,14 @@ export default function VouchersSection() {
                     </span>
                     <button
                       onClick={() => handleCopy(v.code)}
-                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                        copiedCode === v.code
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-                          : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent hover:shadow-md'
-                      }`}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${copiedCode === v.code
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                        : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent hover:shadow-md'
+                        }`}
                     >
                       {copiedCode === v.code ? (
                         <>
-                          <Check className="h-3 w-3" /> Đã chép
+                          <Check className="h-3 w-3" /> Đã lưu
                         </>
                       ) : (
                         <>

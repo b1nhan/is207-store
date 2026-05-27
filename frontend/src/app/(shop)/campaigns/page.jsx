@@ -91,118 +91,100 @@ export default async function CampaignsPage() {
       <div className="container mx-auto max-w-6xl px-4 pt-4">
         <Breadcrumbs items={[{ label: 'Khuyến mãi' }]} />
       </div>
-      {/* Campaign grid */}
-      <section className="container mx-auto max-w-6xl px-4 py-12">
-        {sorted.length === 0 ? (
-          <div className="py-20 text-center">
-            <div className="mb-4 text-5xl">🎁</div>
-            <h3 className="text-xl font-semibold text-text-primary">Chưa có campaign nào</h3>
-            <p className="mt-2 text-text-muted">Hãy quay lại sau để khám phá các ưu đãi mới!</p>
-            <Link
-              href="/products"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-hover"
-            >
-              Xem sản phẩm
-            </Link>
+
+      {/* Campaign & Vouchers grids */}
+      <section className="container mx-auto max-w-6xl px-4 py-12 space-y-16">
+        {/* Campaign Section */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-6 w-6 text-orange-500 fill-orange-500" />
+            <h2 className="text-2xl font-bold text-gray-800">Campaign đang diễn ra</h2>
           </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sorted.map((c, i) => {
-              const summary = discountSummary(c);
-              const gradient = gradients[i % gradients.length];
-              {/* Campaign & Vouchers grids */ }
-              <section className="container mx-auto max-w-6xl px-4 py-12 space-y-16">
-                {/* Campaign Section */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Zap className="h-6 w-6 text-orange-500 fill-orange-500" />
-                    <h2 className="text-2xl font-bold text-gray-800">Chương trình khuyến mãi (Campaigns)</h2>
-                  </div>
 
-                  {sorted.length === 0 ? (
-                    <div className="py-20 text-center bg-gray-50 border border-gray-100 rounded-2xl">
-                      <div className="mb-4 text-5xl">🎁</div>
-                      <h3 className="text-xl font-semibold text-text-primary">Chưa có campaign nào</h3>
-                      <p className="mt-2 text-text-muted">Hãy quay lại sau để khám phá các ưu đãi mới!</p>
-                      <Link
-                        href="/products"
-                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-hover"
-                      >
-                        Xem sản phẩm
-                      </Link>
+          {sorted.length === 0 ? (
+            <div className="py-20 text-center bg-gray-50 border border-gray-100 rounded-2xl">
+              <div className="mb-4 text-5xl">🎁</div>
+              <h3 className="text-xl font-semibold text-text-primary">Chưa có campaign nào</h3>
+              <p className="mt-2 text-text-muted">Hãy quay lại sau để khám phá các ưu đãi mới!</p>
+              <Link
+                href="/products"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-hover"
+              >
+                Xem sản phẩm
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {sorted.map((c, i) => {
+                const summary = discountSummary(c);
+                const gradient = gradients[i % gradients.length];
+
+                return (
+                  <Link
+                    key={c.campaign_id}
+                    href={`/campaigns/${c.campaign_id}`}
+                    id={`campaign-listing-${c.campaign_id}`}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  >
+                    {/* Gradient background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                    <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
+                    <div className="absolute -bottom-10 -left-6 h-40 w-40 rounded-full bg-white/10" />
+
+                    <div className="relative flex flex-1 flex-col gap-4 p-6">
+                      {/* Type + product count */}
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                          <CampaignTypeIcon type={c.campaign_type} />
+                          {campaignTypeLabel(c.campaign_type)}
+                        </span>
+                        {c.products?.length > 0 && (
+                          <span className="text-xs font-medium text-white/70">
+                            {c.products.length} SP
+                          </span>
+                        )}
+                      </div>
+
+                      <h2 className="line-clamp-2 text-xl font-bold leading-snug text-white drop-shadow-sm">
+                        {c.name}
+                      </h2>
+
+                      {c.description && (
+                        <p className="line-clamp-2 text-sm text-white/80">{c.description}</p>
+                      )}
+
+                      {/* Discount highlight */}
+                      {summary && (
+                        <div className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-xl bg-white/25 px-4 py-2 text-sm font-bold text-white backdrop-blur-sm">
+                          <Tag className="h-3.5 w-3.5" />
+                          {summary}
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between border-t border-white/20 pt-3 text-xs text-white/75">
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {formatDateRange(c.start_date, c.end_date)}
+                        </span>
+                        <span className="flex items-center gap-1 font-semibold text-white/90 transition-transform group-hover:translate-x-1">
+                          Chi tiết <ChevronRight className="h-3.5 w-3.5" />
+                        </span>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                      {sorted.map((c, i) => {
-                        const summary = discountSummary(c);
-                        const gradient = gradients[i % gradients.length];
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-                        return (
-                          <Link
-                            key={c.campaign_id}
-                            href={`/campaigns/${c.campaign_id}`}
-                            id={`campaign-listing-${c.campaign_id}`}
-                            className="group relative flex flex-col overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                          >
-                            {/* Gradient background */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
-                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-                            <div className="absolute -bottom-10 -left-6 h-40 w-40 rounded-full bg-white/10" />
+        {/* Separator line */}
+        <hr className="border-gray-200" />
 
-                            <div className="relative flex flex-1 flex-col gap-4 p-6">
-                              {/* Type + product count */}
-                              <div className="flex items-center justify-between">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                                  <CampaignTypeIcon type={c.campaign_type} />
-                                  {campaignTypeLabel(c.campaign_type)}
-                                </span>
-                                {c.products?.length > 0 && (
-                                  <span className="text-xs font-medium text-white/70">
-                                    {c.products.length} SP
-                                  </span>
-                                )}
-                              </div>
-
-                              <h2 className="line-clamp-2 text-xl font-bold leading-snug text-white drop-shadow-sm">
-                                {c.name}
-                              </h2>
-
-                              {c.description && (
-                                <p className="line-clamp-2 text-sm text-white/80">{c.description}</p>
-                              )}
-
-                              {/* Discount highlight */}
-                              {summary && (
-                                <div className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-xl bg-white/25 px-4 py-2 text-sm font-bold text-white backdrop-blur-sm">
-                                  <Tag className="h-3.5 w-3.5" />
-                                  {summary}
-                                </div>
-                              )}
-
-                              {/* Footer */}
-                              <div className="flex items-center justify-between border-t border-white/20 pt-3 text-xs text-white/75">
-                                <span className="flex items-center gap-1.5">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  {formatDateRange(c.start_date, c.end_date)}
-                                </span>
-                                <span className="flex items-center gap-1 font-semibold text-white/90 transition-transform group-hover:translate-x-1">
-                                  Chi tiết <ChevronRight className="h-3.5 w-3.5" />
-                                </span>
-                              </div>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Separator line */}
-                <hr className="border-gray-200" />
-
-                {/* Voucher Section */}
-                <VouchersSection />
-              </section>
+        {/* Voucher Section */}
+        <VouchersSection />
+      </section>
     </div>
-        );
+  );
 }

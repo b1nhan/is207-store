@@ -99,11 +99,6 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
 
   return (
     <div className="px-4 py-10">
-      <div className="px-8 mb-8 flex items-end justify-between">
-        <h2 className="text-text-primary text-2xl font-medium">
-          Sản phẩm nổi bật
-        </h2>
-      </div>
 
       {/* Tab list */}
       <div className="mx-auto flex justify-center gap-4 mb-8">
