@@ -215,6 +215,12 @@ router.get('/dashboard/top-products', verifyToken, requireAdmin, adminDashboardC
 // ─── Campaigns (Admin CRUD) ───────────────────────────────────────────────────
 
 router.get('/campaigns', verifyToken, requireAdmin, adminCampaignController.getAllCampaigns);
+router.post(
+  '/campaigns/generate-description',
+  verifyToken,
+  requireAdmin,
+  adminCampaignController.generateDescription,
+);
 router.get('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.getCampaignById);
 router.post('/campaigns', verifyToken, requireAdmin, validate(createCampaignSchema), adminCampaignController.createCampaign);
 router.put('/campaigns/:id', verifyToken, requireAdmin, validate(updateCampaignSchema), adminCampaignController.updateCampaign);

@@ -19,6 +19,9 @@ const adminCampaignService = {
   deleteCampaign: (id) => {
     return axios.delete(`/admin/campaigns/${id}`);
   },
+  generateDescription: (data) => {
+    return axios.post('/admin/campaigns/generate-description', data);
+  },
 };
 
 export default adminCampaignService;
