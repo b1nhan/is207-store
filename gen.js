@@ -13,7 +13,7 @@ function add(ref, type, actor, p, risk, title, pre, steps, exp, fail) {
     risk,
     type,
     precondition: pre,
-    steps: steps.split('|').map((s,i) => `${i+1}. ${s}`),
+    steps: steps.split('|').map((s, i) => `${i + 1}. ${s}`),
     expected_result: exp,
     failure_indicator: fail
   });
@@ -201,7 +201,7 @@ const out = {
       }
     }
   },
-  test_objectives: tests.sort((a,b) => a.priority.localeCompare(b.priority))
+  test_objectives: tests.sort((a, b) => a.priority.localeCompare(b.priority))
 };
 
 fs.writeFileSync('d:/myData/studio/code/web/IS207/test_objectives.json', JSON.stringify(out, null, 2));
