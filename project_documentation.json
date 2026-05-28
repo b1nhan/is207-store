@@ -1,0 +1,675 @@
+{
+  "project": {
+    "name": "Clothing E-Commerce Management System",
+    "stack": {
+      "backend": "Node.js / Express",
+      "frontend": "React / Next.js",
+      "database": "MySQL"
+    },
+    "scanned_at": "2026-05-28T17:35:00Z",
+    "integrations": [
+      "Groq API (AI for text generation)",
+      "Nodemailer (SMTP Email)",
+      "Cloudinary (Image Storage)"
+    ]
+  },
+  "features": [
+    {
+      "id": "feat_usr_auth_register",
+      "name": "User Registration",
+      "category": "user",
+      "description": "Allows new users to create an account.",
+      "entry_points": ["/api/auth/register", "frontend: /(auth)/register"],
+      "related_files": ["backend/src/controllers/authController.js", "frontend/src/app/(auth)/register/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_auth_login",
+      "name": "User Login",
+      "category": "user",
+      "description": "Allows users to authenticate and receive JWT tokens.",
+      "entry_points": ["/api/auth/login", "frontend: /(auth)/login"],
+      "related_files": ["backend/src/controllers/authController.js", "frontend/src/app/(auth)/login/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_auth_logout",
+      "name": "User Logout",
+      "category": "user",
+      "description": "Logs out the user and invalidates session.",
+      "entry_points": ["/api/auth/logout"],
+      "related_files": ["backend/src/controllers/authController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_profile_view",
+      "name": "View Profile",
+      "category": "user",
+      "description": "Fetches current user's profile information.",
+      "entry_points": ["/api/auth/me", "frontend: /(shop)/profile"],
+      "related_files": ["backend/src/controllers/authController.js", "frontend/src/app/(shop)/profile/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_profile_update",
+      "name": "Update Profile",
+      "category": "user",
+      "description": "Allows user to update personal information.",
+      "entry_points": ["/api/auth/me/profile", "frontend: /(shop)/profile"],
+      "related_files": ["backend/src/controllers/authController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_change_password",
+      "name": "Change Password",
+      "category": "user",
+      "description": "Allows user to change their account password.",
+      "entry_points": ["/api/auth/change-password"],
+      "related_files": ["backend/src/controllers/authController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_shipping_crud",
+      "name": "Manage Shipping Profiles",
+      "category": "user",
+      "description": "Users can add, update, delete, and set default shipping addresses.",
+      "entry_points": ["/api/auth/shipping-profiles", "frontend: /(shop)/profile"],
+      "related_files": ["backend/src/controllers/shippingProfileController.js", "backend/src/services/shippingProfileService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_list",
+      "name": "List Products",
+      "category": "user",
+      "description": "View list of active products with pagination, filtering, and sorting.",
+      "entry_points": ["/api/products", "frontend: /(shop)/products"],
+      "related_files": ["backend/src/controllers/productController.js", "frontend/src/app/(shop)/products/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_search",
+      "name": "Search Products",
+      "category": "user",
+      "description": "Autocomplete search for products.",
+      "entry_points": ["/api/products/search"],
+      "related_files": ["backend/src/controllers/productController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_special",
+      "name": "Special Product Lists",
+      "category": "user",
+      "description": "View new arrivals, best sellers, and hot products.",
+      "entry_points": ["/api/products/new-arrivals", "/api/products/best-sellers", "/api/products/hot"],
+      "related_files": ["backend/src/controllers/productController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_detail",
+      "name": "Product Details",
+      "category": "user",
+      "description": "View detailed information, images, and variants of a specific product.",
+      "entry_points": ["/api/products/:id", "frontend: /(shop)/products/[slug]"],
+      "related_files": ["backend/src/controllers/productController.js", "frontend/src/app/(shop)/products/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_cat_list",
+      "name": "List Categories",
+      "category": "user",
+      "description": "View available product categories.",
+      "entry_points": ["/api/categories", "frontend: /(shop)/category"],
+      "related_files": ["backend/src/controllers/categoryController.js", "frontend/src/app/(shop)/category/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_brand_list",
+      "name": "List Brands",
+      "category": "user",
+      "description": "View available brands and their products.",
+      "entry_points": ["/api/brands"],
+      "related_files": ["backend/src/controllers/brandController.js"],
+      "status": "partial"
+    },
+    {
+      "id": "feat_usr_camp_view",
+      "name": "View Campaigns",
+      "category": "user",
+      "description": "View active promotional campaigns and discounted products.",
+      "entry_points": ["/api/campaigns/active", "/api/campaigns/discounted-products", "frontend: /(shop)/campaigns"],
+      "related_files": ["backend/src/controllers/campaignController.js", "frontend/src/app/(shop)/campaigns/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_vouch_active",
+      "name": "View Active Vouchers",
+      "category": "user",
+      "description": "View vouchers available for the user to apply.",
+      "entry_points": ["/api/vouchers/active"],
+      "related_files": ["backend/src/controllers/voucherController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_cart_manage",
+      "name": "Manage Cart",
+      "category": "user",
+      "description": "Add items, update quantities/variants, remove items, or clear cart.",
+      "entry_points": ["/api/cart", "frontend: /(shop)/cart"],
+      "related_files": ["backend/src/controllers/cartController.js", "frontend/src/app/(shop)/cart/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_vouch_apply",
+      "name": "Apply Voucher",
+      "category": "user",
+      "description": "Apply a voucher code to calculate cart discount.",
+      "entry_points": ["/api/vouchers/apply"],
+      "related_files": ["backend/src/controllers/voucherController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_ord_preview",
+      "name": "Preview Checkout",
+      "category": "user",
+      "description": "Calculate final price, discounts, and validate stock before placing order.",
+      "entry_points": ["/api/orders/checkout/preview", "frontend: /(shop)/checkout"],
+      "related_files": ["backend/src/controllers/orderController.js", "frontend/src/app/(shop)/checkout/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_ord_place",
+      "name": "Place Order",
+      "category": "user",
+      "description": "Submit a new order from cart.",
+      "entry_points": ["/api/orders/checkout", "frontend: /(shop)/checkout"],
+      "related_files": ["backend/src/controllers/orderController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_ord_list",
+      "name": "View My Orders",
+      "category": "user",
+      "description": "View order history for current user.",
+      "entry_points": ["/api/orders", "frontend: /(shop)/orders"],
+      "related_files": ["backend/src/controllers/orderController.js", "frontend/src/app/(shop)/orders/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_ord_detail",
+      "name": "Order Detail",
+      "category": "user",
+      "description": "View details of a specific user order.",
+      "entry_points": ["/api/orders/:id", "frontend: /(shop)/orders/[id]"],
+      "related_files": ["backend/src/controllers/orderController.js", "frontend/src/app/(shop)/orders/[id]/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_ord_cancel",
+      "name": "Cancel Order",
+      "category": "user",
+      "description": "Cancel an order if it is still in pending status.",
+      "entry_points": ["/api/orders/:id/cancel"],
+      "related_files": ["backend/src/controllers/orderController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_dash_view",
+      "name": "Admin Dashboard",
+      "category": "admin",
+      "description": "View summary statistics, revenue, and top products.",
+      "entry_points": ["/api/admin/dashboard/*", "frontend: /(admin)/admin/"],
+      "related_files": ["backend/src/controllers/admin/adminDashboardController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_prod_crud",
+      "name": "Manage Products",
+      "category": "admin",
+      "description": "Create, read, update, and toggle status of products.",
+      "entry_points": ["/api/admin/products", "frontend: /(admin)/admin/products"],
+      "related_files": ["backend/src/controllers/admin/adminProductController.js", "frontend/src/app/(admin)/admin/products/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_prod_img",
+      "name": "Manage Product Images",
+      "category": "admin",
+      "description": "Upload and delete product images via Cloudinary.",
+      "entry_points": ["/api/admin/products/:id/images"],
+      "related_files": ["backend/src/controllers/admin/adminProductController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_prod_var_crud",
+      "name": "Manage Product Variants",
+      "category": "admin",
+      "description": "Add, update, and delete product variants.",
+      "entry_points": ["/api/admin/products/variants", "/api/admin/products/:id/variants"],
+      "related_files": ["backend/src/controllers/admin/adminProductController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_cat_crud",
+      "name": "Manage Categories",
+      "category": "admin",
+      "description": "Create, read, update, and delete categories.",
+      "entry_points": ["/api/admin/categories", "frontend: /(admin)/admin/categories"],
+      "related_files": ["backend/src/controllers/categoryController.js", "frontend/src/app/(admin)/admin/categories/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_brand_crud",
+      "name": "Manage Brands",
+      "category": "admin",
+      "description": "Create, read, update, and delete brands.",
+      "entry_points": ["/api/admin/brands", "frontend: /(admin)/admin/brands"],
+      "related_files": ["backend/src/controllers/brandController.js", "frontend/src/app/(admin)/admin/brands/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_vouch_crud",
+      "name": "Manage Vouchers",
+      "category": "admin",
+      "description": "Create, read, update, and soft delete vouchers.",
+      "entry_points": ["/api/admin/vouchers", "frontend: /(admin)/admin/vouchers"],
+      "related_files": ["backend/src/controllers/admin/adminVoucherController.js", "frontend/src/app/(admin)/admin/vouchers/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_ord_manage",
+      "name": "Manage Orders",
+      "category": "admin",
+      "description": "List all orders, view details, and update statuses.",
+      "entry_points": ["/api/admin/orders", "frontend: /(admin)/admin/orders"],
+      "related_files": ["backend/src/controllers/admin/adminOrderController.js", "frontend/src/app/(admin)/admin/orders/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_camp_crud",
+      "name": "Manage Campaigns",
+      "category": "admin",
+      "description": "Create, update, toggle status, and delete campaigns.",
+      "entry_points": ["/api/admin/campaigns", "frontend: /(admin)/admin/campaigns"],
+      "related_files": ["backend/src/controllers/admin/adminCampaignController.js", "frontend/src/app/(admin)/admin/campaigns/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_ai_desc",
+      "name": "AI Text Generation",
+      "category": "system",
+      "description": "Generate descriptions using Groq LLM API for products, vouchers, and campaigns.",
+      "entry_points": ["/api/admin/products/generate-description", "/api/admin/vouchers/generate-description", "/api/admin/campaigns/generate-description"],
+      "related_files": ["backend/src/controllers/admin/adminProductController.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_email_notif",
+      "name": "Email Notifications",
+      "category": "system",
+      "description": "Automated email notifications via SMTP for order placement and cancellation.",
+      "entry_points": ["Background trigger on order actions"],
+      "related_files": ["backend/src/services/mailService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_img_upload",
+      "name": "Image Hosting",
+      "category": "system",
+      "description": "Image upload and deletion via Cloudinary API.",
+      "entry_points": ["/api/upload/image"],
+      "related_files": ["backend/src/controllers/uploadController.js", "backend/src/services/uploadService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_jwt_refresh",
+      "name": "JWT Token Refresh",
+      "category": "system",
+      "description": "Issues a new access token using a valid refresh token stored in localStorage. Handled by axios interceptor automatically.",
+      "entry_points": ["/api/auth/refresh", "frontend/src/config/axios.js interceptor"],
+      "related_files": ["backend/src/controllers/authController.js", "backend/src/utils/jwt.js", "frontend/src/config/axios.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_related",
+      "name": "Related Products",
+      "category": "user",
+      "description": "Fetches products in the same category as a given product for cross-sell display on the product detail page.",
+      "entry_points": ["/api/products/:id/related", "frontend: /(shop)/products/[id]"],
+      "related_files": ["backend/src/controllers/productController.js", "backend/src/repositories/productRepository.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_buy_now",
+      "name": "Buy Now (Direct Checkout)",
+      "category": "user",
+      "description": "Allows user to purchase a single product variant directly, bypassing the cart. Handled via directItem payload in checkout/preview endpoints.",
+      "entry_points": ["/api/orders/checkout/preview (directItem)", "/api/orders/checkout (directItem)", "frontend: /(shop)/products/[id]"],
+      "related_files": ["backend/src/services/orderService.js", "frontend/src/app/(shop)/checkout/page.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_ord_bulk",
+      "name": "Bulk Order Status Update",
+      "category": "admin",
+      "description": "Admin can update the status of multiple orders at once. Iterates each order through the valid-transition state machine.",
+      "entry_points": ["/api/admin/orders/bulk-status", "frontend: /(admin)/admin/orders"],
+      "related_files": ["backend/src/controllers/admin/adminOrderController.js", "backend/src/services/admin/adminOrderService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_homepage",
+      "name": "Homepage Display",
+      "category": "user",
+      "description": "Server-side rendered homepage showing hero section, category grid, active campaign banners, new arrivals, and discounted products.",
+      "entry_points": ["frontend: /(shop)/"],
+      "related_files": ["frontend/src/app/(shop)/page.jsx", "frontend/src/components/homepage/HeroSection.jsx", "frontend/src/components/homepage/CampaignBanner.jsx", "frontend/src/components/homepage/ProductSection.jsx"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_prod_filter",
+      "name": "Product Filtering & Pagination",
+      "category": "user",
+      "description": "Filter products by category, brand, gender, price range, and sort order. Server-side pagination with configurable page size.",
+      "entry_points": ["/api/products?category_id=&brand_id=&gender=&sort=", "frontend: /(shop)/products"],
+      "related_files": ["backend/src/repositories/productRepository.js", "backend/src/utils/pagination.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_ord_filter",
+      "name": "Admin Order Filtering",
+      "category": "admin",
+      "description": "Admin can filter the order list by status, user_id, and date range (from_date, to_date).",
+      "entry_points": ["/api/admin/orders?status=&from_date=&to_date=", "frontend: /(admin)/admin/orders"],
+      "related_files": ["backend/src/controllers/admin/adminOrderController.js", "backend/src/repositories/admin/adminOrderRepository.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_camp_status",
+      "name": "Toggle Campaign Status",
+      "category": "admin",
+      "description": "Admin can activate or deactivate a campaign independently of editing. Guards prevent editing already-active campaigns.",
+      "entry_points": ["/api/admin/campaigns/:id/status", "frontend: /(admin)/admin/campaigns"],
+      "related_files": ["backend/src/controllers/admin/adminCampaignController.js", "backend/src/services/admin/adminCampaignService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_usr_shipping_default",
+      "name": "Set Default Shipping Profile",
+      "category": "user",
+      "description": "User marks one shipping profile as the default address, used as pre-selected address on checkout.",
+      "entry_points": ["/api/auth/shipping-profiles/:id/default", "frontend: /(shop)/profile"],
+      "related_files": ["backend/src/controllers/shippingProfileController.js", "backend/src/services/shippingProfileService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_stock_guard",
+      "name": "Stock Validation & Restore",
+      "category": "system",
+      "description": "Atomically decrements stock on order placement and restores it on cancellation (by user or admin) within a MySQL transaction.",
+      "entry_points": ["Triggered by: POST /api/orders/checkout, POST /api/orders/:id/cancel, PATCH /api/admin/orders/:id/status"],
+      "related_files": ["backend/src/services/orderService.js", "backend/src/services/admin/adminOrderService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_campaign_engine",
+      "name": "Campaign Discount Engine",
+      "category": "system",
+      "description": "Automatically selects the best applicable campaign (PERCENTAGE, FIXED_PRICE, TIER_DISCOUNT, FREESHIP) at checkout preview and order placement. Supports tier-based thresholds.",
+      "entry_points": ["Triggered internally by orderService.previewOrder and orderService.placeOrder"],
+      "related_files": ["backend/src/services/orderService.js", "backend/src/repositories/campaignRepository.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_voucher_engine",
+      "name": "Voucher Validation Engine",
+      "category": "system",
+      "description": "Validates voucher (active status, dates, global and per-user usage limits, min order value) and calculates discount amount (PERCENTAGE, FIXED, FREESHIP).",
+      "entry_points": ["/api/vouchers/apply", "Triggered internally by orderService during checkout"],
+      "related_files": ["backend/src/services/voucherService.js", "backend/src/repositories/voucherRepository.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_price_change_detect",
+      "name": "Price Change Detection",
+      "category": "system",
+      "description": "At checkout preview, compares current product prices against the cart price snapshots and notifies the user of any price changes since they added items.",
+      "entry_points": ["POST /api/orders/checkout/preview"],
+      "related_files": ["backend/src/services/orderService.js", "backend/src/repositories/cartRepository.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_adm_auth_guard",
+      "name": "Admin Authentication Guard",
+      "category": "system",
+      "description": "verifyToken + requireAdmin middleware chain ensures all /admin/* routes reject unauthenticated or non-admin requests.",
+      "entry_points": ["Applied to all /api/admin/* routes"],
+      "related_files": ["backend/src/middlewares/verifyToken.js", "backend/src/middlewares/requireAdmin.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_sku_autogen",
+      "name": "Auto SKU Generation",
+      "category": "system",
+      "description": "Automatically generates a unique SKU from brand, product name, color, size, and random hex suffix when admin creates a variant without providing one.",
+      "entry_points": ["Triggered on POST /api/admin/products/:id/variants when sku is empty"],
+      "related_files": ["backend/src/services/admin/adminProductService.js"],
+      "status": "active"
+    },
+    {
+      "id": "feat_sys_order_snapshot",
+      "name": "Order Snapshot",
+      "category": "system",
+      "description": "At order placement, snapshots product name, size, color, unit price, and shipping address so historical records remain accurate even if master data changes later.",
+      "entry_points": ["Triggered on POST /api/orders/checkout"],
+      "related_files": ["backend/src/services/orderService.js", "backend/database/schema.sql (order_items, order_shipping_address)"],
+      "status": "active"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_001",
+      "name": "Customer Purchase Flow",
+      "actors": ["user", "system", "admin"],
+      "steps": [
+        {
+          "step": 1,
+          "description": "User views products and selects an item.",
+          "feature_id": "feat_usr_prod_detail"
+        },
+        {
+          "step": 2,
+          "description": "User adds the item to their cart.",
+          "feature_id": "feat_usr_cart_manage"
+        },
+        {
+          "step": 3,
+          "description": "User applies a discount voucher to the cart.",
+          "feature_id": "feat_usr_vouch_apply"
+        },
+        {
+          "step": 4,
+          "description": "User previews the checkout details.",
+          "feature_id": "feat_usr_ord_preview"
+        },
+        {
+          "step": 5,
+          "description": "User submits and places the order.",
+          "feature_id": "feat_usr_ord_place"
+        },
+        {
+          "step": 6,
+          "description": "System automatically sends an order confirmation email to the admin/user.",
+          "feature_id": "feat_sys_email_notif"
+        },
+        {
+          "step": 7,
+          "description": "Admin reviews the order and updates its status (e.g., to fulfilled).",
+          "feature_id": "feat_adm_ord_manage"
+        }
+      ],
+      "entry_point": "frontend: /(shop)/products",
+      "exit_point": "order status = fulfilled",
+      "related_feature_ids": [
+        "feat_usr_prod_detail",
+        "feat_usr_cart_manage",
+        "feat_usr_vouch_apply",
+        "feat_usr_ord_preview",
+        "feat_usr_ord_place",
+        "feat_sys_email_notif",
+        "feat_adm_ord_manage"
+      ]
+    },
+    {
+      "id": "flow_002",
+      "name": "Admin Product Creation Flow",
+      "actors": ["admin", "system"],
+      "steps": [
+        {
+          "step": 1,
+          "description": "Admin initiates product creation and fills base info.",
+          "feature_id": "feat_adm_prod_crud"
+        },
+        {
+          "step": 2,
+          "description": "Admin requests AI to generate a product description based on keywords.",
+          "feature_id": "feat_sys_ai_desc"
+        },
+        {
+          "step": 3,
+          "description": "Admin uploads product images which are saved to Cloudinary.",
+          "feature_id": "feat_adm_prod_img"
+        },
+        {
+          "step": 4,
+          "description": "System processes and hosts the uploaded images.",
+          "feature_id": "feat_sys_img_upload"
+        },
+        {
+          "step": 5,
+          "description": "Admin adds product variants (size, color, etc).",
+          "feature_id": "feat_adm_prod_var_crud"
+        },
+        {
+          "step": 6,
+          "description": "Admin toggles the product status to active, making it visible to users.",
+          "feature_id": "feat_adm_prod_crud"
+        }
+      ],
+      "entry_point": "frontend: /(admin)/admin/products",
+      "exit_point": "product is active and available to users",
+      "related_feature_ids": [
+        "feat_adm_prod_crud",
+        "feat_sys_ai_desc",
+        "feat_adm_prod_img",
+        "feat_sys_img_upload",
+        "feat_adm_prod_var_crud"
+      ]
+    },
+    {
+      "id": "flow_003",
+      "name": "User Order Cancellation Flow",
+      "actors": ["user", "system", "admin"],
+      "steps": [
+        {
+          "step": 1,
+          "description": "User views their order history.",
+          "feature_id": "feat_usr_ord_list"
+        },
+        {
+          "step": 2,
+          "description": "User requests to cancel a pending order.",
+          "feature_id": "feat_usr_ord_cancel"
+        },
+        {
+          "step": 3,
+          "description": "System cancels the order and triggers a cancellation email notification to admin.",
+          "feature_id": "feat_sys_email_notif"
+        }
+      ],
+      "entry_point": "frontend: /(shop)/orders",
+      "exit_point": "order status = cancelled",
+      "related_feature_ids": [
+        "feat_usr_ord_list",
+        "feat_usr_ord_cancel",
+        "feat_sys_email_notif"
+      ]
+    },
+    {
+      "id": "flow_004",
+      "name": "Admin Campaign Creation with AI Description",
+      "actors": ["admin", "system"],
+      "steps": [
+        { "step": 1, "description": "Admin navigates to Campaigns page and clicks 'New Campaign'.", "feature_id": "feat_adm_camp_crud" },
+        { "step": 2, "description": "Admin fills campaign name, type (PERCENTAGE/FIXED_PRICE/TIER_DISCOUNT/FREESHIP), dates, and product list.", "feature_id": "feat_adm_camp_crud" },
+        { "step": 3, "description": "Admin requests Groq AI to generate a promotional description.", "feature_id": "feat_sys_ai_desc" },
+        { "step": 4, "description": "Admin submits the form; backend validates tiers/config, saves campaign and linked products in a transaction.", "feature_id": "feat_adm_camp_crud" },
+        { "step": 5, "description": "Admin toggles campaign status to active when the start date is reached.", "feature_id": "feat_adm_camp_status" }
+      ],
+      "entry_point": "frontend: /(admin)/admin/campaigns/new",
+      "exit_point": "campaign status = active, visible on storefront",
+      "related_feature_ids": ["feat_adm_camp_crud", "feat_sys_ai_desc", "feat_adm_camp_status"]
+    },
+    {
+      "id": "flow_005",
+      "name": "User Registration to First Purchase",
+      "actors": ["user", "system"],
+      "steps": [
+        { "step": 1, "description": "New user registers with username, email, and password.", "feature_id": "feat_usr_auth_register" },
+        { "step": 2, "description": "User logs in and receives access + refresh tokens stored in localStorage.", "feature_id": "feat_usr_auth_login" },
+        { "step": 3, "description": "User browses homepage and product listings.", "feature_id": "feat_usr_homepage" },
+        { "step": 4, "description": "User adds a shipping profile for delivery.", "feature_id": "feat_usr_shipping_crud" },
+        { "step": 5, "description": "User adds items to cart.", "feature_id": "feat_usr_cart_manage" },
+        { "step": 6, "description": "User proceeds to checkout and places order.", "feature_id": "feat_usr_ord_place" },
+        { "step": 7, "description": "System sends order notification email to admin.", "feature_id": "feat_sys_email_notif" }
+      ],
+      "entry_point": "frontend: /(auth)/register",
+      "exit_point": "order placed, admin notified",
+      "related_feature_ids": ["feat_usr_auth_register", "feat_usr_auth_login", "feat_usr_homepage", "feat_usr_shipping_crud", "feat_usr_cart_manage", "feat_usr_ord_place", "feat_sys_email_notif"]
+    },
+    {
+      "id": "flow_006",
+      "name": "Campaign Discount Applied at Checkout",
+      "actors": ["user", "system"],
+      "steps": [
+        { "step": 1, "description": "User views storefront showing active campaign banners.", "feature_id": "feat_usr_homepage" },
+        { "step": 2, "description": "User adds campaign-eligible products to cart.", "feature_id": "feat_usr_cart_manage" },
+        { "step": 3, "description": "User previews checkout; system's campaign engine auto-selects the best applicable campaign.", "feature_id": "feat_sys_campaign_engine" },
+        { "step": 4, "description": "User optionally applies a voucher for additional discount.", "feature_id": "feat_usr_vouch_apply" },
+        { "step": 5, "description": "System calculates final total: subtotal - campaign_discount - voucher_discount + shipping_fee.", "feature_id": "feat_sys_campaign_engine" },
+        { "step": 6, "description": "User confirms and places order; stock is decremented atomically.", "feature_id": "feat_usr_ord_place" }
+      ],
+      "entry_point": "frontend: /(shop)/cart",
+      "exit_point": "order persisted with campaign_id, campaign_discount_total recorded",
+      "related_feature_ids": ["feat_usr_homepage", "feat_usr_cart_manage", "feat_sys_campaign_engine", "feat_usr_vouch_apply", "feat_usr_ord_place", "feat_sys_stock_guard"]
+    },
+    {
+      "id": "flow_007",
+      "name": "Admin Order Fulfillment Pipeline",
+      "actors": ["admin"],
+      "steps": [
+        { "step": 1, "description": "Admin views orders dashboard, filters by status=pending.", "feature_id": "feat_adm_ord_filter" },
+        { "step": 2, "description": "Admin reviews order details and verifies items.", "feature_id": "feat_adm_ord_manage" },
+        { "step": 3, "description": "Admin updates status from pending → confirmed.", "feature_id": "feat_adm_ord_manage" },
+        { "step": 4, "description": "Admin updates status from confirmed → shipping.", "feature_id": "feat_adm_ord_manage" },
+        { "step": 5, "description": "Admin updates status from shipping → delivered.", "feature_id": "feat_adm_ord_manage" },
+        { "step": 6, "description": "Optionally, admin uses bulk-status update to process multiple orders at once.", "feature_id": "feat_adm_ord_bulk" }
+      ],
+      "entry_point": "frontend: /(admin)/admin/orders",
+      "exit_point": "order status = delivered, revenue counted in dashboard",
+      "related_feature_ids": ["feat_adm_ord_manage", "feat_adm_ord_filter", "feat_adm_ord_bulk", "feat_adm_dash_view"]
+    },
+    {
+      "id": "flow_008",
+      "name": "Admin Voucher Creation with AI",
+      "actors": ["admin", "system"],
+      "steps": [
+        { "step": 1, "description": "Admin opens voucher creation form and enters code, discount type, value, limits, and validity dates.", "feature_id": "feat_adm_vouch_crud" },
+        { "step": 2, "description": "Admin requests AI to generate a short promotional description for the voucher.", "feature_id": "feat_sys_ai_desc" },
+        { "step": 3, "description": "Admin submits; backend checks code uniqueness, saves voucher with created_by admin ID.", "feature_id": "feat_adm_vouch_crud" }
+      ],
+      "entry_point": "frontend: /(admin)/admin/vouchers/new",
+      "exit_point": "voucher is_active=1, available for users to apply",
+      "related_feature_ids": ["feat_adm_vouch_crud", "feat_sys_ai_desc"]
+    }
+  ]
+}

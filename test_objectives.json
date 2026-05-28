@@ -1,0 +1,2558 @@
+{
+  "meta": {
+    "project": "Clothing E-Commerce Management System",
+    "generated_at": "2026-05-28T18:00:10.470Z",
+    "total_test_objectives": 153,
+    "breakdown": {
+      "by_priority": {
+        "P1-critical": 57,
+        "P2-high": 58,
+        "P3-medium": 30,
+        "P4-low": 8
+      },
+      "by_actor": {
+        "user": 53,
+        "admin": 34,
+        "system": 20,
+        "unauthenticated": 46
+      },
+      "by_scope": {
+        "feature": 129,
+        "flow": 24
+      }
+    }
+  },
+  "test_objectives": [
+    {
+      "id": "tc_001",
+      "title": "Valid reg",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_register",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go /register",
+        "2. Fill details",
+        "3. Submit"
+      ],
+      "expected_result": "Account created",
+      "failure_indicator": "Error shown"
+    },
+    {
+      "id": "tc_004",
+      "title": "Valid login",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_login",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Has account",
+      "steps": [
+        "1. Go /login",
+        "2. Enter creds",
+        "3. Submit"
+      ],
+      "expected_result": "Logged in",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_007",
+      "title": "Logout",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_logout",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click logout"
+      ],
+      "expected_result": "Session ends",
+      "failure_indicator": "Stays logged in"
+    },
+    {
+      "id": "tc_012",
+      "title": "Unauth access",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_view",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Go /profile"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Data shown"
+    },
+    {
+      "id": "tc_015",
+      "title": "Unauth API",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_update",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. POST /api/auth/me"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_018",
+      "title": "Unauth API",
+      "scope": "feature",
+      "scope_ref": "feat_usr_change_password",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. POST change-pass"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_021",
+      "title": "Unauth access",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_crud",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Access shipping API"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_028",
+      "title": "View detail",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_detail",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Product exists",
+      "steps": [
+        "1. Click product"
+      ],
+      "expected_result": "Detail page loads",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_038",
+      "title": "Add to cart",
+      "scope": "feature",
+      "scope_ref": "feat_usr_cart_manage",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click add to cart"
+      ],
+      "expected_result": "Item added",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_040",
+      "title": "Unauth add",
+      "scope": "feature",
+      "scope_ref": "feat_usr_cart_manage",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Click add to cart"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Added"
+    },
+    {
+      "id": "tc_043",
+      "title": "Unauth apply",
+      "scope": "feature",
+      "scope_ref": "feat_usr_vouch_apply",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. API apply voucher"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_044",
+      "title": "Preview cart",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_preview",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /checkout"
+      ],
+      "expected_result": "Preview loads",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_046",
+      "title": "Unauth preview",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_preview",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Go /checkout"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Loads"
+    },
+    {
+      "id": "tc_047",
+      "title": "Place order",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_place",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click place order"
+      ],
+      "expected_result": "Order created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_049",
+      "title": "Unauth place",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_place",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. API checkout"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_052",
+      "title": "Unauth view",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_list",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Go /orders"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Loads"
+    },
+    {
+      "id": "tc_055",
+      "title": "Unauth detail",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_detail",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Go /orders/1"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Loads"
+    },
+    {
+      "id": "tc_056",
+      "title": "Cancel pending",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_cancel",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click cancel on pending"
+      ],
+      "expected_result": "Cancelled",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_058",
+      "title": "Unauth cancel",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_cancel",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. API cancel"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_061",
+      "title": "Buy direct",
+      "scope": "feature",
+      "scope_ref": "feat_usr_buy_now",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click Buy Now"
+      ],
+      "expected_result": "Go checkout",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_063",
+      "title": "Unauth buy",
+      "scope": "feature",
+      "scope_ref": "feat_usr_buy_now",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Click Buy Now"
+      ],
+      "expected_result": "Redirect login",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_070",
+      "title": "Unauth set",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_default",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. API set default"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_073",
+      "title": "User access",
+      "scope": "feature",
+      "scope_ref": "feat_adm_dash_view",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. Go /admin"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "Loads"
+    },
+    {
+      "id": "tc_074",
+      "title": "Create prod",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_crud",
+      "actor": "admin",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill product",
+        "2. Save"
+      ],
+      "expected_result": "Created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_076",
+      "title": "User create",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API POST product"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_079",
+      "title": "User upload",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_img",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API upload img"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_082",
+      "title": "User add",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_var_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API add var"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_085",
+      "title": "User add cat",
+      "scope": "feature",
+      "scope_ref": "feat_adm_cat_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API add cat"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_088",
+      "title": "User add brand",
+      "scope": "feature",
+      "scope_ref": "feat_adm_brand_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API add brand"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_091",
+      "title": "User add vouch",
+      "scope": "feature",
+      "scope_ref": "feat_adm_vouch_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API add vouch"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_092",
+      "title": "Update status",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_manage",
+      "actor": "admin",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Change status",
+        "2. Save"
+      ],
+      "expected_result": "Updated",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_094",
+      "title": "User update",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_manage",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API update ord"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_097",
+      "title": "User add camp",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_crud",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API add camp"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_100",
+      "title": "User bulk",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_bulk",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API bulk update"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_103",
+      "title": "User filter",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_filter",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API filter ord"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_106",
+      "title": "User toggle",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_status",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API toggle camp"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_107",
+      "title": "Admin token",
+      "scope": "feature",
+      "scope_ref": "feat_adm_auth_guard",
+      "actor": "admin",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Access API"
+      ],
+      "expected_result": "200 OK",
+      "failure_indicator": "403 error"
+    },
+    {
+      "id": "tc_109",
+      "title": "No token",
+      "scope": "feature",
+      "scope_ref": "feat_adm_auth_guard",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Access API"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_116",
+      "title": "Auto refresh",
+      "scope": "feature",
+      "scope_ref": "feat_sys_jwt_refresh",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Token expired",
+      "steps": [
+        "1. Make API call"
+      ],
+      "expected_result": "New token got",
+      "failure_indicator": "Logout"
+    },
+    {
+      "id": "tc_117",
+      "title": "Bad refresh",
+      "scope": "feature",
+      "scope_ref": "feat_sys_jwt_refresh",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Refresh exp",
+      "steps": [
+        "1. Make API call"
+      ],
+      "expected_result": "Forced logout",
+      "failure_indicator": "Stuck"
+    },
+    {
+      "id": "tc_118",
+      "title": "Stock dec",
+      "scope": "feature",
+      "scope_ref": "feat_sys_stock_guard",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Checkout",
+      "steps": [
+        "1. Place order"
+      ],
+      "expected_result": "Stock reduced",
+      "failure_indicator": "Unchanged"
+    },
+    {
+      "id": "tc_119",
+      "title": "Race cond",
+      "scope": "feature",
+      "scope_ref": "feat_sys_stock_guard",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Checkout",
+      "steps": [
+        "1. Concurrent checkout"
+      ],
+      "expected_result": "Rollback one",
+      "failure_indicator": "Negative stock"
+    },
+    {
+      "id": "tc_120",
+      "title": "Calc best",
+      "scope": "feature",
+      "scope_ref": "feat_sys_campaign_engine",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Cart loaded",
+      "steps": [
+        "1. Preview checkout"
+      ],
+      "expected_result": "Best disc applied",
+      "failure_indicator": "Wrong disc"
+    },
+    {
+      "id": "tc_122",
+      "title": "Calc vouch",
+      "scope": "feature",
+      "scope_ref": "feat_sys_voucher_engine",
+      "actor": "system",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Apply vouch",
+      "steps": [
+        "1. Preview checkout"
+      ],
+      "expected_result": "Vouch applied",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_130",
+      "title": "Purchase Flow",
+      "scope": "flow",
+      "scope_ref": "flow_001",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. View",
+        "2. Add",
+        "3. Apply",
+        "4. Preview",
+        "5. Place",
+        "6. Email",
+        "7. Fulfill"
+      ],
+      "expected_result": "Completed",
+      "failure_indicator": "Stuck"
+    },
+    {
+      "id": "tc_132",
+      "title": "Unauth Flow",
+      "scope": "flow",
+      "scope_ref": "flow_001",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "None",
+      "steps": [
+        "1. View",
+        "2. Add",
+        "3. Checkout"
+      ],
+      "expected_result": "Login redirect",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_133",
+      "title": "Create Prod Flow",
+      "scope": "flow",
+      "scope_ref": "flow_002",
+      "actor": "admin",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Info",
+        "2. AI",
+        "3. Img",
+        "4. Var",
+        "5. Active"
+      ],
+      "expected_result": "Active prod",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_135",
+      "title": "User Flow 2",
+      "scope": "flow",
+      "scope_ref": "flow_002",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. Start Flow 002"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_136",
+      "title": "Cancel Flow",
+      "scope": "flow",
+      "scope_ref": "flow_003",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Order pend",
+      "steps": [
+        "1. List",
+        "2. Cancel",
+        "3. Email"
+      ],
+      "expected_result": "Cancelled",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_138",
+      "title": "Unauth Cancel",
+      "scope": "flow",
+      "scope_ref": "flow_003",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. API Cancel"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_141",
+      "title": "User Camp",
+      "scope": "flow",
+      "scope_ref": "flow_004",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. Start Flow 004"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_142",
+      "title": "Reg to Buy",
+      "scope": "flow",
+      "scope_ref": "flow_005",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Reg",
+        "2. Login",
+        "3. Home",
+        "4. Ship",
+        "5. Cart",
+        "6. Place",
+        "7. Email"
+      ],
+      "expected_result": "Completed",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_145",
+      "title": "Camp Buy Flow",
+      "scope": "flow",
+      "scope_ref": "flow_006",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Home",
+        "2. Cart",
+        "3. Preview",
+        "4. Vouch",
+        "5. Calc",
+        "6. Place"
+      ],
+      "expected_result": "Completed",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_147",
+      "title": "Unauth Camp",
+      "scope": "flow",
+      "scope_ref": "flow_006",
+      "actor": "unauthenticated",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Home",
+        "2. Cart",
+        "3. Checkout"
+      ],
+      "expected_result": "Login req",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_148",
+      "title": "Fulfill Flow",
+      "scope": "flow",
+      "scope_ref": "flow_007",
+      "actor": "admin",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Filter",
+        "2. Review",
+        "3. Confirm",
+        "4. Ship",
+        "5. Deliver"
+      ],
+      "expected_result": "Completed",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_150",
+      "title": "User Fulfill",
+      "scope": "flow",
+      "scope_ref": "flow_007",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. API update"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_153",
+      "title": "User Vouch",
+      "scope": "flow",
+      "scope_ref": "flow_008",
+      "actor": "user",
+      "priority": "P1-critical",
+      "risk": "high",
+      "type": "auth_boundary",
+      "precondition": "User in",
+      "steps": [
+        "1. Start Flow 008"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_002",
+      "title": "Dup email",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_register",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Email exists",
+      "steps": [
+        "1. Go /register",
+        "2. Fill existing email",
+        "3. Submit"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_003",
+      "title": "Logged in",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_register",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "auth_boundary",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /register"
+      ],
+      "expected_result": "Redirected",
+      "failure_indicator": "Page loads"
+    },
+    {
+      "id": "tc_005",
+      "title": "Wrong pass",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_login",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Has account",
+      "steps": [
+        "1. Go /login",
+        "2. Enter wrong pass",
+        "3. Submit"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Logs in"
+    },
+    {
+      "id": "tc_006",
+      "title": "Logged in",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_login",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "auth_boundary",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /login"
+      ],
+      "expected_result": "Redirected",
+      "failure_indicator": "Page loads"
+    },
+    {
+      "id": "tc_009",
+      "title": "No session",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_logout",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "auth_boundary",
+      "precondition": "Logged out",
+      "steps": [
+        "1. Call logout API"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_010",
+      "title": "View profile",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_view",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /profile"
+      ],
+      "expected_result": "Data shown",
+      "failure_indicator": "Empty/Error"
+    },
+    {
+      "id": "tc_013",
+      "title": "Update name",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_update",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /profile",
+        "2. Change name",
+        "3. Save"
+      ],
+      "expected_result": "Updated",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_016",
+      "title": "Change pass",
+      "scope": "feature",
+      "scope_ref": "feat_usr_change_password",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Enter old pass",
+        "2. Enter new",
+        "3. Save"
+      ],
+      "expected_result": "Pass updated",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_019",
+      "title": "Add address",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_crud",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click add",
+        "2. Fill info",
+        "3. Save"
+      ],
+      "expected_result": "Saved",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_022",
+      "title": "View list",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_list",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go /products"
+      ],
+      "expected_result": "List loads",
+      "failure_indicator": "Empty/Error"
+    },
+    {
+      "id": "tc_024",
+      "title": "Search valid",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_search",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Type 'shirt'"
+      ],
+      "expected_result": "Results match",
+      "failure_indicator": "No results"
+    },
+    {
+      "id": "tc_029",
+      "title": "Invalid slug",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_detail",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Go /products/invalid"
+      ],
+      "expected_result": "404 page",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_030",
+      "title": "View cats",
+      "scope": "feature",
+      "scope_ref": "feat_usr_cat_list",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go /category"
+      ],
+      "expected_result": "Categories show",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_032",
+      "title": "View brands",
+      "scope": "feature",
+      "scope_ref": "feat_usr_brand_list",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go /brands"
+      ],
+      "expected_result": "Brands show",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_034",
+      "title": "View campaigns",
+      "scope": "feature",
+      "scope_ref": "feat_usr_camp_view",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Active campaign",
+      "steps": [
+        "1. Go /campaigns"
+      ],
+      "expected_result": "Campaigns show",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_036",
+      "title": "View vouchers",
+      "scope": "feature",
+      "scope_ref": "feat_usr_vouch_active",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Active voucher",
+      "steps": [
+        "1. Go /vouchers"
+      ],
+      "expected_result": "Vouchers show",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_039",
+      "title": "Exceed stock",
+      "scope": "feature",
+      "scope_ref": "feat_usr_cart_manage",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Add qty > stock"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Added"
+    },
+    {
+      "id": "tc_041",
+      "title": "Apply valid",
+      "scope": "feature",
+      "scope_ref": "feat_usr_vouch_apply",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Enter valid code",
+        "2. Apply"
+      ],
+      "expected_result": "Discount applied",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_042",
+      "title": "Apply expired",
+      "scope": "feature",
+      "scope_ref": "feat_usr_vouch_apply",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Enter expired code",
+        "2. Apply"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Applied"
+    },
+    {
+      "id": "tc_045",
+      "title": "Out of stock",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_preview",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /checkout with OOS item"
+      ],
+      "expected_result": "Warning msg",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_048",
+      "title": "Empty cart",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_place",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Place empty cart"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_050",
+      "title": "View orders",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_list",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /orders"
+      ],
+      "expected_result": "List loads",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_053",
+      "title": "View detail",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_detail",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click order"
+      ],
+      "expected_result": "Detail loads",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_054",
+      "title": "View others",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_detail",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go other user order ID"
+      ],
+      "expected_result": "403 error",
+      "failure_indicator": "Loads"
+    },
+    {
+      "id": "tc_057",
+      "title": "Cancel shipped",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_cancel",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. API cancel shipped"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Cancelled"
+    },
+    {
+      "id": "tc_062",
+      "title": "Buy OOS",
+      "scope": "feature",
+      "scope_ref": "feat_usr_buy_now",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click Buy Now on OOS"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Proceeds"
+    },
+    {
+      "id": "tc_064",
+      "title": "View home",
+      "scope": "feature",
+      "scope_ref": "feat_usr_homepage",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go /"
+      ],
+      "expected_result": "Home loads",
+      "failure_indicator": "Error"
+    },
+    {
+      "id": "tc_066",
+      "title": "Filter price",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_filter",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Set price range"
+      ],
+      "expected_result": "List updates",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_068",
+      "title": "Set default",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_default",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Click set default"
+      ],
+      "expected_result": "Updated",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_071",
+      "title": "View dash",
+      "scope": "feature",
+      "scope_ref": "feat_adm_dash_view",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Go /admin"
+      ],
+      "expected_result": "Stats load",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_075",
+      "title": "Missing name",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Save empty form"
+      ],
+      "expected_result": "Validation",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_077",
+      "title": "Upload img",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_img",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Select image",
+        "2. Upload"
+      ],
+      "expected_result": "Uploaded",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_080",
+      "title": "Add var",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_var_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill variant",
+        "2. Save"
+      ],
+      "expected_result": "Added",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_083",
+      "title": "Add cat",
+      "scope": "feature",
+      "scope_ref": "feat_adm_cat_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill cat",
+        "2. Save"
+      ],
+      "expected_result": "Created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_086",
+      "title": "Add brand",
+      "scope": "feature",
+      "scope_ref": "feat_adm_brand_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill brand",
+        "2. Save"
+      ],
+      "expected_result": "Created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_089",
+      "title": "Add vouch",
+      "scope": "feature",
+      "scope_ref": "feat_adm_vouch_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill vouch",
+        "2. Save"
+      ],
+      "expected_result": "Created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_090",
+      "title": "End < Start",
+      "scope": "feature",
+      "scope_ref": "feat_adm_vouch_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Set dates wrong",
+        "2. Save"
+      ],
+      "expected_result": "Validation",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_093",
+      "title": "Invalid transition",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_manage",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. API pending to delivered"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Updated"
+    },
+    {
+      "id": "tc_095",
+      "title": "Add camp",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_crud",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Fill camp",
+        "2. Save"
+      ],
+      "expected_result": "Created",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_098",
+      "title": "Bulk update",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_bulk",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Select multi",
+        "2. Update"
+      ],
+      "expected_result": "Updated",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_099",
+      "title": "Mixed states",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_bulk",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Select invalid ones"
+      ],
+      "expected_result": "Partial/Error",
+      "failure_indicator": "Updated all"
+    },
+    {
+      "id": "tc_104",
+      "title": "Toggle camp",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_status",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Click toggle"
+      ],
+      "expected_result": "Toggled",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_108",
+      "title": "Expired token",
+      "scope": "feature",
+      "scope_ref": "feat_adm_auth_guard",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Admin token exp",
+      "steps": [
+        "1. Access API"
+      ],
+      "expected_result": "401 error",
+      "failure_indicator": "200 OK"
+    },
+    {
+      "id": "tc_112",
+      "title": "Send email",
+      "scope": "feature",
+      "scope_ref": "feat_sys_email_notif",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Order placed",
+      "steps": [
+        "1. Check inbox"
+      ],
+      "expected_result": "Email received",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_114",
+      "title": "Upload Cloud",
+      "scope": "feature",
+      "scope_ref": "feat_sys_img_upload",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "File picked",
+      "steps": [
+        "1. Upload API"
+      ],
+      "expected_result": "URL returned",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_121",
+      "title": "Item removed",
+      "scope": "feature",
+      "scope_ref": "feat_sys_campaign_engine",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Cart loaded",
+      "steps": [
+        "1. Remove req item"
+      ],
+      "expected_result": "Disc removed",
+      "failure_indicator": "Disc stays"
+    },
+    {
+      "id": "tc_123",
+      "title": "Under min",
+      "scope": "feature",
+      "scope_ref": "feat_sys_voucher_engine",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Apply vouch",
+      "steps": [
+        "1. Reduce cart val"
+      ],
+      "expected_result": "Vouch rejected",
+      "failure_indicator": "Vouch stays"
+    },
+    {
+      "id": "tc_124",
+      "title": "Detect change",
+      "scope": "feature",
+      "scope_ref": "feat_sys_price_change_detect",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "happy_path",
+      "precondition": "Price changed",
+      "steps": [
+        "1. Preview checkout"
+      ],
+      "expected_result": "Warning shown",
+      "failure_indicator": "Silent"
+    },
+    {
+      "id": "tc_128",
+      "title": "Snapshot",
+      "scope": "feature",
+      "scope_ref": "feat_sys_order_snapshot",
+      "actor": "system",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Order placed",
+      "steps": [
+        "1. Change prod price"
+      ],
+      "expected_result": "Order price same",
+      "failure_indicator": "Price changes"
+    },
+    {
+      "id": "tc_131",
+      "title": "Cart Fail",
+      "scope": "flow",
+      "scope_ref": "flow_001",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. View",
+        "2. Add OOS",
+        "3. Stop"
+      ],
+      "expected_result": "Stopped safely",
+      "failure_indicator": "Proceeds empty"
+    },
+    {
+      "id": "tc_134",
+      "title": "AI Fail Flow",
+      "scope": "flow",
+      "scope_ref": "flow_002",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Info",
+        "2. AI Fails",
+        "3. Manual"
+      ],
+      "expected_result": "Saved",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_137",
+      "title": "Cancel Ship",
+      "scope": "flow",
+      "scope_ref": "flow_003",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Order ship",
+      "steps": [
+        "1. List",
+        "2. Try Cancel"
+      ],
+      "expected_result": "Hidden/Error",
+      "failure_indicator": "Cancelled"
+    },
+    {
+      "id": "tc_139",
+      "title": "Camp Flow",
+      "scope": "flow",
+      "scope_ref": "flow_004",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. New",
+        "2. Info",
+        "3. AI",
+        "4. Submit",
+        "5. Active"
+      ],
+      "expected_result": "Active camp",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_143",
+      "title": "Reg Fail",
+      "scope": "flow",
+      "scope_ref": "flow_005",
+      "actor": "unauthenticated",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Reg Bad",
+        "2. Stop"
+      ],
+      "expected_result": "Handled",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_144",
+      "title": "Already Reg",
+      "scope": "flow",
+      "scope_ref": "flow_005",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "auth_boundary",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Reg again"
+      ],
+      "expected_result": "Redirect",
+      "failure_indicator": "Page loads"
+    },
+    {
+      "id": "tc_146",
+      "title": "Camp Expire",
+      "scope": "flow",
+      "scope_ref": "flow_006",
+      "actor": "user",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Home",
+        "2. Cart",
+        "3. Wait Expire",
+        "4. Place"
+      ],
+      "expected_result": "Reverts price",
+      "failure_indicator": "Old price"
+    },
+    {
+      "id": "tc_149",
+      "title": "Skip states",
+      "scope": "flow",
+      "scope_ref": "flow_007",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "medium",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Filter",
+        "2. Skip to Deliver"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Allowed"
+    },
+    {
+      "id": "tc_151",
+      "title": "Vouch Flow",
+      "scope": "flow",
+      "scope_ref": "flow_008",
+      "actor": "admin",
+      "priority": "P2-high",
+      "risk": "high",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. New",
+        "2. Info",
+        "3. AI",
+        "4. Submit"
+      ],
+      "expected_result": "Active vouch",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_008",
+      "title": "Fast click",
+      "scope": "feature",
+      "scope_ref": "feat_usr_auth_logout",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Double click logout"
+      ],
+      "expected_result": "Logs out safely",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_011",
+      "title": "Server slow",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_view",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Simulate delay"
+      ],
+      "expected_result": "Loading state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_014",
+      "title": "Invalid phone",
+      "scope": "feature",
+      "scope_ref": "feat_usr_profile_update",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Enter letters in phone",
+        "2. Save"
+      ],
+      "expected_result": "Validation error",
+      "failure_indicator": "Saved"
+    },
+    {
+      "id": "tc_017",
+      "title": "Wrong old",
+      "scope": "feature",
+      "scope_ref": "feat_usr_change_password",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Enter wrong old pass",
+        "2. Save"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Updated"
+    },
+    {
+      "id": "tc_020",
+      "title": "Missing field",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_crud",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Omit city",
+        "2. Save"
+      ],
+      "expected_result": "Validation error",
+      "failure_indicator": "Saved"
+    },
+    {
+      "id": "tc_023",
+      "title": "Bad page",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_list",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Go /products?page=999"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_025",
+      "title": "Search special",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_search",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Type '###'"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_026",
+      "title": "View hot",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_special",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "happy_path",
+      "precondition": "None",
+      "steps": [
+        "1. Go homepage"
+      ],
+      "expected_result": "Hot items show",
+      "failure_indicator": "Missing"
+    },
+    {
+      "id": "tc_059",
+      "title": "View related",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_related",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "happy_path",
+      "precondition": "Product exists",
+      "steps": [
+        "1. View product"
+      ],
+      "expected_result": "Related show",
+      "failure_indicator": "Empty"
+    },
+    {
+      "id": "tc_065",
+      "title": "API slow",
+      "scope": "feature",
+      "scope_ref": "feat_usr_homepage",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Simulate slow API"
+      ],
+      "expected_result": "Loading state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_067",
+      "title": "Min > Max",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_filter",
+      "actor": "unauthenticated",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None",
+      "steps": [
+        "1. Set min 100 max 10"
+      ],
+      "expected_result": "Validation error",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_069",
+      "title": "Invalid ID",
+      "scope": "feature",
+      "scope_ref": "feat_usr_shipping_default",
+      "actor": "user",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. API set default 999"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Success"
+    },
+    {
+      "id": "tc_072",
+      "title": "Bad dates",
+      "scope": "feature",
+      "scope_ref": "feat_adm_dash_view",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Filter invalid dates"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_078",
+      "title": "Upload PDF",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_img",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Select PDF",
+        "2. Upload"
+      ],
+      "expected_result": "Validation",
+      "failure_indicator": "Uploaded"
+    },
+    {
+      "id": "tc_081",
+      "title": "Neg price",
+      "scope": "feature",
+      "scope_ref": "feat_adm_prod_var_crud",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Set price -10",
+        "2. Save"
+      ],
+      "expected_result": "Validation",
+      "failure_indicator": "Saved"
+    },
+    {
+      "id": "tc_084",
+      "title": "Dup cat",
+      "scope": "feature",
+      "scope_ref": "feat_adm_cat_crud",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Save existing name"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_087",
+      "title": "Dup brand",
+      "scope": "feature",
+      "scope_ref": "feat_adm_brand_crud",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Save existing name"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_096",
+      "title": "No items",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_crud",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Save without items"
+      ],
+      "expected_result": "Validation",
+      "failure_indicator": "Created"
+    },
+    {
+      "id": "tc_101",
+      "title": "Filter ord",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_filter",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "happy_path",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Select status"
+      ],
+      "expected_result": "List filtered",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_102",
+      "title": "Bad query",
+      "scope": "feature",
+      "scope_ref": "feat_adm_ord_filter",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. API status=XYZ"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_105",
+      "title": "Toggle expired",
+      "scope": "feature",
+      "scope_ref": "feat_adm_camp_status",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. Toggle ended camp"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Toggled"
+    },
+    {
+      "id": "tc_110",
+      "title": "Gen AI",
+      "scope": "feature",
+      "scope_ref": "feat_sys_ai_desc",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "happy_path",
+      "precondition": "Admin edits",
+      "steps": [
+        "1. Click Gen AI"
+      ],
+      "expected_result": "Desc filled",
+      "failure_indicator": "Fails"
+    },
+    {
+      "id": "tc_111",
+      "title": "API Down",
+      "scope": "feature",
+      "scope_ref": "feat_sys_ai_desc",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin edits",
+      "steps": [
+        "1. Simulate Groq down"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_113",
+      "title": "SMTP fail",
+      "scope": "feature",
+      "scope_ref": "feat_sys_email_notif",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Order placed",
+      "steps": [
+        "1. Simulate SMTP down"
+      ],
+      "expected_result": "Order still OK",
+      "failure_indicator": "Order fails"
+    },
+    {
+      "id": "tc_115",
+      "title": "Too large",
+      "scope": "feature",
+      "scope_ref": "feat_sys_img_upload",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "File picked",
+      "steps": [
+        "1. Upload 20MB"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Uploaded"
+    },
+    {
+      "id": "tc_125",
+      "title": "Item deleted",
+      "scope": "feature",
+      "scope_ref": "feat_sys_price_change_detect",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Item deleted",
+      "steps": [
+        "1. Preview checkout"
+      ],
+      "expected_result": "Removed msg",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_126",
+      "title": "Gen SKU",
+      "scope": "feature",
+      "scope_ref": "feat_sys_sku_autogen",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "happy_path",
+      "precondition": "Add var empty",
+      "steps": [
+        "1. Save variant"
+      ],
+      "expected_result": "SKU generated",
+      "failure_indicator": "Empty"
+    },
+    {
+      "id": "tc_129",
+      "title": "DB Error",
+      "scope": "feature",
+      "scope_ref": "feat_sys_order_snapshot",
+      "actor": "system",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Order placed",
+      "steps": [
+        "1. Simulate DB err"
+      ],
+      "expected_result": "Order rollbacks",
+      "failure_indicator": "Half saved"
+    },
+    {
+      "id": "tc_140",
+      "title": "Camp AI Fail",
+      "scope": "flow",
+      "scope_ref": "flow_004",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. New",
+        "2. AI Fail",
+        "3. Manual"
+      ],
+      "expected_result": "Saved",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_152",
+      "title": "Vouch Dup",
+      "scope": "flow",
+      "scope_ref": "flow_008",
+      "actor": "admin",
+      "priority": "P3-medium",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Admin in",
+      "steps": [
+        "1. New",
+        "2. Dup code",
+        "3. Submit"
+      ],
+      "expected_result": "Error msg",
+      "failure_indicator": "Saved"
+    },
+    {
+      "id": "tc_027",
+      "title": "Empty hot",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_special",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "No DB data",
+      "steps": [
+        "1. Go homepage"
+      ],
+      "expected_result": "Hidden/Empty msg",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_031",
+      "title": "Empty cats",
+      "scope": "feature",
+      "scope_ref": "feat_usr_cat_list",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "DB empty",
+      "steps": [
+        "1. Go /category"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_033",
+      "title": "Empty brands",
+      "scope": "feature",
+      "scope_ref": "feat_usr_brand_list",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "DB empty",
+      "steps": [
+        "1. Go /brands"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_035",
+      "title": "No active",
+      "scope": "feature",
+      "scope_ref": "feat_usr_camp_view",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None active",
+      "steps": [
+        "1. Go /campaigns"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_037",
+      "title": "No active",
+      "scope": "feature",
+      "scope_ref": "feat_usr_vouch_active",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "None active",
+      "steps": [
+        "1. Go /vouchers"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_051",
+      "title": "No orders",
+      "scope": "feature",
+      "scope_ref": "feat_usr_ord_list",
+      "actor": "user",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Logged in",
+      "steps": [
+        "1. Go /orders"
+      ],
+      "expected_result": "Empty state",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_060",
+      "title": "No related",
+      "scope": "feature",
+      "scope_ref": "feat_usr_prod_related",
+      "actor": "unauthenticated",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Unique category",
+      "steps": [
+        "1. View product"
+      ],
+      "expected_result": "Empty/Hidden",
+      "failure_indicator": "Crash"
+    },
+    {
+      "id": "tc_127",
+      "title": "Collision",
+      "scope": "feature",
+      "scope_ref": "feat_sys_sku_autogen",
+      "actor": "system",
+      "priority": "P4-low",
+      "risk": "low",
+      "type": "error_case",
+      "precondition": "Add var empty",
+      "steps": [
+        "1. Force collision"
+      ],
+      "expected_result": "Appends random",
+      "failure_indicator": "Error"
+    }
+  ]
+}
