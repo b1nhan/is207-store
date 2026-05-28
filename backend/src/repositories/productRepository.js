@@ -110,7 +110,7 @@ class ProductRepository {
       [id],
     );
     const [variants] = await db.query(
-      `SELECT variant_id, size, color, stock_quantity, variant_price FROM product_variants WHERE product_id = ? AND status = 1`,
+      `SELECT variant_id, size, color, stock_quantity, variant_price, sku FROM product_variants WHERE product_id = ? AND status = 1`,
       [id],
     );
 

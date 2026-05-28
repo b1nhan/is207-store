@@ -43,7 +43,6 @@ function OrderDetailModal({ orderId, onClose }) {
     const fetchDetail = async () => {
       try {
         const res = await adminOrderService.getOrderById(orderId);
-        console.log(res.data);
         setDetail(res.data);
       } catch (err) {
         console.error('Failed to fetch order detail', err);

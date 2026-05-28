@@ -88,9 +88,6 @@ export default function RegisterForm() {
       const payload = loginResult.data || loginResult;
 
       localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, payload.accessToken);
-      if (payload.refreshToken) {
-        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, payload.refreshToken);
-      }
 
       setUser(payload.user);
       toast.success('Tạo tài khoản thành công');

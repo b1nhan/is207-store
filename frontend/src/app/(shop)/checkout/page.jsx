@@ -275,7 +275,6 @@ export default function CheckoutPage() {
   };
 
   const handleRemoveVoucher = async () => {
-    console.log('xóa')
     setIsApplyingVoucher(true);
     try {
       const data = {};
@@ -355,7 +354,7 @@ export default function CheckoutPage() {
       if (!isDirectCheckout) {
         removeItemsFromStore(selectedItemIds);
       }
-      router.push(`/orders/${response.data?.order_id ?? response.order_id}`);
+      router.push(`/orders/${response.order_id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng.');
       setIsSubmitting(false);

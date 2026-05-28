@@ -74,12 +74,12 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-
-        // Use a clean axios instance (or the global one) to avoid the interceptor loop
+        // Use a clean axios instance to avoid the interceptor loop
+        // The refreshToken is stored in an HttpOnly cookie — send no body, just credentials
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          { refreshToken },
+          {},
+          { withCredentials: true },
         );
 
         const { accessToken } = response.data.data;
@@ -97,8 +97,8 @@ axiosInstance.interceptors.response.use(
 
         if (typeof window !== 'undefined') {
           // Only redirect if we aren't already on the login page
-          if (!window.location.pathname.includes('/auth/login')) {
-            window.location.href = '/auth/login';
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
           }
         }
         return Promise.reject(refreshError);

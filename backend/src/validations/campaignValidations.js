@@ -50,3 +50,10 @@ export const updateCampaignSchema = z.object({
 export const statusCampaignSchema = z.object({
   status: z.number({ required_error: 'Trạng thái là bắt buộc' }).int().min(0).max(1)
 });
+
+export const generateDescriptionSchema = z.object({
+  name: z.string({ required_error: 'Tên chiến dịch là bắt buộc' }).min(1, 'Tên không được để trống').max(255),
+  campaign_type: z.enum(['PERCENTAGE', 'FIXED_PRICE', 'TIER_DISCOUNT', 'FREESHIP']).optional(),
+  discount_value: z.number().positive().optional(),
+});
+

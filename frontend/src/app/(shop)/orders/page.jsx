@@ -41,7 +41,6 @@ export default function OrdersPage() {
     setError('');
     try {
       const response = await orderService.getOrders({ page: currentPage, limit: 10 });
-      console.log(response)
       setOrders(response.orders || []);
       setPagination(response.pagination);
     } catch (err) {

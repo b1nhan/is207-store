@@ -54,9 +54,6 @@ export default function LoginForm() {
       const payload = result.data || result;
 
       localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, payload.accessToken);
-      if (payload.refreshToken) {
-        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, payload.refreshToken);
-      }
 
       setUser(payload.user);
       toast.success('Welcome back!');

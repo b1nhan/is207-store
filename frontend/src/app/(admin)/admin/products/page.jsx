@@ -36,7 +36,6 @@ export default function AdminProductsPage() {
     setLoading(true);
     try {
       const response = await adminProductService.getAllProducts({ page: currentPage, limit: pageSize });
-      console.log(response);
       const { items = [], pagination } = response.data;
       setProducts(items);
       setTotalItems(pagination?.totalItems ?? items.length);

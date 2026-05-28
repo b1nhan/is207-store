@@ -59,9 +59,6 @@ class AdminCampaignController {
   generateDescription = async (req, res, next) => {
     try {
       const { name, campaign_type, discount_value } = req.body;
-      if (!name) {
-        return res.status(400).json({ success: false, message: 'Tên chiến dịch là bắt buộc.' });
-      }
 
       const apiKey = process.env.GROQ_API_KEY;
       if (!apiKey) {

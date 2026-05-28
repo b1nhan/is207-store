@@ -1,5 +1,9 @@
 import axiosInstance from '@/config/axios';
 
+// NOTE: axiosInstance response interceptor already unwraps response.data,
+// so each method receives the full API payload { success, message, data }.
+// We return `response.data` to give callers the actual data object directly.
+
 const orderService = {
   previewCheckout: async (data) => {
     const response = await axiosInstance.post('/orders/checkout/preview', data);
@@ -7,7 +11,6 @@ const orderService = {
   },
 
   checkout: async (data) => {
-    // Expected data: { shipping_address, payment_method, voucher_code, note } etc.
     const response = await axiosInstance.post('/orders/checkout', data);
     return response.data;
   },
@@ -22,8 +25,9 @@ const orderService = {
     return response.data;
   },
 
-  cancelOrder: async (id, reason) => {
-    const response = await axiosInstance.post(`/orders/${id}/cancel`, { cancel_reason: reason });
+  // W2: Removed unused `cancel_reason` body — backend ignores req.body entirely.
+  cancelOrder: async (id) => {
+    const response = await axiosInstance.post(`/orders/${id}/cancel`);
     return response.data;
   },
 };
