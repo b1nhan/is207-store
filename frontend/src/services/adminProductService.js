@@ -1,20 +1,24 @@
 import axios from '@/config/axios';
+import { API_ENDPOINTS } from '@/constants/api';
 
+// I9: Refactored to use API_ENDPOINTS.ADMIN.PRODUCTS constants.
+//     Note: was previously TOGGLE_STATUS pointing to wrong path `/toggle-status`.
+//     Now correctly UPDATE_STATUS → `/admin/products/:id/status`.
 const adminProductService = {
   getAllProducts: (params) => {
-    return axios.get('/admin/products', { params });
+    return axios.get(API_ENDPOINTS.ADMIN.PRODUCTS.LIST, { params });
   },
   getProductById: (id) => {
-    return axios.get(`/admin/products/${id}`);
+    return axios.get(API_ENDPOINTS.ADMIN.PRODUCTS.DETAIL(id));
   },
   createProduct: (data) => {
-    return axios.post('/admin/products', data);
+    return axios.post(API_ENDPOINTS.ADMIN.PRODUCTS.CREATE, data);
   },
   updateProduct: (id, data) => {
-    return axios.put(`/admin/products/${id}`, data);
+    return axios.put(API_ENDPOINTS.ADMIN.PRODUCTS.UPDATE(id), data);
   },
   updateStatus: (id, status) => {
-    return axios.patch(`/admin/products/${id}/status`, { status });
+    return axios.patch(API_ENDPOINTS.ADMIN.PRODUCTS.UPDATE_STATUS(id), { status });
   },
   // ─── Image Management ────────────────────────────────────────────────────────
   addImage: (productId, file) => {

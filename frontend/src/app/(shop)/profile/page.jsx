@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
@@ -409,6 +409,7 @@ function ChangePasswordModal({ onClose }) {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated, isInitialized, updateUser } = useAuthStore();
   const { totalItems } = useCartStore();
 
@@ -428,9 +429,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
-  }, [isInitialized, isAuthenticated, router]);
+  }, [isInitialized, isAuthenticated, router, pathname]);
 
   useEffect(() => {
     if (isAuthenticated) {

@@ -10,16 +10,9 @@ export const productService = {
   // Detail by ID
   getProduct: (id) => api.get(API_ENDPOINTS.PRODUCTS.DETAIL(id)),
 
-  // Detail by slug (for shop pages)
-  getProductBySlug: (slug) => api.get(API_ENDPOINTS.PRODUCTS.BY_SLUG(slug)),
-
   // Search (used by SearchBar)
   searchProducts: (query, params = {}) =>
     api.get(API_ENDPOINTS.PRODUCTS.SEARCH, { q: query, ...params }),
-
-  // Featured products for homepage
-  getFeaturedProducts: (limit = 8) =>
-    api.get(API_ENDPOINTS.PRODUCTS.FEATURED, { limit }),
 
   // Related products on detail page
   getRelatedProducts: (id, limit = 6) =>
@@ -37,9 +30,12 @@ export const productService = {
   getHotProducts: (limit = 10) =>
     api.get(API_ENDPOINTS.PRODUCTS.HOT, { limit }),
 
-  // Reviews
-  getReviews: (id, params = {}) =>
-    api.get(API_ENDPOINTS.PRODUCTS.REVIEWS(id), params),
+  // C3: getProductBySlug removed — no backend /products/slug/:slug route exists.
+  //     Use getProduct(id) for product detail pages.
 
-  postReview: (id, data) => api.post(API_ENDPOINTS.PRODUCTS.REVIEWS(id), data),
+  // C4: getFeaturedProducts removed — no backend /products/featured route exists.
+  //     Use getNewArrivals() or getHotProducts() for homepage featured sections.
+
+  // I3: getReviews / postReview removed — no reviews DB table or backend route.
+  //     Implement when the review feature is planned end-to-end.
 };

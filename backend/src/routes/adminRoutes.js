@@ -27,7 +27,7 @@ import {
 } from '../validations/categoryValidations.js';
 import { createVoucherSchema, updateVoucherSchema } from '../validations/voucherValidations.js';
 import { updateOrderStatusSchema, updateBulkOrderStatusSchema } from '../validations/orderValidations.js';
-import { createCampaignSchema, updateCampaignSchema, statusCampaignSchema } from '../validations/campaignValidations.js';
+import { createCampaignSchema, updateCampaignSchema, statusCampaignSchema, generateDescriptionSchema } from '../validations/campaignValidations.js';
 
 const router = Router();
 
@@ -225,6 +225,7 @@ router.post(
   '/campaigns/generate-description',
   verifyToken,
   requireAdmin,
+  validate(generateDescriptionSchema),
   adminCampaignController.generateDescription,
 );
 router.get('/campaigns/:id', verifyToken, requireAdmin, adminCampaignController.getCampaignById);

@@ -7,7 +7,7 @@ import { campaignService } from '@/services/campaignService';
 import { Button } from '@/components/ui/button';
 import { Trash2Icon, MinusIcon, PlusIcon, ShoppingBagIcon, ZapIcon, CheckIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { CartItemVariantSelector } from '../../../components/cart/CartItemVariantSelector';
 
@@ -126,6 +126,7 @@ function QuantityInput({ value, stock, onChange, disabled }) {
 
 export default function CartPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { items, isLoading, error, updateQuantity, removeItem, clearCart } = useCartStore();
   const { isAuthenticated, isInitialized } = useAuthStore();
 
@@ -228,7 +229,7 @@ export default function CartPage() {
         <h1 className="text-3xl font-bold text-text-primary mb-6">Giỏ hàng của bạn</h1>
         <p className="text-text-secondary mb-8">Bạn cần đăng nhập để xem giỏ hàng.</p>
         <Button asChild size="lg">
-          <Link href="/login">Đăng nhập ngay</Link>
+          <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>Đăng nhập ngay</Link>
         </Button>
       </div>
     );

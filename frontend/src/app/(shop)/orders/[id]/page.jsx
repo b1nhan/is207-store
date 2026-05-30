@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
@@ -28,6 +28,7 @@ export default function OrderDetailPage({ params }) {
   const orderId = unwrappedParams.id;
 
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, isInitialized } = useAuthStore();
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +67,7 @@ export default function OrderDetailPage({ params }) {
 
     setIsCancelling(true);
     try {
-      await orderService.cancelOrder(orderId, 'Khách hàng hủy đơn');
+      await orderService.cancelOrder(orderId);
       toast.info('Đã hủy đơn hàng');
       await fetchOrderDetail(); // Reload order detail to show cancelled status
     } catch (err) {
@@ -86,7 +87,7 @@ export default function OrderDetailPage({ params }) {
         <h1 className="text-3xl font-bold text-text-primary mb-6">Chi tiết đơn hàng</h1>
         <p className="text-text-secondary mb-8">Bạn cần đăng nhập để xem đơn hàng.</p>
         <Button asChild size="lg">
-          <Link href="/login">Đăng nhập ngay</Link>
+          <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>Đăng nhập ngay</Link>
         </Button>
       </div>
     );
@@ -108,7 +109,6 @@ export default function OrderDetailPage({ params }) {
 
   const statusInfo = STATUS_MAP[order.status] || { label: order.status, color: 'bg-gray-100 text-gray-800' };
 
-  console.log(order);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

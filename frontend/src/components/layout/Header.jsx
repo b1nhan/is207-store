@@ -14,7 +14,7 @@ import Link from 'next/link';
 import SearchBar from './SearchBar';
 import useAuthStore from '@/store/authStore';
 import useCartStore from '@/store/cartStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { authService } from '@/services/authService';
 
 const NAV_ITEMS = [
@@ -104,6 +104,7 @@ const AccountDropdown = ({ user, logout }) => {
 const Header = () => {
   const { isAuthenticated, user, logout, isInitialized } = useAuthStore();
   const { totalItems, fetchCart, clearCartState } = useCartStore();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -145,7 +146,7 @@ const Header = () => {
           <AccountDropdown user={user} logout={logout} />
         ) : (
           <Button asChild variant="default" size="default" className="font-semibold">
-            <Link href="/login">Đăng nhập</Link>
+            <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>Đăng nhập</Link>
           </Button>
         )}
       </div>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import useCartStore from '@/store/cartStore';
 import useAuthStore from '@/store/authStore';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function ProductActions({ product }) {
@@ -19,6 +19,7 @@ export default function ProductActions({ product }) {
   const { addToCart, isLoading } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Lọc variant hiện tại dựa trên color và size được chọn
   const selectedVariant = variants.find(
@@ -31,7 +32,7 @@ export default function ProductActions({ product }) {
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để mua hàng!');
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -58,7 +59,7 @@ export default function ProductActions({ product }) {
   const handleBuyNow = async () => {
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để mua hàng!');
-      router.push('/login');
+      router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
 

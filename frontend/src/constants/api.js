@@ -23,11 +23,11 @@ export const API_ENDPOINTS = {
     BEST_SELLERS: '/products/best-sellers',
     HOT: '/products/hot',
     DETAIL: (id) => `/products/${id}`,
-    BY_SLUG: (slug) => `/products/slug/${slug}`,
     SEARCH: '/products/search',
-    FEATURED: '/products/featured',
     RELATED: (id) => `/products/${id}/related`,
-    REVIEWS: (id) => `/products/${id}/reviews`,
+    // C3: BY_SLUG removed — no backend /products/slug/:slug route.
+    // C4: FEATURED removed — no backend /products/featured route.
+    // I3: REVIEWS removed — no reviews DB table or backend route.
   },
 
   // ── Categories ─────────────────────────────────────────────────────────────
@@ -43,25 +43,29 @@ export const API_ENDPOINTS = {
   },
 
   // ── Cart ───────────────────────────────────────────────────────────────────
+  // I5: Fixed incorrect paths to match actual backend routes.
   CART: {
     GET: '/cart',
-    ADD: '/cart/items',
-    UPDATE: (itemId) => `/cart/items/${itemId}`,
-    REMOVE: (itemId) => `/cart/items/${itemId}`,
-    CLEAR: '/cart/clear',
+    ADD: '/cart',
+    UPDATE: (itemId) => `/cart/${itemId}`,
+    UPDATE_VARIANT: (itemId) => `/cart/${itemId}/variant`,
+    REMOVE: (itemId) => `/cart/${itemId}`,
+    CLEAR: '/cart',
   },
 
   // ── Orders ─────────────────────────────────────────────────────────────────
   ORDERS: {
     LIST: '/orders',
     DETAIL: (id) => `/orders/${id}`,
-    CREATE: '/orders',
+    CHECKOUT_PREVIEW: '/orders/checkout/preview',
+    CHECKOUT: '/orders/checkout',
     CANCEL: (id) => `/orders/${id}/cancel`,
   },
 
   // ── Vouchers (shop) ────────────────────────────────────────────────────────
+  // W4: VALIDATE removed — no backend /vouchers/validate route.
   VOUCHERS: {
-    VALIDATE: '/vouchers/validate',
+    ACTIVE: '/vouchers/active',
     APPLY: '/vouchers/apply',
   },
 
@@ -72,15 +76,14 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/campaigns/${id}`,
   },
 
-  // ── User ───────────────────────────────────────────────────────────────────
-  USER: {
-    PROFILE: '/user/profile',
-    UPDATE_PROFILE: '/user/profile',
-    CHANGE_PASSWORD: '/user/change-password',
-    ADDRESSES: '/user/addresses',
-    ADDRESS_DETAIL: (id) => `/user/addresses/${id}`,
-    WISHLIST: '/user/wishlist',
-    WISHLIST_ITEM: (id) => `/user/wishlist/${id}`,
+  // ── Shipping Profiles ──────────────────────────────────────────────────────
+  SHIPPING_PROFILES: {
+    LIST: '/shipping-profiles',
+    DETAIL: (id) => `/shipping-profiles/${id}`,
+    CREATE: '/shipping-profiles',
+    UPDATE: (id) => `/shipping-profiles/${id}`,
+    DELETE: (id) => `/shipping-profiles/${id}`,
+    SET_DEFAULT: (id) => `/shipping-profiles/${id}/default`,
   },
 
   // ── Upload ─────────────────────────────────────────────────────────────────
@@ -92,7 +95,8 @@ export const API_ENDPOINTS = {
   // ── Admin — Dashboard ──────────────────────────────────────────────────────
   ADMIN: {
     DASHBOARD: {
-      STATS: '/admin/dashboard/stats',
+      // I6: Renamed STATS → SUMMARY to match actual backend route /admin/dashboard/summary.
+      SUMMARY: '/admin/dashboard/summary',
       REVENUE: '/admin/dashboard/revenue',
       TOP_PRODUCTS: '/admin/dashboard/top-products',
       RECENT_ORDERS: '/admin/dashboard/recent-orders',
@@ -105,7 +109,8 @@ export const API_ENDPOINTS = {
       CREATE: '/admin/products',
       UPDATE: (id) => `/admin/products/${id}`,
       DELETE: (id) => `/admin/products/${id}`,
-      TOGGLE_STATUS: (id) => `/admin/products/${id}/toggle-status`,
+      // I9: Renamed TOGGLE_STATUS → UPDATE_STATUS, fixed path to match backend PATCH /admin/products/:id/status.
+      UPDATE_STATUS: (id) => `/admin/products/${id}/status`,
     },
 
     // ── Admin — Categories ───────────────────────────────────────────────────
@@ -127,11 +132,12 @@ export const API_ENDPOINTS = {
     },
 
     // ── Admin — Orders ───────────────────────────────────────────────────────
+    // W5: UPDATE_PAYMENT removed — no backend /admin/orders/:id/payment-status route.
     ORDERS: {
       LIST: '/admin/orders',
       DETAIL: (id) => `/admin/orders/${id}`,
       UPDATE_STATUS: (id) => `/admin/orders/${id}/status`,
-      UPDATE_PAYMENT: (id) => `/admin/orders/${id}/payment-status`,
+      BULK_STATUS: '/admin/orders/bulk-status',
     },
 
     // ── Admin — Vouchers ─────────────────────────────────────────────────────
@@ -141,15 +147,17 @@ export const API_ENDPOINTS = {
       CREATE: '/admin/vouchers',
       UPDATE: (id) => `/admin/vouchers/${id}`,
       DELETE: (id) => `/admin/vouchers/${id}`,
-      TOGGLE: (id) => `/admin/vouchers/${id}/toggle`,
     },
 
-    // ── Admin — Users ────────────────────────────────────────────────────────
-    USERS: {
-      LIST: '/admin/users',
-      DETAIL: (id) => `/admin/users/${id}`,
-      UPDATE_ROLE: (id) => `/admin/users/${id}/role`,
-      TOGGLE_BAN: (id) => `/admin/users/${id}/ban`,
+    // ── Admin — Campaigns ────────────────────────────────────────────────────
+    CAMPAIGNS: {
+      LIST: '/admin/campaigns',
+      DETAIL: (id) => `/admin/campaigns/${id}`,
+      CREATE: '/admin/campaigns',
+      UPDATE: (id) => `/admin/campaigns/${id}`,
+      DELETE: (id) => `/admin/campaigns/${id}`,
+      UPDATE_STATUS: (id) => `/admin/campaigns/${id}/status`,
+      GENERATE_DESCRIPTION: '/admin/campaigns/generate-description',
     },
 
     // ── Admin — Upload ───────────────────────────────────────────────────────
@@ -157,5 +165,8 @@ export const API_ENDPOINTS = {
       IMAGE: '/admin/upload/image',
       IMAGES: '/admin/upload/images',
     },
+
+    // I1: USER.* group removed — profile via AUTH.ME/UPDATE_PROFILE, addresses via SHIPPING_PROFILES.
+    // I2: ADMIN.USERS.* group removed — no backend implementation for user management.
   },
 };

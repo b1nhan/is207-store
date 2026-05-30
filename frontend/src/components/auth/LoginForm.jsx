@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { authService } from '@/services/authService';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setUser = useAuthStore((state) => state.setUser);
 
   const [email, setEmail] = useState('');
@@ -19,6 +20,8 @@ export default function LoginForm() {
   const [errorDetail, setErrorDetail] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   const validate = () => {
     const newErrors = {};
@@ -51,13 +54,10 @@ export default function LoginForm() {
       const payload = result.data || result;
 
       localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, payload.accessToken);
-      if (payload.refreshToken) {
-        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, payload.refreshToken);
-      }
 
       setUser(payload.user);
       toast.success('Welcome back!');
-      router.push('/');
+      router.push(callbackUrl);
     } catch (err) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
       setErrorDetail(err.response?.data.errors);

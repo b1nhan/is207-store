@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import useAuthStore from '@/store/authStore';
 import orderService from '@/services/orderService';
@@ -20,6 +21,7 @@ const STATUS_MAP = {
 
 export default function OrdersPage() {
   const { isAuthenticated, isInitialized } = useAuthStore();
+  const pathname = usePathname();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,7 +41,6 @@ export default function OrdersPage() {
     setError('');
     try {
       const response = await orderService.getOrders({ page: currentPage, limit: 10 });
-      console.log(response)
       setOrders(response.orders || []);
       setPagination(response.pagination);
     } catch (err) {
@@ -59,7 +60,7 @@ export default function OrdersPage() {
         <h1 className="text-3xl font-bold text-text-primary mb-6">Đơn hàng của bạn</h1>
         <p className="text-text-secondary mb-8">Bạn cần đăng nhập để xem đơn hàng.</p>
         <Button asChild size="lg">
-          <Link href="/login">Đăng nhập ngay</Link>
+          <Link href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}>Đăng nhập ngay</Link>
         </Button>
       </div>
     );
