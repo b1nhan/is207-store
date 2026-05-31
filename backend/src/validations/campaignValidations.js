@@ -54,6 +54,11 @@ export const statusCampaignSchema = z.object({
 export const generateDescriptionSchema = z.object({
   name: z.string({ required_error: 'Tên chiến dịch là bắt buộc' }).min(1, 'Tên không được để trống').max(255),
   campaign_type: z.enum(['PERCENTAGE', 'FIXED_PRICE', 'TIER_DISCOUNT', 'FREESHIP']).optional(),
-  discount_value: z.number().positive().optional(),
+  discount_value: z.preprocess((val) => {
+    if (val === '' || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? val : num;
+  }, z.number().positive().optional()),
 });
+
 
