@@ -264,7 +264,7 @@ export default function CampaignForm({ initialData = null, isEdit = false }) {
       const response = await adminCampaignService.generateDescription({
         name: form.name,
         campaign_type: form.campaign_type,
-        discount_value: form.discount_value ? Number(form.discount_value) : undefined,
+        discount_value: form.discount_value,
       });
       const aiDescription = response.data?.description;
       if (aiDescription) {
