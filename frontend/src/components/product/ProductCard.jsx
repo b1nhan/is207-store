@@ -11,6 +11,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { productService } from '@/services/productService';
 import { Button } from '@/components/ui/button';
+import { MagicCard } from '../ui/magic-card';
 
 /**
  * ProductCard – hiển thị sản phẩm trong grid/listing.
@@ -136,7 +137,13 @@ export const ProductCard = ({ product, discount }) => {
   };
 
   return (
-    <div className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+    <MagicCard
+      mode="orb"
+      glowFrom={"#E9D5FF"}
+      glowTo={"#FBCFE8"}
+      className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md"
+    >
+      {/* <div className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md"> */}
       <Link href={productlink} className="flex w-full flex-col items-center">
         {/* Image container with badge */}
         <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg">
@@ -182,7 +189,9 @@ export const ProductCard = ({ product, discount }) => {
       >
         <ShoppingCart size={16} />
       </button>
-    </div>
+      {/* </div> */}
+    </MagicCard >
+
   );
 };
 

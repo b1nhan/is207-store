@@ -21,7 +21,7 @@ export default function ProductImageGallery({ images, thumbnail }) {
   if (allImages.length === 0) {
     return (
       <div className="aspect-square w-full rounded-2xl bg-gray-100 flex items-center justify-center">
-        <span className="text-gray-400">No image available</span>
+        <span className="text-gray-400">Không có hình ảnh nào</span>
       </div>
     );
   }
@@ -36,7 +36,7 @@ export default function ProductImageGallery({ images, thumbnail }) {
               <div className="aspect-square w-full overflow-hidden rounded-2xl bg-gray-50 border border-gray-100">
                 <img
                   src={img.url}
-                  alt={`Product image ${idx}`}
+                  alt={`Hình ảnh sản phẩm ${idx}`}
                   className="h-full w-full object-cover"
                 />
               </div>
