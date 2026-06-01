@@ -453,7 +453,7 @@ export default function CheckoutPage() {
                     <img src={item.thumbnail} alt={item.product_name} className="w-16 h-16 object-cover rounded-lg border border-border flex-shrink-0" />
                     {/* Product Info */}
                     <div className="flex-grow">
-                      <Link href={`/products/${item.product_id || '#'}`} className="text-base font-medium text-text-primary hover:text-primary transition-colors line-clamp-2">
+                      <Link href={`/products/${item.product_slug || item.product_id || '#'}`} className="text-base font-medium text-text-primary hover:text-primary transition-colors line-clamp-2">
                         {item.product_name}
                       </Link>
                       <div className="text-sm text-text-secondary mt-1">

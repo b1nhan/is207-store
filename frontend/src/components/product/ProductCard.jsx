@@ -24,8 +24,7 @@ export const ProductCard = ({ product, discount }) => {
   const { isAuthenticated } = useAuthStore();
   const { addToCart } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
-
-  const productlink = `/products/${product.product_id || product.slug}`;
+  const productlink = `/products/${product.slug || product.product_id}`;
 
   // Ưu tiên sale_price từ API, nếu không thì tính từ campaign discount
   const basePrice = parseFloat(product.base_price) || 0;

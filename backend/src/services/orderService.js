@@ -34,6 +34,7 @@ class OrderService {
           p.product_name, p.status as product_status,
           v.status as variant_status,
           v.variant_price, p.base_price,
+          p.slug as product_slug,
           pi.image_url as product_thumbnail
           FROM product_variants v
           JOIN products p ON v.product_id = p.product_id
@@ -49,6 +50,7 @@ class OrderService {
 
       items = [{
         product_id: variant.product_id,
+        product_slug: variant.product_slug,
         variant_id: variant.variant_id,
         quantity: dto.directItem.quantity,
         unit_price: unitPrice,
@@ -240,7 +242,6 @@ class OrderService {
     // ── 1. Lấy items (từ giỏ hàng hoặc directItem) ───────────────────────────
     let items = [];
     let cart = null;
-    console.log(dto);
     if (dto.directItem) {
       console.log('bypass cart');
       // ── Mua ngay (Bypass cart) ──────────────────────────────────────────────
@@ -516,7 +517,7 @@ class OrderService {
       // ── 7. Trả về order detail ───────────────────────────────────────────
       const orderDetail = await this._getOrderDetail(orderId);
 
-      // Gửi mail thông báo cho admin bất đồng bộ
+      // Gửi mail thông báo cho admin ajax
       userRepository.findById(userId)
         .then((user) => {
           mailService.sendOrderPlacementNotification(orderDetail, user);

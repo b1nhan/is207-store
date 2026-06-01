@@ -47,7 +47,8 @@ class OrderItemRepository {
         oi.product_name_snapshot,
         oi.size_snapshot,
         oi.color_snapshot,
-        p.product_id
+        p.product_id,
+        p.slug
        FROM order_items oi
        JOIN product_variants pv ON oi.variant_id = pv.variant_id
        JOIN products p ON pv.product_id = p.product_id

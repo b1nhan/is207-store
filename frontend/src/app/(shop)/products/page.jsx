@@ -60,7 +60,7 @@ export default async function ProductPage({ searchParams }) {
     if (categoryRes.status === 'fulfilled') {
       categories = categoryRes.value?.data?.items || [];
     }
-
+    console.log(products)
   } catch (error) {
     console.error('Error fetching data for products page:', error);
   }

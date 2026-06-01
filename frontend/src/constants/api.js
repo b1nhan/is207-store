@@ -23,9 +23,9 @@ export const API_ENDPOINTS = {
     BEST_SELLERS: '/products/best-sellers',
     HOT: '/products/hot',
     DETAIL: (id) => `/products/${id}`,
+    BY_SLUG: (slug) => `/products/slug/${slug}`,
     SEARCH: '/products/search',
     RELATED: (id) => `/products/${id}/related`,
-    // C3: BY_SLUG removed — no backend /products/slug/:slug route.
     // C4: FEATURED removed — no backend /products/featured route.
     // I3: REVIEWS removed — no reviews DB table or backend route.
   },

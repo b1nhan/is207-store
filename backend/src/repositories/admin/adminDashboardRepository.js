@@ -82,6 +82,7 @@ class AdminDashboardRepository {
       SELECT
         p.product_id,
         p.product_name,
+        p.slug,
         SUM(oi.quantity) AS sold_quantity,
         SUM(oi.line_total) AS total_revenue
       FROM order_items oi
@@ -102,7 +103,7 @@ class AdminDashboardRepository {
     }
 
     query += `
-      GROUP BY p.product_id, p.product_name
+      GROUP BY p.product_id, p.product_name, p.slug
       ORDER BY sold_quantity DESC
       LIMIT ?
     `;

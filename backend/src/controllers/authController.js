@@ -68,16 +68,11 @@ export const getMe = async (req, res, next) => {
 
 // ─── POST /auth/refresh ──────────────────────────────────────────────────────
 
-export const refresh = (req, res, next) => {
+export const refresh = async (req, res, next) => {
   try {
     const token = req.cookies?.refreshToken;
-
     if (!token) {
-      throw new AppError(
-        'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại',
-        401,
-        'TOKEN_EXPIRED',
-      );
+      throw new AppError('Phiên đăng nhập đã hết hạn', 401, 'TOKEN_EXPIRED');
     }
 
     let decoded;
@@ -85,19 +80,20 @@ export const refresh = (req, res, next) => {
       decoded = verifyRefreshToken(token);
     } catch (jwtErr) {
       if (jwtErr.name === 'TokenExpiredError') {
-        throw new AppError(
-          'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại',
-          401,
-          'TOKEN_EXPIRED',
-        );
+        throw new AppError('Phiên đăng nhập đã hết hạn', 401, 'TOKEN_EXPIRED');
       }
       throw new AppError('Token không hợp lệ', 401, 'TOKEN_INVALID');
     }
 
-    // Cấp access token mới, refresh token giữ nguyên đến khi tự hết hạn
+    // ✅ Lấy role mới nhất từ DB — tránh dùng role cũ có thể đã thay đổi
+    const user = await authService.getMe(decoded.user_id);
+    if (!user) {
+      throw new AppError('User không tồn tại', 401, 'UNAUTHORIZED');
+    }
+
     const accessToken = generateAccessToken({
-      user_id: decoded.user_id,
-      role: decoded.role,
+      user_id: user.user_id,
+      role: user.role, // ✅
     });
 
     return sendSuccess(res, { data: { accessToken } });

@@ -42,3 +42,35 @@ export const updateShippingProfileSchema = z.object({
   label: labelSchema,
   is_default: isDefaultSchema,
 });
+
+/**
+ * Schema cho validate path parameter id
+ */
+export const shippingProfileIdSchema = z.object({
+  profile_id: z.number({ invalid_type_error: 'ID không hợp lệ' }),
+  user_id: z.number({ invalid_type_error: 'ID không hợp lệ' }),
+});
+
+export const createVariantSchema = z.object({
+  size: z
+    .string({ required_error: 'Size là bắt buộc' })
+    .min(1, 'Size không được để trống')
+    .max(20, 'Size tối đa 20 ký tự'),
+
+  color: z
+    .string({ required_error: 'Màu sắc là bắt buộc' })
+    .min(1, 'Màu sắc không được để trống')
+    .max(30, 'Màu sắc tối đa 30 ký tự'),
+
+  stock_quantity: z
+    .number({
+      required_error: 'Số lượng tồn kho là bắt buộc',
+      invalid_type_error: 'Số lượng phải là số nguyên',
+    })
+    .int('Số lượng phải là số nguyên')
+    .min(0, 'Số lượng không được âm'),
+
+  variant_price: z.number().positive('Giá variant phải lớn hơn 0').optional().nullable(),
+
+  sku: z.string().max(50, 'SKU tối đa 50 ký tự').optional().nullable(),
+});

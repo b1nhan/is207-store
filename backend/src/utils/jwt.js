@@ -1,19 +1,20 @@
 import jwt from 'jsonwebtoken';
+import env from '../config/env.js';
 
-// ─── Secrets & config — đọc thẳng từ process.env với fallback rõ ràng ────────
+// ─── Secrets & config — lấy từ env.js (nguồn duy nhất) ──────────────────────
 const ACCESS_SECRET =
-  process.env.JWT_ACCESS_SECRET || 'dev_access_secret_change_me';
+  env.JWT_ACCESS_SECRET || 'dev_access_secret_change_me';
 const REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_change_me';
-const ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
-const REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-const NODE_ENV = process.env.NODE_ENV || 'development';
+  env.JWT_REFRESH_SECRET || 'dev_refresh_secret_change_me';
+// Fallback sane: 15m access, 7d refresh — phải khớp với env.js defaults
+const ACCESS_EXPIRES_IN = env.JWT_ACCESS_EXPIRES_IN || '15m';
+const REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || '7d';
+const NODE_ENV = env.nodeEnv || 'development';
 
-/** Thời gian sống cookie refresh token: 7 ngày tính bằng ms */
-const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+/** Thời gian sống cookie refresh token — phải >= REFRESH_EXPIRES_IN */
+const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 ngày (ms)
 
 // ─── Token generators ────────────────────────────────────────────────────────
-
 /**
  * Tạo access token ngắn hạn.
  * Payload: { user_id, role }

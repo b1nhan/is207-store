@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, Tag, LogOut, ArrowLeft, Megaphone, Layers, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Tag, LogOut, ArrowLeft, Megaphone, Layers, ShoppingBag, FlaskConical } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
 import { STORAGE_KEYS } from '@/constants';
 
@@ -56,6 +56,13 @@ export default function AdminSidebar() {
         >
           <ArrowLeft size={20} />
           <span>Back to Shop</span>
+        </Link>
+        <Link
+          href="/test-api"
+          className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+        >
+          <FlaskConical size={20} />
+          <span>Test API</span>
         </Link>
         <button
           onClick={handleLogout}

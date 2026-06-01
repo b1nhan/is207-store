@@ -4,6 +4,7 @@ import validate from '../middlewares/validate.js';
 import {
   createShippingProfileSchema,
   updateShippingProfileSchema,
+  shippingProfileIdSchema,
 } from '../validations/shippingProfileValidations.js';
 
 const router = Router();
@@ -53,6 +54,10 @@ router.delete('/:id', shippingProfileController.deleteProfile);
  * PATCH /auth/shipping-profiles/:id/default
  * Set profile này làm default, unset profile default cũ.
  */
-router.patch('/:id/default', shippingProfileController.setDefault);
+router.patch(
+  '/:id/default',
+  validate(shippingProfileIdSchema),
+  shippingProfileController.setDefault,
+);
 
 export default router;

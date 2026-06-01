@@ -56,6 +56,7 @@ class CartRepository {
         COALESCE(pv.variant_price, p.base_price) AS unit_price,
         p.product_id,
         p.product_name,
+        p.slug,
         p.status AS product_status,
         p.base_price,
         pi.image_url AS thumbnail

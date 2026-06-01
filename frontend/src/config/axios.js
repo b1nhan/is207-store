@@ -6,6 +6,7 @@ import { STORAGE_KEYS } from '@/constants';
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1',
   timeout: 15000,
+  withCredentials: true,  // send HttpOnly refreshToken cookie on every request
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -74,10 +75,10 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Use a clean axios instance to avoid the interceptor loop
-        // The refreshToken is stored in an HttpOnly cookie — send no body, just credentials
+        // Use a clean axios instance to avoid the interceptor loop.
+        // refreshToken is in an HttpOnly cookie — withCredentials ensures it's sent.
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          `${axiosInstance.defaults.baseURL}/auth/refresh`,
           {},
           { withCredentials: true },
         );
@@ -92,8 +93,9 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
+        // Only accessToken lives in localStorage; refreshToken is an HttpOnly cookie
+        // and will be cleared server-side once the user logs in again.
         localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 
         if (typeof window !== 'undefined') {
           // Only redirect if we aren't already on the login page

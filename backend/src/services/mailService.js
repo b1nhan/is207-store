@@ -70,7 +70,7 @@ class MailService {
   async sendMail({ to, subject, html }) {
     try {
       const config = MAIL_CONFIG;
-      
+
       // Kiểm tra cấu hình SMTP trước khi gửi
       if (!config.SMTP.auth.user || !config.SMTP.auth.pass) {
         logger.warn(
@@ -201,24 +201,22 @@ class MailService {
                   <td style="padding: 6px 0; color: #718096; text-align: right;">Tạm tính:</td>
                   <td style="padding: 6px 0; color: #2d3748; text-align: right; width: 120px;">${this.formatCurrency(order.subtotal)}</td>
                 </tr>
-                ${
-                  order.campaign_discount_total > 0
-                    ? `
+                ${order.campaign_discount_total > 0
+          ? `
                 <tr>
                   <td style="padding: 6px 0; color: #e53e3e; text-align: right;">Khuyến mãi chiến dịch:</td>
                   <td style="padding: 6px 0; color: #e53e3e; text-align: right;">-${this.formatCurrency(order.campaign_discount_total)}</td>
                 </tr>`
-                    : ''
-                }
-                ${
-                  order.discount_total > 0
-                    ? `
+          : ''
+        }
+                ${order.discount_total > 0
+          ? `
                 <tr>
                   <td style="padding: 6px 0; color: #e53e3e; text-align: right;">Voucher giảm giá:</td>
                   <td style="padding: 6px 0; color: #e53e3e; text-align: right;">-${this.formatCurrency(order.discount_total)}</td>
                 </tr>`
-                    : ''
-                }
+          : ''
+        }
                 <tr>
                   <td style="padding: 6px 0; color: #718096; text-align: right;">Phí vận chuyển:</td>
                   <td style="padding: 6px 0; color: #2d3748; text-align: right;">${order.shipping_fee > 0 ? this.formatCurrency(order.shipping_fee) : 'Miễn phí'}</td>

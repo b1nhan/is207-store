@@ -19,6 +19,7 @@ class ProductService {
     const formattedItems = items.map((item) => ({
       product_id: item.product_id,
       product_name: item.product_name,
+      slug: item.slug,
       base_price: item.base_price,
       category_slug: item.category_slug,
       brand_name: item.brand_name,
@@ -63,6 +64,37 @@ class ProductService {
     };
   }
 
+  async getProductDetailBySlug(slug) {
+    const product = await productRepository.findBySlug(slug);
+    if (!product) {
+      throw new AppError(
+        'Sản phẩm không tồn tại hoặc đã bị ẩn',
+        404,
+        ERROR_CODES.PRODUCT_NOT_FOUND,
+      );
+    }
+
+    return {
+      product_id: product.product_id,
+      product_name: product.product_name,
+      product_description: product.product_description,
+      material: product.material,
+      gender: product.gender,
+      base_price: product.base_price,
+      slug: product.slug,
+      brand: { brand_id: product.brand_id, brand_name: product.brand_name },
+      category: {
+        category_id: product.category_id,
+        category_name: product.category_name,
+        category_slug: product.category_slug,
+      },
+      images: product.images,
+      variants: product.variants,
+      status: 'ACTIVE',
+      created_at: product.created_at,
+    };
+  }
+
   async searchProducts(q) {
     if (!q || q.length < 2) return [];
     return await productRepository.searchAutocomplete(q);
@@ -73,6 +105,7 @@ class ProductService {
     return rows.map((item) => ({
       product_id: item.product_id,
       product_name: item.product_name,
+      slug: item.slug,
       base_price: item.base_price,
       brand_name: item.brand_name,
       category_slug: item.category_slug,

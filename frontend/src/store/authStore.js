@@ -14,8 +14,9 @@ const useAuthStore = create((set) => ({
     })),
 
   logout: () => {
+    // accessToken is stored in localStorage; refreshToken lives in an
+    // HttpOnly cookie — it is cleared server-side by the /logout endpoint.
     localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     set({ user: null, isAuthenticated: false });
   },
 

@@ -16,9 +16,9 @@ const router = Router();
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/refresh', authController.refresh);
+router.post('/logout', authController.logout);
 
 // ── Authenticated (cần JWT access token hợp lệ) ───────────────────────────────
-router.post('/logout', verifyToken, authController.logout);
 router.get('/me', verifyToken, authController.getMe);
 router.patch(
   '/me/profile',

@@ -8,7 +8,7 @@ dotenv.config();
  */
 export const MAIL_CONFIG = {
   // 1. Email của Admin nhận thông báo (Chỉnh sửa trực tiếp ở đây hoặc điền ADMIN_EMAIL trong file .env)
-  ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@example.com',
+  // ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@example.com',
 
   // 2. Email gửi đi (Sender)
   FROM_EMAIL: process.env.SMTP_USER || 'noreply@yourstore.com',

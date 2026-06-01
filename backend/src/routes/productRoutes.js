@@ -39,6 +39,12 @@ router.get('/:id/related', (req, res, next) =>
   productController.getRelatedProducts(req, res, next),
 );
 
+// @route   GET /products/slug/:slug
+// @desc    Chi tiết sản phẩm theo slug
+router.get('/slug/:slug', (req, res, next) =>
+  productController.getProductBySlug(req, res, next),
+);
+
 // @route   GET /products/:id
 // @desc    Chi tiết sản phẩm
 router.get('/:id', (req, res, next) =>

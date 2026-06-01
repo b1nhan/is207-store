@@ -209,7 +209,7 @@ export default function OrderDetailPage({ params }) {
             <div key={item.order_item_id} className="p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               {/* Product Info */}
               <div className="flex-grow">
-                <Link href={`/products/${item.product_id || '#'}`} className="text-lg font-medium text-text-primary hover:text-primary transition-colors">
+                <Link href={`/products/${item.slug || item.product_id || '#'}`} className="text-lg font-medium text-text-primary hover:text-primary transition-colors">
                   {item.product_name_snapshot}
                 </Link>
                 <div className="text-sm text-text-secondary mt-1">

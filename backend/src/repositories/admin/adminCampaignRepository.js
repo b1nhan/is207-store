@@ -63,7 +63,7 @@ class AdminCampaignRepository {
     const c = rows[0];
 
     const [products] = await db.query(`
-      SELECT cp.product_id, p.product_name, p.base_price
+      SELECT cp.product_id, p.product_name, p.slug, p.base_price
       FROM campaign_products cp
       JOIN products p ON cp.product_id = p.product_id
       WHERE cp.campaign_id = ?

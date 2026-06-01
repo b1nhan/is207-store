@@ -117,6 +117,37 @@ class ProductRepository {
     return { ...products[0], images, variants };
   }
 
+  async findBySlug(slug) {
+    const db = getDB();
+    const [products] = await db.query(
+      `
+      SELECT p.*, 
+             b.brand_id, b.brand_name,
+             c.category_id, c.category_name, c.slug as category_slug
+      FROM products p
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      WHERE p.slug = ? AND p.status = 1
+    `,
+      [slug],
+    );
+
+    if (products.length === 0) return null;
+
+    const productId = products[0].product_id;
+
+    const [images] = await db.query(
+      `SELECT image_id, image_url as url, is_primary FROM product_images WHERE product_id = ? ORDER BY sort_order ASC`,
+      [productId],
+    );
+    const [variants] = await db.query(
+      `SELECT variant_id, size, color, stock_quantity, variant_price, sku FROM product_variants WHERE product_id = ? AND status = 1`,
+      [productId],
+    );
+
+    return { ...products[0], images, variants };
+  }
+
   async searchAutocomplete(q) {
     const query = `
       SELECT p.product_id, p.product_name, pi.image_url as thumbnail
@@ -154,6 +185,7 @@ class ProductRepository {
       SELECT
         p.product_id,
         p.product_name,
+        p.slug,
         p.base_price,
         b.brand_name,
         c.slug  AS category_slug,
@@ -212,7 +244,7 @@ class ProductRepository {
     const db = getDB();
     const query = `
       SELECT
-        p.product_id, p.product_name, p.base_price, p.gender,
+        p.product_id, p.product_name, p.slug, p.base_price, p.gender,
         pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
         (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price
       FROM products p
@@ -231,7 +263,7 @@ class ProductRepository {
     const db = getDB();
     const query = `
       SELECT
-        p.product_id, p.product_name, p.base_price, p.gender,
+        p.product_id, p.product_name, p.slug, p.base_price, p.gender,
         pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
         (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
         SUM(oi.quantity) AS total_sold
@@ -263,7 +295,7 @@ class ProductRepository {
     const db = getDB();
     const query = `
       SELECT
-        p.product_id, p.product_name, p.base_price, p.gender,
+        p.product_id, p.product_name, p.slug, p.base_price, p.gender,
         pi.image_url AS thumbnail, b.brand_name, c.category_name, c.slug AS category_slug,
         (SELECT MIN(variant_price) FROM product_variants pv WHERE pv.product_id = p.product_id) AS lowest_variant_price,
         SUM(oi.quantity) AS total_sold

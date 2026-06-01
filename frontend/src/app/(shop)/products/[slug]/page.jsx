@@ -5,9 +5,9 @@ import ProductDetailClient from '@/components/productPage/productDetail';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 
 export async function generateMetadata({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
   try {
-    const res = await productService.getProduct(id);
+    const res = await productService.getProductBySlug(slug);
     const product = res.data;
     return {
       title: `${product.product_name} | Cerulean Blue`,
@@ -21,13 +21,13 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductDetailPage({ params }) {
-  const { id } = await params;
+  const { slug } = await params;
 
   let product = null;
   let campaigns = [];
 
   try {
-    const res = await productService.getProduct(id);
+    const res = await productService.getProductBySlug(slug);
     product = res.data;
   } catch (error) {
     console.error('Error fetching product:', error);
@@ -40,7 +40,7 @@ export default async function ProductDetailPage({ params }) {
 
   // Fetch campaigns áp dụng cho sản phẩm này (related products được fetch client-side)
   const campaignRes = await campaignService
-    .getActiveCampaigns({ product_id: id })
+    .getActiveCampaigns({ product_id: product.product_id })
     .catch(() => null);
 
   if (campaignRes) {

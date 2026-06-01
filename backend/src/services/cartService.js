@@ -18,6 +18,7 @@ class CartService {
       quantity: item.quantity,
       product_id: item.product_id,
       product_name: item.product_name,
+      slug: item.slug,
       size: item.size,
       color: item.color,
       sku: item.sku,

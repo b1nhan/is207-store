@@ -105,7 +105,7 @@
         "1. POST /api/auth/me"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
       "id": "tc_018",
@@ -121,7 +121,7 @@
         "1. POST change-pass"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
       "id": "tc_021",
@@ -137,7 +137,7 @@
         "1. Access shipping API"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
       "id": "tc_028",
@@ -201,7 +201,7 @@
         "1. API apply voucher"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
       "id": "tc_044",
@@ -217,7 +217,7 @@
         "1. Go /checkout"
       ],
       "expected_result": "Preview loads",
-      "failure_indicator": "Fails"
+      "failure_indicator": "Fails --- bug here ## Error Type Console Error ## Error Message Cannot update a component (`Router`) while rendering a different component (`CheckoutPage`). To locate the bad setState() call inside `CheckoutPage`, follow the stack trace as described in https://react.dev/link/setstate-in-render at CheckoutPage (src/app/(shop)/checkout/page.jsx:385:12) ## Code Frame 383 |   // Guard: nếu không có selectedItemIds hợp lệ → redirect về cart (nếu không phải direct checkout) 384 |   if (mounted && isInitialized && isAuthenticated && !cartLoading && !isDirectCheckout && selectedItemIds.length === 0) { > 385 |     router.replace('/cart'); |            ^ 386 |     return null; 387 |   } 388 | Next.js version: 16.1.6 (Turbopack)"
     },
     {
       "id": "tc_046",
@@ -265,7 +265,7 @@
         "1. API checkout"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
       "id": "tc_052",
@@ -329,10 +329,10 @@
         "1. API cancel"
       ],
       "expected_result": "401 error",
-      "failure_indicator": "200 OK"
+      "failure_indicator": "200 OK --- bug here"
     },
     {
-      "id": "tc_061",
+      "id": "tc_061 -/ stop here",
       "title": "Buy direct",
       "scope": "feature",
       "scope_ref": "feat_usr_buy_now",

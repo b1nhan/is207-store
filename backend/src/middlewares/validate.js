@@ -1,17 +1,19 @@
 import { sendError } from '../utils/response.js';
 
 /**
- * Factory: trả về Express middleware validate req.body với Zod schema.
+ * Factory: trả về Express middleware validate req.body hoặc req.params/req.query với Zod schema.
  * Khi fail → trả 400 kèm danh sách lỗi từng field.
- * Khi pass → ghi đè req.body bằng dữ liệu đã được parse/coerce.
+ * Khi pass → ghi đè source bằng dữ liệu đã được parse/coerce.
  *
  * @param {import('zod').ZodSchema} schema
+ * @param {string} source - 'body' | 'params' | 'query'
  *
  * @example
  * router.post('/register', validate(registerSchema), authController.register);
+ * router.patch('/:id/default', validate(idSchema, 'params'), controller.setDefault);
  */
-const validate = (schema) => (req, res, next) => {
-  const result = schema.safeParse(req.body);
+const validate = (schema, source = 'body') => (req, res, next) => {
+  const result = schema.safeParse(req[source]);
 
   if (!result.success) {
     const errors = result.error.issues.map((e) => ({
@@ -26,7 +28,7 @@ const validate = (schema) => (req, res, next) => {
     });
   }
 
-  req.body = result.data;
+  req[source] = result.data;
   next();
 };
 

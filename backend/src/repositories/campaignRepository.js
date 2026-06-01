@@ -38,7 +38,7 @@ class CampaignRepository {
     const campaignIds = campaigns.map(c => c.campaign_id);
     
     const [products] = await db.query(`
-      SELECT cp.campaign_id, p.product_id, p.product_name, p.base_price,
+      SELECT cp.campaign_id, p.product_id, p.product_name, p.slug, p.base_price,
              pi.image_url as thumbnail
       FROM campaign_products cp
       JOIN products p ON cp.product_id = p.product_id
@@ -78,6 +78,7 @@ class CampaignRepository {
       camp.products = products.filter(p => p.campaign_id === c.campaign_id).map(p => ({
         product_id: p.product_id,
         product_name: p.product_name,
+        slug: p.slug,
         base_price: Number(p.base_price),
         thumbnail: p.thumbnail || null
       }));
@@ -100,7 +101,7 @@ class CampaignRepository {
     const c = rows[0];
 
     const [products] = await db.query(`
-      SELECT cp.product_id, p.product_name, p.base_price,
+      SELECT cp.product_id, p.product_name, p.slug, p.base_price,
              pi.image_url as thumbnail
       FROM campaign_products cp
       JOIN products p ON cp.product_id = p.product_id
@@ -140,6 +141,7 @@ class CampaignRepository {
     camp.products = products.map(p => ({
       product_id: p.product_id,
       product_name: p.product_name,
+      slug: p.slug,
       base_price: Number(p.base_price),
       thumbnail: p.thumbnail || null
     }));
@@ -160,6 +162,7 @@ class CampaignRepository {
       SELECT
         p.product_id,
         p.product_name,
+        p.slug,
         p.base_price,
         pi.image_url  AS thumbnail,
         c.campaign_id,
@@ -206,6 +209,7 @@ class CampaignRepository {
       .map(r => ({
         product_id: r.product_id,
         product_name: r.product_name,
+        slug: r.slug,
         base_price: Number(r.base_price),
         thumbnail: r.thumbnail || null,
         campaign_id: r.campaign_id,

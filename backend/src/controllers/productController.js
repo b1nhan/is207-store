@@ -26,6 +26,18 @@ class ProductController {
     }
   };
 
+  getProductBySlug = async (req, res, next) => {
+    try {
+      const product = await productService.getProductDetailBySlug(req.params.slug);
+      sendSuccess(res, {
+        data: product,
+        message: 'Lấy chi tiết sản phẩm thành công',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   searchProducts = async (req, res, next) => {
     try {
       const results = await productService.searchProducts(req.query.q);

@@ -30,8 +30,8 @@ export const productService = {
   getHotProducts: (limit = 10) =>
     api.get(API_ENDPOINTS.PRODUCTS.HOT, { limit }),
 
-  // C3: getProductBySlug removed — no backend /products/slug/:slug route exists.
-  //     Use getProduct(id) for product detail pages.
+  // Detail by slug
+  getProductBySlug: (slug) => api.get(API_ENDPOINTS.PRODUCTS.BY_SLUG(slug)),
 
   // C4: getFeaturedProducts removed — no backend /products/featured route exists.
   //     Use getNewArrivals() or getHotProducts() for homepage featured sections.
