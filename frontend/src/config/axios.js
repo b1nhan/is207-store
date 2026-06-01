@@ -101,19 +101,21 @@ axiosInstance.interceptors.response.use(
           // Only redirect if we aren't already on the login page
           if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
           }
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
-    }
 
-    // Standard error normalization
-    const message =
-      error.response?.data?.message || error.message || 'Đã xảy ra lỗi';
-    return Promise.reject({ ...error, message });
-  },
+      // Standard error normalization
+      const message =
+        error.response?.data?.message || error.message || 'Đã xảy ra lỗi';
+      return Promise.reject({ ...error, message });
+    },
 );
 
 export default axiosInstance;

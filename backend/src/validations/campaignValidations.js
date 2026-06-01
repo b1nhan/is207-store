@@ -9,7 +9,7 @@ export const createCampaignSchema = z.object({
   start_date: z.string({ required_error: 'start_date là bắt buộc' }).datetime({ offset: true, message: 'start_date phải là định dạng ISO 8601' }),
   end_date: z.string({ required_error: 'end_date là bắt buộc' }).datetime({ offset: true, message: 'end_date phải là định dạng ISO 8601' }),
   status: z.number().int().min(0).max(1).optional().default(1),
-  
+
   config: z.object({
     discount_value: z.number().positive('Giá trị giảm phải lớn hơn 0')
   }).nullable().optional(),
@@ -29,7 +29,7 @@ export const updateCampaignSchema = z.object({
   description: z.string().optional().nullable(),
   start_date: z.string().datetime({ offset: true }).optional(),
   end_date: z.string().datetime({ offset: true }).optional(),
-  
+
   config: z.object({
     discount_value: z.number().positive()
   }).nullable().optional(),
@@ -54,6 +54,11 @@ export const statusCampaignSchema = z.object({
 export const generateDescriptionSchema = z.object({
   name: z.string({ required_error: 'Tên chiến dịch là bắt buộc' }).min(1, 'Tên không được để trống').max(255),
   campaign_type: z.enum(['PERCENTAGE', 'FIXED_PRICE', 'TIER_DISCOUNT', 'FREESHIP']).optional(),
-  discount_value: z.number().positive().optional(),
+  discount_value: z.preprocess((val) => {
+    if (val === '' || val === undefined || val === null) return undefined;
+    const num = Number(val);
+    return isNaN(num) ? val : num;
+  }, z.number().positive().optional()),
 });
+
 
