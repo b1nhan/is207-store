@@ -166,10 +166,9 @@ export default function CheckoutPage() {
     setProfilesError('');
     try {
       const response = await shippingProfileService.getProfiles();
-      // axiosInstance unwraps to response.data — handle cả hai dạng
       const list = Array.isArray(response) ? response : (response?.data ?? []);
       setProfiles(list);
-
+      console.log(response);
       // Pre-select profile default (nếu có)
       const defaultProfile = list.find((p) => p.is_default);
       if (defaultProfile) {
@@ -198,11 +197,11 @@ export default function CheckoutPage() {
     setSelectedProfileId(id);
   };
 
-  const handleSetDefault = async (profileId) => {
+  const handleSetDefault = async (profileId, userId) => {
     setIsSettingDefault(true);
     const toastId = toast.loading('Đang đặt làm địa chỉ mặc định...');
     try {
-      await shippingProfileService.setDefault(profileId);
+      await shippingProfileService.setDefault(profileId, userId);
       // Cập nhật local state
       setProfiles((prev) =>
         prev.map((p) => ({ ...p, is_default: p.profile_id === profileId }))
@@ -597,7 +596,7 @@ export default function CheckoutPage() {
                         checked={!!selectedProfile.is_default}
                         onChange={() => {
                           if (!selectedProfile.is_default && !isSettingDefault) {
-                            handleSetDefault(selectedProfile.profile_id);
+                            handleSetDefault(selectedProfile.profile_id, selectedProfile.user_id);
                           }
                         }}
                         disabled={!!selectedProfile.is_default || isSettingDefault}

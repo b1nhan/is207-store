@@ -449,34 +449,30 @@ export default function AdminOrdersPage() {
       {/* Toolbar: Sorting & Bulk Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {/* Bulk Action Toolbar */}
-        {selectedOrderIds.length > 0 ? (
-          <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-lg w-full sm:w-auto">
-            <span className="text-sm font-medium text-blue-700 whitespace-nowrap">
-              Đã chọn {selectedOrderIds.length} đơn
-            </span>
-            <select
-              className="border border-blue-200 rounded px-2 py-1 text-sm bg-white focus:outline-none"
-              value={bulkStatus}
-              onChange={(e) => setBulkStatus(e.target.value)}
-            >
-              <option value="">-- Chọn trạng thái --</option>
-              <option value="confirmed">confirmed</option>
-              <option value="shipping">shipping</option>
-              <option value="delivered">delivered</option>
-              <option value="cancelled">cancelled</option>
-            </select>
-            <button
-              onClick={handleBulkApply}
-              className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              Apply
-            </button>
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500">
-            * Chọn các đơn hàng để thao tác hàng loạt
-          </div>
-        )}
+        <div className='flex items-center gap-2 bg-blue-50 border border-blue-100 px-4 py-2 rounded-lg w-full sm:w-auto'>
+          <span className="text-sm font-medium text-blue-700 whitespace-nowrap">
+            Đã chọn {selectedOrderIds.length} đơn
+          </span>
+          <select
+            className="border border-blue-200 rounded px-2 py-1 text-sm bg-white focus:outline-none"
+            value={bulkStatus}
+            onChange={(e) => setBulkStatus(e.target.value)}
+          >
+            <option value="">-- Chọn trạng thái --</option>
+            <option value="confirmed">confirmed</option>
+            <option value="shipping">shipping</option>
+            <option value="delivered">delivered</option>
+            <option value="cancelled">cancelled</option>
+          </select>
+          <button
+            onClick={handleBulkApply}
+            className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Apply
+          </button>
+        </div>
+
+
 
         {/* Reset Sort Button */}
         {sortConfig && (
@@ -484,7 +480,7 @@ export default function AdminOrdersPage() {
             onClick={handleResetSort}
             className="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm"
           >
-            ↺ Reset Sort
+            ↺ Đặt lại
           </button>
         )}
       </div>

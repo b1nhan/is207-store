@@ -1,11 +1,19 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { motion, useReducedMotion, useTransform } from 'motion/react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { ProductGrid } from '../product/ProductGrid';
 import { ProductCard } from '../product/ProductCard';
 import { ChevronRight, Tag, Loader2, RefreshCw } from 'lucide-react';
 import { productService } from '@/services/productService';
+import Image from 'next/image';
+
+// ── Variants ───────────────────────────────────────────────────────────────────
+const sectionFadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.52, ease: [0.16, 1, 0.3, 1] } },
+};
 
 /**
  * ProductSection
@@ -14,6 +22,7 @@ import { productService } from '@/services/productService';
  *   discountedItems    – array of { ... } từ API
  */
 const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
+  const reduced = useReducedMotion();
   const [activeTab, setActiveTab] = useState('new');
 
   const [tabData, setTabData] = useState({
@@ -59,9 +68,7 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
     fetchTabData(activeTab);
   }, [activeTab]);
 
-  const handleRetry = () => {
-    fetchTabData(activeTab);
-  };
+  const handleRetry = () => fetchTabData(activeTab);
 
   const renderContent = () => {
     const current = tabData[activeTab];
@@ -69,8 +76,8 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
     if (current.loading) {
       return (
         <div className="flex h-64 flex-col items-center justify-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-gray-500">Đang tải sản phẩm...</p>
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: 'var(--primary)' }} />
+          <p style={{ color: 'var(--text-muted)' }}>Đang tải sản phẩm...</p>
         </div>
       );
     }
@@ -78,7 +85,7 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
     if (current.error) {
       return (
         <div className="flex h-64 flex-col items-center justify-center gap-4">
-          <p className="text-red-500">{current.error}</p>
+          <p style={{ color: 'var(--error)' }}>{current.error}</p>
           <Button variant="outline" onClick={handleRetry} className="flex items-center gap-2">
             <RefreshCw className="h-4 w-4" /> Thử lại
           </Button>
@@ -89,7 +96,7 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
     if (!current.data || current.data.length === 0) {
       return (
         <div className="flex h-64 items-center justify-center">
-          <p className="text-gray-500">Không có sản phẩm nào</p>
+          <p style={{ color: 'var(--text-muted)' }}>Không có sản phẩm nào</p>
         </div>
       );
     }
@@ -98,22 +105,39 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
   };
 
   return (
-    <div className="px-4 py-10">
+    <motion.div
+      variants={reduced ? {} : sectionFadeUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-80px' }}
+      className="px-4 py-10"
+    >
 
       {/* Tab list */}
       <div className="mx-auto flex justify-center gap-4 mb-8">
         {tabs.map((tab) => (
-          <Button
+          <button
             key={tab.id}
-            variant="ghost"
             onClick={() => setActiveTab(tab.id)}
-            className={`text-lg font-semibold hover:bg-transparent hover:text-black ${activeTab === tab.id
-              ? 'text-black underline decoration-2 underline-offset-8'
-              : 'text-gray-500'
-              }`}
+            className="relative text-lg font-semibold transition-colors pb-1"
+            style={{
+              color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             {tab.label}
-          </Button>
+            {/* Gradient underline for active tab */}
+            {activeTab === tab.id && (
+              <motion.span
+                layoutId="tab-underline"
+                className="absolute -bottom-0.5 left-0 h-[2.5px] w-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, var(--sa-500), var(--sa-700))' }}
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
+          </button>
         ))}
       </div>
 
@@ -125,10 +149,18 @@ const ProductSection = ({ initialNewArrivals = [], discountedItems = [] }) => {
       {/* Phần Giảm Giá */}
       {discountedItems.length > 0 && (
         <div className="mt-8">
-          <ProductGrid products={discountedItems} title="Đang Giảm Giá" icon={Tag} badge={discountedItems.length + " sản phẩm"} highlightColor="red" />
+
+          <ProductGrid
+            products={discountedItems}
+            title="Đang Giảm Giá"
+            icon={Tag}
+            badge={discountedItems.length + ' sản phẩm'}
+            highlightColor="red"
+            linkViewAll='/campaigns'
+          />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

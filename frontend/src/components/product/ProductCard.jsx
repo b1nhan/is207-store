@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'motion/react';
 import { formatCurrency } from '@/utils/currency';
 import { DiscountBadge, getDiscountedPrice } from './DiscountBadge';
 import { ShoppingCart } from 'lucide-react';
@@ -19,6 +20,25 @@ import { MagicCard } from '../ui/magic-card';
  *   product  – object từ API
  *   discount – { type, value } từ getBestDiscount() (optional, từ campaign)
  */
+
+// ── Buy Now button with spring hover ─────────────────────────────────────────
+function BuyNowButton({ onClick }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      onClick={onClick}
+      whileHover={reduced ? {} : { scale: 1.06, boxShadow: '0 4px 16px var(--sa-400)' }}
+      whileTap={reduced ? {} : { scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+      className="relative mx-auto mt-4 flex h-[40px] w-full max-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-lg text-center text-sm font-semibold text-white"
+      style={{ background: 'linear-gradient(135deg, var(--sa-600), var(--sa-700))' }}
+    >
+      Mua ngay
+    </motion.div>
+  );
+}
+
+
 export const ProductCard = ({ product, discount }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -139,9 +159,10 @@ export const ProductCard = ({ product, discount }) => {
   return (
     <MagicCard
       mode="orb"
-      glowFrom={"#E9D5FF"}
-      glowTo={"#FBCFE8"}
-      className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md"
+      glowFrom="var(--sa-300)"
+      glowTo="var(--sa-500)"
+      // glowOpacity={0.35}
+      className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-50 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-none "
     >
       {/* <div className="group relative mx-auto flex w-full max-w-[280px] flex-col items-center justify-center space-y-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:shadow-md"> */}
       <Link href={productlink} className="flex w-full flex-col items-center">
@@ -172,12 +193,7 @@ export const ProductCard = ({ product, discount }) => {
         </div>
 
         {/* Đổi Button thành div để tránh lỗi lồng thẻ button trong thẻ a */}
-        <div
-          onClick={handleBuyNow}
-          className="bg-primary hover:bg-hover relative mx-auto mt-4 flex h-[40px] w-full max-w-[140px] cursor-pointer items-center justify-center overflow-hidden rounded-lg text-center text-sm font-semibold text-white transition-all active:scale-95"
-        >
-          Mua ngay
-        </div>
+        <BuyNowButton onClick={handleBuyNow} />
       </Link>
 
       {/* Nút Add to Cart */}

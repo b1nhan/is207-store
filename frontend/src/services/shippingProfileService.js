@@ -5,7 +5,7 @@ const shippingProfileService = {
 
   createProfile: (data) => api.post('/auth/shipping-profiles', data),
 
-  setDefault: (id) => api.patch(`/auth/shipping-profiles/${id}/default`, {}),
+  setDefault: (id, userId) => api.patch(`/auth/shipping-profiles/${id}/default`, { profile_id: id, user_id: userId }),
 
   updateProfile: (id, data) => api.put(`/auth/shipping-profiles/${id}`, data),
 

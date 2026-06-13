@@ -77,14 +77,7 @@ export default async function CampaignDetailPage({ params }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-6xl px-4 pt-4">
-        <Breadcrumbs
-          items={[
-            { label: 'Khuyến mãi', href: '/campaigns' },
-            { label: campaign.name },
-          ]}
-        />
-      </div>
+
       {/* ── Hero banner ──────────────────────────────────────────────────────── */}
       <section className={`relative overflow-hidden bg-gradient-to-br ${headerGradient} py-16`}>
         {/* Decorative circles */}
@@ -92,14 +85,6 @@ export default async function CampaignDetailPage({ params }) {
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-80 w-80 rounded-full bg-white/10" />
 
         <div className="container relative mx-auto max-w-6xl px-4">
-          {/* Back */}
-          <Link
-            href="/"
-            className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/25"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Trang chủ
-          </Link>
 
           <div className="flex flex-col gap-4">
             {/* Type badge */}
@@ -140,7 +125,14 @@ export default async function CampaignDetailPage({ params }) {
           </div>
         </div>
       </section>
-
+      <div className="container mx-auto max-w-6xl px-4 pt-4">
+        <Breadcrumbs
+          items={[
+            { label: 'Khuyến mãi', href: '/campaigns' },
+            { label: campaign.name },
+          ]}
+        />
+      </div>
       {/* ── Tier table (TIER_DISCOUNT) ───────────────────────────────────────── */}
       {campaign.campaign_type === 'TIER_DISCOUNT' && campaign.tiers?.length > 0 && (
         <section className="container mx-auto max-w-6xl px-4 py-10">

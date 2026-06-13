@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import Link from 'next/link';
 import { Tag, Zap, ChevronRight, Layers } from 'lucide-react';
 
@@ -15,12 +16,7 @@ function useCountdown(endDate) {
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setT({
-        h: String(h).padStart(2, '0'),
-        m: String(m).padStart(2, '0'),
-        s: String(s).padStart(2, '0'),
-        expired: false,
-      });
+      setT({ h: String(h).padStart(2, '0'), m: String(m).padStart(2, '0'), s: String(s).padStart(2, '0'), expired: false });
     };
     calc();
     const id = setInterval(calc, 1000);
@@ -34,50 +30,48 @@ function CountdownBlock({ endDate, light = false }) {
   const t = useCountdown(endDate);
   if (!t) return null;
 
-  const unitCls = light
-    ? 'flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm'
-    : 'flex h-14 w-14 flex-col items-center justify-center rounded-xl bg-cb-950/10 backdrop-blur-sm';
+  const unitStyle = light
+    ? { background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(6px)' }
+    : { background: 'rgba(15,68,116,0.10)', backdropFilter: 'blur(6px)' };
 
-  const valueCls = `text-xl font-bold tabular-nums ${light ? 'text-white' : 'text-text-primary'}`;
-  const labelCls = `text-[9px] uppercase tracking-widest ${light ? 'text-white/60' : 'text-text-muted'}`;
-  const sepCls = `text-lg font-bold ${light ? 'text-white/50' : 'text-text-muted'}`;
+  const valueColor = light ? '#ffffff' : 'var(--text-primary)';
+  const labelColor = light ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)';
+  const sepColor = light ? 'rgba(255,255,255,0.5)' : 'var(--text-muted)';
 
   if (t.expired) {
-    return (
-      <span className={`text-xs font-medium ${light ? 'text-white/60' : 'text-text-muted'}`}>
-        Đã kết thúc
-      </span>
-    );
+    return <span className="text-xs font-medium" style={{ color: light ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)' }}>Đã kết thúc</span>;
   }
 
   const hours = parseInt(t.h, 10);
   const days = Math.floor(hours / 24);
   const remH = String(hours % 24).padStart(2, '0');
 
+  const unitCls = 'flex h-14 w-14 flex-col items-center justify-center rounded-xl';
+
   return (
     <div className="flex items-center gap-1.5">
       {days > 0 && (
         <>
-          <div className={unitCls}>
-            <span className={valueCls}>{days}</span>
-            <span className={labelCls}>ngày</span>
+          <div className={unitCls} style={unitStyle}>
+            <span className="text-xl font-bold tabular-nums" style={{ color: valueColor }}>{days}</span>
+            <span className="text-[9px] uppercase tracking-widest" style={{ color: labelColor }}>ngày</span>
           </div>
-          <span className={sepCls}>:</span>
+          <span className="text-lg font-bold" style={{ color: sepColor }}>:</span>
         </>
       )}
-      <div className={unitCls}>
-        <span className={valueCls}>{remH}</span>
-        <span className={labelCls}>giờ</span>
+      <div className={unitCls} style={unitStyle}>
+        <span className="text-xl font-bold tabular-nums" style={{ color: valueColor }}>{remH}</span>
+        <span className="text-[9px] uppercase tracking-widest" style={{ color: labelColor }}>giờ</span>
       </div>
-      <span className={sepCls}>:</span>
-      <div className={unitCls}>
-        <span className={valueCls}>{t.m}</span>
-        <span className={labelCls}>phút</span>
+      <span className="text-lg font-bold" style={{ color: sepColor }}>:</span>
+      <div className={unitCls} style={unitStyle}>
+        <span className="text-xl font-bold tabular-nums" style={{ color: valueColor }}>{t.m}</span>
+        <span className="text-[9px] uppercase tracking-widest" style={{ color: labelColor }}>phút</span>
       </div>
-      <span className={sepCls}>:</span>
-      <div className={unitCls}>
-        <span className={valueCls}>{t.s}</span>
-        <span className={labelCls}>giây</span>
+      <span className="text-lg font-bold" style={{ color: sepColor }}>:</span>
+      <div className={unitCls} style={unitStyle}>
+        <span className="text-xl font-bold tabular-nums" style={{ color: valueColor }}>{t.s}</span>
+        <span className="text-[9px] uppercase tracking-widest" style={{ color: labelColor }}>giây</span>
       </div>
     </div>
   );
@@ -102,139 +96,159 @@ function TypeIcon({ type }) {
   return <Tag className="h-4 w-4" />;
 }
 
-// ─── Left panel (dark gradient) ───────────────────────────────────────────────
-function LeftPanel({ campaign }) {
+// ─── Left panel (dark — Sky Azure deep gradient) ──────────────────────────────
+function LeftPanel({ campaign, reduced }) {
   return (
-    <Link
-      href={`/campaigns/${campaign.campaign_id}`}
-      className="group relative flex items-center justify-between overflow-hidden bg-gradient-to-br from-cb-950 via-cb-900 to-cb-800 px-10 py-14 transition-all hover:brightness-110"
+    <motion.div
+      whileHover={reduced ? {} : { y: -3, boxShadow: '0 16px 40px rgba(9,42,80,0.25)' }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="h-full"
     >
-      {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-white/5" />
-      <div className="pointer-events-none absolute -bottom-16 left-8 h-64 w-64 rounded-full bg-cb-600/20" />
+      <Link
+        href={`/campaigns/${campaign.campaign_id}`}
+        className="group relative flex h-full items-center justify-between overflow-hidden px-10 py-14 transition-all hover:brightness-105"
+        style={{
+          background: 'linear-gradient(135deg, var(--sa-950) 0%, var(--sa-800) 60%, var(--sa-700) 100%)',
+        }}
+      >
+        {/* Decorative blobs using sa-* palette */}
+        <div className="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }} />
+        <div className="pointer-events-none absolute -bottom-16 left-8 h-64 w-64 rounded-full" style={{ background: 'var(--sa-600)', opacity: 0.15, filter: 'blur(40px)' }} />
 
-      {/* Text side */}
-      <div className="relative z-10 flex flex-col gap-4">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-          <TypeIcon type={campaign.campaign_type} />
-          {discountLabel(campaign)}
-        </span>
+        {/* Text side */}
+        <div className="relative z-10 flex flex-col gap-4">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.15)' }}>
+            <TypeIcon type={campaign.campaign_type} />
+            {discountLabel(campaign)}
+          </span>
 
-        <h2 className="max-w-xs text-4xl font-extrabold leading-tight text-white drop-shadow-sm">
-          {campaign.name}
-        </h2>
+          <h2 className="max-w-xs text-4xl font-extrabold leading-tight text-white drop-shadow-sm">
+            {campaign.name}
+          </h2>
 
-        {campaign.description && (
-          <p className="max-w-xs text-sm leading-relaxed text-white/75">
-            {campaign.description}
-          </p>
-        )}
+          {campaign.description && (
+            <p className="max-w-xs text-sm leading-relaxed text-white/75">{campaign.description}</p>
+          )}
 
-        <div className="mt-2">
-          <CountdownBlock endDate={campaign.end_date} light />
+          <div className="mt-2">
+            <CountdownBlock endDate={campaign.end_date} light />
+          </div>
+
+          <span
+            className="mt-3 inline-flex w-fit items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all group-hover:bg-white/20"
+            style={{ border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)' }}
+          >
+            Xem ngay <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </span>
         </div>
 
-        <span className="mt-3 inline-flex w-fit items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all group-hover:bg-white/20">
-          Xem ngay <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </span>
-      </div>
-
-      {/* Product thumbnails (up to 3) */}
-      {campaign.products?.length > 0 && (
-        <div className="relative z-10 hidden shrink-0 lg:flex lg:flex-col lg:gap-3">
-          {campaign.products.slice(0, 3).map((p) =>
-            p.thumbnail ? (
-              <div
-                key={p.product_id}
-                className="h-16 w-16 overflow-hidden rounded-xl border-2 border-white/20 bg-white/10 shadow-lg"
-              >
-                <img src={p.thumbnail} alt={p.product_name} className="h-full w-full object-cover" />
+        {/* Product thumbnails (up to 3) */}
+        {campaign.products?.length > 0 && (
+          <div className="relative z-10 hidden shrink-0 lg:flex lg:flex-col lg:gap-3">
+            {campaign.products.slice(0, 3).map((p) =>
+              p.thumbnail ? (
+                <div key={p.product_id} className="h-16 w-16 overflow-hidden rounded-xl shadow-lg" style={{ border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)' }}>
+                  <img src={p.thumbnail} alt={p.product_name} className="h-full w-full object-cover" />
+                </div>
+              ) : null,
+            )}
+            {campaign.products.length > 3 && (
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ border: '2px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)' }}>
+                +{campaign.products.length - 3}
               </div>
-            ) : null,
-          )}
-          {campaign.products.length > 3 && (
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-white/20 bg-white/10 text-sm font-bold text-white">
-              +{campaign.products.length - 3}
-            </div>
-          )}
-        </div>
-      )}
-    </Link>
+            )}
+          </div>
+        )}
+      </Link>
+    </motion.div>
   );
 }
 
-// ─── Right panel (light) ──────────────────────────────────────────────────────
-function RightPanel({ campaign, index }) {
-  const gradients = [
-    'from-rose-400 via-pink-400 to-red-500',
-    'from-violet-500 via-purple-400 to-indigo-500',
-    'from-amber-400 via-orange-400 to-red-400',
-    'from-emerald-400 via-teal-400 to-cyan-500',
-  ];
-  const gradient = gradients[index % gradients.length];
+// ─── Right panel gradient pairs (all sa-* derived) ───────────────────────────
+// Using mid-range Sky Azure tones so they stay within the design system
+const RIGHT_GRADIENTS = [
+  'linear-gradient(135deg, var(--sa-600) 0%, var(--sa-400) 100%)',
+  'linear-gradient(135deg, var(--sa-700) 0%, var(--sa-500) 100%)',
+  'linear-gradient(135deg, var(--sa-800) 0%, var(--sa-600) 100%)',
+  'linear-gradient(135deg, var(--sa-500) 0%, var(--sa-300) 100%)',
+];
+
+function RightPanel({ campaign, index, reduced }) {
+  const gradient = RIGHT_GRADIENTS[index % RIGHT_GRADIENTS.length];
 
   return (
-    <Link
-      href={`/campaigns/${campaign.campaign_id}`}
-      className={`group relative flex items-center justify-between overflow-hidden bg-gradient-to-br ${gradient} px-10 py-14 transition-all hover:brightness-110`}
+    <motion.div
+      whileHover={reduced ? {} : { y: -3, boxShadow: '0 16px 40px rgba(51,136,216,0.2)' }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="h-full"
     >
-      <div className="pointer-events-none absolute -left-8 -top-8 h-48 w-48 rounded-full bg-white/15" />
-      <div className="pointer-events-none absolute -bottom-10 -right-6 h-56 w-56 rounded-full bg-white/10" />
+      <Link
+        href={`/campaigns/${campaign.campaign_id}`}
+        className="group relative flex h-full items-center justify-between overflow-hidden px-10 py-14 transition-all hover:brightness-105"
+        style={{ background: gradient }}
+      >
+        <div className="pointer-events-none absolute -left-8 -top-8 h-48 w-48 rounded-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
+        <div className="pointer-events-none absolute -bottom-10 -right-6 h-56 w-56 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
 
-      <div className="relative z-10 flex flex-col gap-4">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/25 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-          <TypeIcon type={campaign.campaign_type} />
-          {discountLabel(campaign)}
-        </span>
+        <div className="relative z-10 flex flex-col gap-4">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.22)' }}>
+            <TypeIcon type={campaign.campaign_type} />
+            {discountLabel(campaign)}
+          </span>
 
-        <h2 className="max-w-xs text-4xl font-extrabold leading-tight text-white drop-shadow-sm">
-          {campaign.name}
-        </h2>
+          <h2 className="max-w-xs text-4xl font-extrabold leading-tight text-white drop-shadow-sm">
+            {campaign.name}
+          </h2>
 
-        {campaign.description && (
-          <p className="max-w-xs text-sm leading-relaxed text-white/85">
-            {campaign.description}
-          </p>
-        )}
+          {campaign.description && (
+            <p className="max-w-xs text-sm leading-relaxed text-white/85">{campaign.description}</p>
+          )}
 
-        <div className="mt-2">
-          <CountdownBlock endDate={campaign.end_date} light />
+          <div className="mt-2">
+            <CountdownBlock endDate={campaign.end_date} light />
+          </div>
+
+          <span
+            className="mt-3 inline-flex w-fit items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all group-hover:bg-white/30"
+            style={{ border: '1px solid rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.2)' }}
+          >
+            Xem ngay <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </span>
         </div>
 
-        <span className="mt-3 inline-flex w-fit items-center gap-2 rounded-xl border border-white/40 bg-white/20 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all group-hover:bg-white/30">
-          Xem ngay <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </span>
-      </div>
-
-      {campaign.products?.length > 0 && (
-        <div className="relative z-10 hidden shrink-0 lg:flex lg:flex-col lg:gap-3">
-          {campaign.products.slice(0, 3).map((p) =>
-            p.thumbnail ? (
-              <div
-                key={p.product_id}
-                className="h-16 w-16 overflow-hidden rounded-xl border-2 border-white/30 bg-white/15 shadow-lg"
-              >
-                <img src={p.thumbnail} alt={p.product_name} className="h-full w-full object-cover" />
+        {campaign.products?.length > 0 && (
+          <div className="relative z-10 hidden shrink-0 lg:flex lg:flex-col lg:gap-3">
+            {campaign.products.slice(0, 3).map((p) =>
+              p.thumbnail ? (
+                <div key={p.product_id} className="h-16 w-16 overflow-hidden rounded-xl shadow-lg" style={{ border: '2px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)' }}>
+                  <img src={p.thumbnail} alt={p.product_name} className="h-full w-full object-cover" />
+                </div>
+              ) : null,
+            )}
+            {campaign.products.length > 3 && (
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ border: '2px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.15)' }}>
+                +{campaign.products.length - 3}
               </div>
-            ) : null,
-          )}
-          {campaign.products.length > 3 && (
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-white/30 bg-white/15 text-sm font-bold text-white">
-              +{campaign.products.length - 3}
-            </div>
-          )}
-        </div>
-      )}
-    </Link>
+            )}
+          </div>
+        )}
+      </Link>
+    </motion.div>
   );
 }
 
 // ─── Single campaign full-width fallback ──────────────────────────────────────
-function SingleCampaignBanner({ campaign }) {
+function SingleCampaignBanner({ campaign, reduced }) {
   return (
-    <section className="w-full">
-      <LeftPanel campaign={campaign} />
-    </section>
+    <motion.section
+      variants={reduced ? {} : { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } } }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-60px' }}
+      className="w-full"
+    >
+      <LeftPanel campaign={campaign} reduced={reduced} />
+    </motion.section>
   );
 }
 
@@ -245,9 +259,10 @@ function SingleCampaignBanner({ campaign }) {
  * If no campaigns → renders nothing (parent should skip this component).
  */
 export default function CampaignBanner({ campaigns = [] }) {
+  const reduced = useReducedMotion();
+
   if (!campaigns || campaigns.length === 0) return null;
 
-  // Sort same as CampaignSection: product discounts first, then end_date asc
   const sorted = [...campaigns].sort((a, b) => {
     const p = { PERCENTAGE: 0, FIXED_PRICE: 0, TIER_DISCOUNT: 1 };
     const pa = p[a.campaign_type] ?? 2;
@@ -256,14 +271,20 @@ export default function CampaignBanner({ campaigns = [] }) {
     return new Date(a.end_date) - new Date(b.end_date);
   });
 
-  if (sorted.length === 1) return <SingleCampaignBanner campaign={sorted[0]} />;
+  if (sorted.length === 1) return <SingleCampaignBanner campaign={sorted[0]} reduced={reduced} />;
 
   return (
-    <section className="w-full">
+    <motion.section
+      variants={reduced ? {} : { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } } }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-60px' }}
+      className="w-full"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2">
-        <LeftPanel campaign={sorted[0]} />
-        <RightPanel campaign={sorted[1]} index={0} />
+        <LeftPanel campaign={sorted[0]} reduced={reduced} />
+        <RightPanel campaign={sorted[1]} index={0} reduced={reduced} />
       </div>
-    </section>
+    </motion.section>
   );
 }

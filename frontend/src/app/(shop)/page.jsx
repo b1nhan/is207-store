@@ -27,13 +27,20 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col gap-16 pb-20">
+      {/* Hero — above fold, no scroll trigger needed */}
       <HeroSection />
+
+      {/* Categories */}
       <CategorySectionWrapper />
+
+      {/* Campaign banner (if any) */}
       {campaigns.length > 0 && <CampaignBanner campaigns={campaigns} />}
 
+      {/* Campaign section cards (if any) */}
 
       {campaigns.length > 0 && <CampaignSection campaigns={campaigns} />}
 
+      {/* Product tabs + discounted grid */}
       <ProductSection
         initialNewArrivals={newArrivals}
         discountedItems={discountedItems}

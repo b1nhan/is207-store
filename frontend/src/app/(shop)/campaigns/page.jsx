@@ -74,13 +74,13 @@ export default async function CampaignsPage() {
     <div className="min-h-screen bg-background">
 
       {/* Page header */}
-      <section className="bg-gradient-to-r from-cb-950 via-cb-900 to-cb-800 py-14">
+      <section className="bg-gradient-to-r from-slate-500 via-slate-500 to-slate-600 py-14">
         <div className="container mx-auto max-w-6xl px-4 text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-cb-300">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-white/70">
             Ưu đãi đặc biệt
           </p>
           <h1 className="text-4xl font-bold text-white">Campaign đang diễn ra</h1>
-          <p className="mt-3 text-cb-300">
+          <p className="mt-3 text-white/70">
             {sorted.length > 0
               ? `${sorted.length} chương trình ưu đãi đang chờ bạn`
               : 'Hiện chưa có campaign nào đang diễn ra'}
