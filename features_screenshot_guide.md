@@ -27,8 +27,8 @@
 - **URL:** `/(auth)/register`
 - **Mô tả:** Form đăng ký tài khoản mới với các trường username, email, mật khẩu.
 - **Cần screenshot:**
-  - [ ] Trang đăng ký trống (hiển thị form đầy đủ)
-  - [ ] Form đã điền thông tin hợp lệ (trước khi submit)
+  - [x] Trang đăng ký trống (hiển thị form đầy đủ)
+  - [x] Form đã điền thông tin hợp lệ (trước khi submit)
   - [ ] Thông báo lỗi validation (nếu có)
 
 ---
@@ -37,8 +37,8 @@
 - **URL:** `/(auth)/login`
 - **Mô tả:** Form đăng nhập bằng email/username và mật khẩu. Hệ thống trả về JWT access token + refresh token.
 - **Cần screenshot:**
-  - [ ] Trang đăng nhập (form trống)
-  - [ ] Form đã điền thông tin
+  - [x] Trang đăng nhập (form trống)
+  - [x] Form đã điền thông tin
 
 ---
 
@@ -46,7 +46,7 @@
 - **URL:** `/(shop)/profile`
 - **Mô tả:** Xem và chỉnh sửa thông tin cá nhân (tên, email, số điện thoại, avatar,...).
 - **Cần screenshot:**
-  - [ ] Tab thông tin cá nhân (chế độ xem)
+  - [x] Tab thông tin cá nhân (chế độ xem)
   - [ ] Form chỉnh sửa thông tin đang mở
 
 ---
@@ -78,7 +78,7 @@
   - Sắp xếp theo: giá, mới nhất, bán chạy
   - Phân trang phía server
 - **Cần screenshot:**
-  - [ ] Trang danh sách sản phẩm (lưới sản phẩm, sidebar lọc)
+  - [x] Trang danh sách sản phẩm (lưới sản phẩm, sidebar lọc)
   - [ ] Đã chọn bộ lọc (ví dụ: lọc theo danh mục + sắp xếp)
   - [ ] Phân trang ở dưới cùng
 
@@ -123,7 +123,7 @@
 - **URL:** `/(shop)/category`
 - **Mô tả:** Hiển thị tất cả danh mục sản phẩm đang có.
 - **Cần screenshot:**
-  - [ ] Trang danh mục (lưới các danh mục)
+  - [x] Trang danh mục (lưới các danh mục)
 
 ---
 
@@ -133,7 +133,7 @@
 - **URL:** `/(shop)/cart`
 - **Mô tả:** Xem giỏ hàng, cập nhật số lượng, thay đổi variant, xóa sản phẩm, xóa toàn bộ giỏ.
 - **Cần screenshot:**
-  - [ ] Trang giỏ hàng có sản phẩm (hiển thị tên, ảnh, giá, số lượng)
+  - [x] Trang giỏ hàng có sản phẩm (hiển thị tên, ảnh, giá, số lượng)
   - [ ] Nút tăng/giảm số lượng
   - [ ] Tổng tiền cuối trang
 
@@ -190,7 +190,7 @@
 - **URL:** `/(shop)/orders`
 - **Mô tả:** Danh sách tất cả đơn hàng của người dùng hiện tại, có trạng thái (pending, confirmed, shipping, delivered, cancelled).
 - **Cần screenshot:**
-  - [ ] Trang danh sách đơn hàng (nhiều đơn, các trạng thái khác nhau)
+  - [x] Trang danh sách đơn hàng (nhiều đơn, các trạng thái khác nhau)
 
 ---
 
@@ -218,7 +218,7 @@
 - **URL:** `/(shop)/`
 - **Mô tả:** SSR homepage gồm: Hero Banner, lưới danh mục, banner campaign đang active, section hàng mới, section hàng giảm giá.
 - **Cần screenshot:**
-  - [ ] Hero section (banner đầu trang)
+  - [x] Hero section (banner đầu trang)
   - [ ] Lưới danh mục (category grid)
   - [ ] Banner campaign đang active
   - [ ] Section sản phẩm mới / sản phẩm giảm giá
@@ -229,7 +229,7 @@
 - **URL:** `/(shop)/campaigns`
 - **Mô tả:** Hiển thị các campaign đang active và danh sách sản phẩm được giảm giá trong campaign đó.
 - **Cần screenshot:**
-  - [ ] Trang campaigns (danh sách campaign)
+  - [x] Trang campaigns (danh sách campaign)
   - [ ] Sản phẩm trong campaign (giá gốc vs giá sau giảm)
 
 ---
@@ -240,7 +240,7 @@
 - **URL:** `/(admin)/admin/`
 - **Mô tả:** Trang tổng quan cho admin gồm: thống kê doanh thu, số đơn hàng theo trạng thái, top sản phẩm bán chạy, biểu đồ.
 - **Cần screenshot:**
-  - [ ] Toàn bộ Dashboard (cards thống kê + biểu đồ)
+  - [x] Toàn bộ Dashboard (cards thống kê + biểu đồ)
   - [ ] Bảng top sản phẩm bán chạy
   - [ ] Thống kê doanh thu (theo tuần/tháng nếu có)
 
@@ -252,7 +252,7 @@
 - **URL:** `/(admin)/admin/products`
 - **Mô tả:** Bảng danh sách sản phẩm. Admin có thể tạo mới, sửa, bật/tắt trạng thái active.
 - **Cần screenshot:**
-  - [ ] Bảng danh sách sản phẩm (tên, danh mục, trạng thái, giá)
+  - [x] Bảng danh sách sản phẩm (tên, danh mục, trạng thái, giá)
   - [ ] Form tạo/sửa sản phẩm (các trường thông tin)
   - [ ] Nút toggle trạng thái active/inactive
 
@@ -291,7 +291,7 @@
 - **URL:** `/(admin)/admin/orders`
 - **Mô tả:** Bảng tất cả đơn hàng. Lọc theo trạng thái, user_id, khoảng ngày (from_date → to_date).
 - **Cần screenshot:**
-  - [ ] Bảng đơn hàng (đầy đủ các cột)
+  - [x] Bảng đơn hàng (đầy đủ các cột)
   - [ ] Bộ lọc đang được áp dụng (lọc theo status / ngày)
 
 ---
@@ -328,7 +328,7 @@
 - **URL:** `/(admin)/admin/vouchers`
 - **Mô tả:** Tạo, sửa, xóa mềm voucher. Các loại: PERCENTAGE (%), FIXED (số tiền cố định), FREESHIP. Cấu hình: ngày hiệu lực, giới hạn lượt dùng, giá trị đơn tối thiểu.
 - **Cần screenshot:**
-  - [ ] Bảng danh sách voucher (code, loại, giá trị, hạn dùng, trạng thái)
+  - [x] Bảng danh sách voucher (code, loại, giá trị, hạn dùng, trạng thái)
   - [ ] Form tạo/sửa voucher
 
 ---
@@ -345,7 +345,7 @@
 - **URL:** `/(admin)/admin/campaigns`
 - **Mô tả:** Tạo, sửa, xóa campaign. Các loại: PERCENTAGE, FIXED_PRICE, TIER_DISCOUNT (giảm theo bậc), FREESHIP. Gắn sản phẩm vào campaign.
 - **Cần screenshot:**
-  - [ ] Bảng danh sách campaign (tên, loại, ngày, trạng thái)
+  - [x] Bảng danh sách campaign (tên, loại, ngày, trạng thái)
   - [ ] Form tạo/sửa campaign (đầy đủ các trường, danh sách sản phẩm được gắn)
   - [ ] Cấu hình TIER_DISCOUNT (bảng các bậc giảm giá)
 
@@ -374,7 +374,7 @@
 - **URL:** `/(admin)/admin/categories`
 - **Mô tả:** CRUD danh mục sản phẩm.
 - **Cần screenshot:**
-  - [ ] Bảng/danh sách danh mục
+  - [x] Bảng/danh sách danh mục
   - [ ] Form thêm/sửa danh mục
 
 ---
@@ -383,7 +383,7 @@
 - **URL:** `/(admin)/admin/brands`
 - **Mô tả:** CRUD thương hiệu (brand).
 - **Cần screenshot:**
-  - [ ] Bảng/danh sách thương hiệu
+  - [x] Bảng/danh sách thương hiệu
   - [ ] Form thêm/sửa thương hiệu
 
 ---
@@ -429,20 +429,20 @@
 
 ## 📊 TỔNG KẾT
 
-| Nhóm | Số tính năng | Số màn hình cần chụp |
-|------|-------------|---------------------|
-| Xác thực & Tài khoản | 5 | ~12 |
-| Sản phẩm & Danh mục | 6 | ~14 |
-| Giỏ hàng & Thanh toán | 6 | ~14 |
-| Đơn hàng (User) | 3 | ~7 |
-| Trang chủ & Campaign | 2 | ~6 |
-| Admin Dashboard | 1 | ~3 |
-| Admin Sản phẩm | 4 | ~10 |
-| Admin Đơn hàng | 4 | ~8 |
-| Admin Voucher & Campaign | 5 | ~10 |
-| Admin Danh mục & Brand | 2 | ~4 |
-| Hệ thống (ẩn) | 5 | ~5 |
-| **TỔNG** | **43** | **~93** |
+| Nhóm                     | Số tính năng | Số màn hình cần chụp |
+| ------------------------ | ------------ | -------------------- |
+| Xác thực & Tài khoản     | 5            | ~12                  |
+| Sản phẩm & Danh mục      | 6            | ~14                  |
+| Giỏ hàng & Thanh toán    | 6            | ~14                  |
+| Đơn hàng (User)          | 3            | ~7                   |
+| Trang chủ & Campaign     | 2            | ~6                   |
+| Admin Dashboard          | 1            | ~3                   |
+| Admin Sản phẩm           | 4            | ~10                  |
+| Admin Đơn hàng           | 4            | ~8                   |
+| Admin Voucher & Campaign | 5            | ~10                  |
+| Admin Danh mục & Brand   | 2            | ~4                   |
+| Hệ thống (ẩn)            | 5            | ~5                   |
+| **TỔNG**                 | **43**       | **~93**              |
 
 ---
 
