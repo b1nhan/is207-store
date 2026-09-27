@@ -49,3 +49,5 @@ dist
 .next
 
 **/node_modules
+
+**/*.xlsx
